@@ -1,7 +1,9 @@
 {
   "business_name": "batata",
-  "domain": "Fashion & Apparel",
-  "location": "Algeria",
-  "services": "lbatata",
+  "domain": "Fashion & Apparel v",
+  "location": [
+    "Algeria"
+  ],
+  "services": "lbatata2",
   "description": "rgdat sahd"
 }

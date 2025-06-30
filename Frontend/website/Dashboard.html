@@ -259,6 +259,46 @@
             color: var(--bg-dark);
             border-color: var(--green-accent);
         }
+        /* Toast Notification Styles */
+        #toastNotification {
+            position: fixed;
+            top: 32px;
+            right: 32px;
+            z-index: 9999;
+            min-width: 220px;
+            max-width: 340px;
+            background: #232325;
+            color: #fff;
+            border-radius: 10px;
+            padding: 16px 24px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+            font-size: 15px;
+            font-weight: 500;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s, transform 0.3s;
+            transform: translateY(-30px);
+        }
+        #toastNotification.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+        #toastNotification.success {
+            background: var(--green-accent);
+            color: var(--bg-dark);
+        }
+        #toastNotification.error {
+            background: #ff6b6b;
+            color: #fff;
+        }
+        @media (max-width: 600px) {
+            #toastNotification {
+                right: 10px;
+                left: 10px;
+                max-width: unset;
+            }
+        }
         @media (max-width: 900px) {
             .settings-sidebar { width: 100vw; max-width: 100vw; right: -100vw; }
             .settings-sidebar.open { right: 0; }
@@ -340,6 +380,8 @@
                 </div>
             </form>
         </div>
+        <!-- Toast Notification -->
+        <div id="toastNotification"></div>
     </div>
     <script type="module">
         let professionalChartInstance;
@@ -527,14 +569,36 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(info)
                 });
-                if (!resp.ok) throw new Error("HTTP " + resp.status);
-                // Optionally show a toast/notification
+                if (!resp.ok) {
+                    let msg = "Failed to save agent info to server.";
+                    try {
+                        const err = await resp.json();
+                        if (err && err.detail) msg = err.detail;
+                    } catch {}
+                    showToast(msg, "error");
+                    return;
+                }
+                // Success
                 sidebar.classList.remove('open');
                 sidebarSettingsForm.style.display = 'none';
                 settingsOptions.style.display = 'block';
+                showToast("Agent info saved successfully!", "success");
             } catch (e) {
-                alert("Failed to save agent info to server.");
+                showToast("Failed to save agent info to server.", "error");
             }
+        }
+
+        // --- TOAST NOTIFICATION ---
+        function showToast(message, type = "success") {
+            const toast = document.getElementById('toastNotification');
+            toast.textContent = message;
+            toast.className = '';
+            toast.classList.add('show');
+            toast.classList.add(type);
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2600);
         }
 
         document.addEventListener('DOMContentLoaded', () => {

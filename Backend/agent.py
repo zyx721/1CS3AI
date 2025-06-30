@@ -286,6 +286,7 @@ async def update_agent_info(info: dict):
             json.dump(info, f, indent=2)
         # Update in-memory BUSINESS_INFO as well
         BUSINESS_INFO.update(info)
-        return {"status": "success"}
+        # Always return a JSONResponse with status 200
+        return JSONResponse(content={"status": "success"}, status_code=200)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save agent info: {e}")
