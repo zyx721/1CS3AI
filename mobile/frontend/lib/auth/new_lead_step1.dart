@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:math' as math;
 import 'dart:developer' as developer;
 import 'dart:convert';
+import 'package:http/http.dart' as http; // <-- Add this import
 
 // === THEME & CONSTANTS ===
 class AppTheme {
@@ -47,6 +48,9 @@ class _AccountSetupScreenState extends State<AccountSetupScreen>
 
   // State Variables
   int _currentPage = 0;
+  bool _isSubmitting = false;
+  String? _submitError;
+  bool _submitSuccess = false;
   
   // Form Controllers & Keys
   final List<GlobalKey<FormState>> _formKeys = [
@@ -120,27 +124,59 @@ class _AccountSetupScreenState extends State<AccountSetupScreen>
     );
   }
 
-  void _collectAndSubmitData() {
+  void _collectAndSubmitData() async {
     final businessInfo = {
       'business_name': _businessNameController.text,
       'domain': _selectedIndustry,
-      'location': _selectedCountries.isNotEmpty ? _selectedCountries : ['Global'],
+      // Convert list to comma-separated string for backend compatibility
+      'location': _selectedCountries.isNotEmpty ? _selectedCountries.join(', ') : 'Global',
       'services': _servicesController.text,
       'description': _descriptionController.text,
     };
 
-    developer.log("--- FINAL BUSINESS INFO ---", name: "AccountSetup");
-    developer.log(
-      const JsonEncoder.withIndent('  ').convert(businessInfo),
-      name: "AccountSetup",
-    );
+    setState(() {
+      _isSubmitting = true;
+      _submitError = null;
+      _submitSuccess = false;
+    });
+
+    try {
+      // Use the correct endpoint and fix the URL
+      final response = await http.post(
+        Uri.parse('http://192.168.100.5:8000/agent-info'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(businessInfo),
+      );
+      if (response.statusCode == 200) {
+        setState(() {
+          _submitSuccess = true;
+        });
+        // Optionally, go to the next page (completion step)
+        _pageController.nextPage(
+          duration: AppConstants.animationDuration,
+          curve: Curves.easeInOut,
+        );
+      } else {
+        setState(() {
+          _submitError = 'Failed to submit: ${response.body}';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _submitError = 'Error: $e';
+      });
+    } finally {
+      setState(() {
+        _isSubmitting = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.bgDark,
-      resizeToAvoidBottomInset: true, // <-- allow body to resize for keyboard
+      resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
           _buildEnhancedAnimatedBackground(),
@@ -148,8 +184,23 @@ class _AccountSetupScreenState extends State<AccountSetupScreen>
             child: Center(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20.0),
-                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag, // <-- dismiss keyboard on drag
-                child: _buildWizardContainer(),
+                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                child: Stack(
+                  children: [
+                    _buildWizardContainer(),
+                    if (_isSubmitting)
+                      Positioned.fill(
+                        child: Container(
+                          color: Colors.black.withOpacity(0.4),
+                          child: const Center(
+                            child: CircularProgressIndicator(
+                              color: AppTheme.gradientEnd,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -486,19 +537,21 @@ class _AccountSetupScreenState extends State<AccountSetupScreen>
         children: [
           const SuccessCheckmark(),
           const SizedBox(height: 30),
-          const Text(
-            'Setup Complete!',
-            style: TextStyle(
+          Text(
+            _submitSuccess ? 'Setup Complete!' : 'Setup Failed',
+            style: const TextStyle(
               color: AppTheme.textLight,
               fontSize: 28,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Your Chilbot AI agent is configured and ready. Let\'s find some leads.',
+          Text(
+            _submitSuccess
+                ? 'Your Chilbot AI agent is configured and ready. Let\'s find some leads.'
+                : (_submitError ?? 'An error occurred. Please try again.'),
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               color: AppTheme.textMuted,
               fontSize: 16,
               height: 1.6,
@@ -506,9 +559,14 @@ class _AccountSetupScreenState extends State<AccountSetupScreen>
           ),
           const SizedBox(height: 30),
           EnhancedElevatedButton(
-            onPressed: () => print("Navigate to Dashboard"),
-            icon: Icons.bar_chart_rounded,
-            label: 'Go to Dashboard',
+            onPressed: _submitSuccess
+                ? () => print("Navigate to Dashboard")
+                : () {
+                    // Retry submission
+                    _collectAndSubmitData();
+                  },
+            icon: _submitSuccess ? Icons.bar_chart_rounded : Icons.refresh,
+            label: _submitSuccess ? 'Go to Dashboard' : 'Retry',
           ),
         ],
       ),

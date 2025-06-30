@@ -1,4 +1,4 @@
-package com.ncs.CSAI
+package com.ncs.CSAI2
 
 import io.flutter.embedding.android.FlutterActivity
 

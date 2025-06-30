@@ -1,41 +1,41 @@
 {
   "project_info": {
-    "project_number": "9180440703",
-    "project_id": "ncs2025-d7a20",
-    "storage_bucket": "ncs2025-d7a20.firebasestorage.app"
+    "project_number": "32175675693",
+    "project_id": "ncs2025-68e40",
+    "storage_bucket": "ncs2025-68e40.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:9180440703:android:a1d9c80be5f63ea5c3374a",
+        "mobilesdk_app_id": "1:32175675693:android:f23b28fb88593bab1d9ba4",
         "android_client_info": {
-          "package_name": "com.ncs.CSAI"
+          "package_name": "com.ncs.CSAI2"
         }
       },
       "oauth_client": [
         {
-          "client_id": "9180440703-rb3qa2b9un1mv0c2v39aic6f69j7rn5a.apps.googleusercontent.com",
+          "client_id": "32175675693-kj2io0b8qg31qsmudn55pabd3buuki9r.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.ncs.CSAI",
+            "package_name": "com.ncs.CSAI2",
             "certificate_hash": "c99d353001ba579008bbdf1e200c1e54e1d67fde"
           }
         },
         {
-          "client_id": "9180440703-lq4hbgthnp5u5b3o6nebr0h0qjiflksj.apps.googleusercontent.com",
+          "client_id": "32175675693-3go68s24llraacarka1hrse84n8isc8a.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDy0mPr8ZCCYGM4o4dUckvhqv_v_cI0QQI"
+          "current_key": "AIzaSyAXQYh3SF5-jIwP9mcWu6wXkWfJ_xp5NI4"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "9180440703-lq4hbgthnp5u5b3o6nebr0h0qjiflksj.apps.googleusercontent.com",
+              "client_id": "32175675693-3go68s24llraacarka1hrse84n8isc8a.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
