@@ -431,8 +431,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                   final userData = snapshot.data!.data() as Map<String, dynamic>;
                   final interests = (userData['interests'] as List<dynamic>?) ?? [];
                   final aboutMe = userData['aboutMe'] as String? ?? "Tell the world about yourself...";
-                  final followers = (userData['followers'] as List<dynamic>?)?.length ?? 0;
-                  final following = (userData['following'] as List<dynamic>?)?.length ?? 0;
+
                   final walletBalance = (userData['wallet_balance'] as num?)?.toDouble() ?? 0.0;
 
                   return Padding(

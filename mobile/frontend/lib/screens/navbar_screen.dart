@@ -24,9 +24,8 @@ class _NavBarScreenState extends State<NavBarScreen>
   final List<Widget> _pages = [
     // const EnhancedMapScreen(),
     // const ChatScreen(),
-    const CampaignsPage(), // Assuming this is the campaign list screen
+    const DashboardPage(), // Assuming this is the campaign list screen
     const ProfileScreen(),
-    const AccountSetupScreen(), // Assuming this is a new lead creation screen
   ];
 
   @override
@@ -223,9 +222,8 @@ class _NavBarScreenState extends State<NavBarScreen>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [    
-                  _buildNavItem(Icons.list_rounded, 0, 'Campaigns'),
+                  _buildNavItem(Icons.list_rounded, 0, 'dashboard'),
                   _buildNavItem(Icons.person_rounded, 1, 'Profile'),
-                  _buildNavItem(Icons.add_circle_outline_rounded, 2, 'New Lead'),
                 ],
               ),
             ),
