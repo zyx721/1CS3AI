@@ -58,7 +58,6 @@
         .main-nav .logo {
             width: 40px;
             height: 40px;
-            background-color: var(--green-accent);
             border-radius: 8px;
             margin-bottom: 20px;
         }
@@ -88,6 +87,26 @@
         .nav-link.active {
             color: var(--bg-dark);
             background-color: var(--green-accent);
+        }
+        /* --- NEW: Settings button in nav --- */
+        .nav-settings-btn {
+            margin-top: auto;
+            margin-bottom: 10px;
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .nav-settings-btn:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-light);
         }
 
         .page-container {
@@ -228,19 +247,21 @@
         .settings-sidebar {
             position: fixed;
             top: 0;
-            right: -400px;
+            left: -400px;
+            right: auto;
             width: 360px;
             height: 100vh;
             background: var(--card-bg);
             box-shadow: -4px 0 24px rgba(0,0,0,0.18);
             z-index: 100;
-            transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+            transition: left 0.35s cubic-bezier(0.4,0,0.2,1);
             padding: 32px 28px 24px 28px;
             display: flex;
             flex-direction: column;
         }
         .settings-sidebar.open {
-            right: 0;
+            left: var(--nav-width);
+            right: auto;
         }
         #settingsOptions {
             display: flex;
@@ -494,8 +515,8 @@
         }
 
         @media (max-width: 900px) {
-            .settings-sidebar { width: 100vw; max-width: 100vw; right: -100vw; }
-            .settings-sidebar.open { right: 0; }
+            .settings-sidebar { width: 100vw; max-width: 100vw; left: -100vw; right: auto; }
+            .settings-sidebar.open { left: 0; right: auto; }
         }
         @media (max-width: 768px) {
              /* --- NEW: Responsive styles for nav --- */
@@ -535,9 +556,9 @@
     </style>
 </head>
 <body>
-    <!-- --- NEW: MAIN SIDE NAVIGATION --- -->
+    <!-- --- MODIFIED: MAIN SIDE NAVIGATION --- -->
     <nav class="main-nav">
-        <div class="logo"></div>
+        <img src="images/logo.png" alt="Logo" class="logo" style="object-fit:cover;" />
         <div class="nav-links">
             <a href="#" class="nav-link active" title="Dashboard">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
@@ -549,6 +570,13 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"></path><path d="M18 20V4"></path><path d="M6 20V16"></path></svg>
             </a>
         </div>
+        <!-- --- NEW: Settings Button in Nav --- -->
+        <button id="settingsBtn" class="nav-settings-btn" title="Agent Settings">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 9 3.09V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+        </button>
     </nav>
     
     <div class="page-container">
@@ -559,9 +587,7 @@
                         <h1>Agent Dashboard</h1>
                         <p>Welcome back! Here's a summary of your activities.</p>
                     </div>
-                    <div class="settings-bar">
-                        <button id="settingsBtn" title="Edit Agent Settings">Settings</button>
-                    </div>
+                    <!-- --- REMOVED: settings-bar from header --- -->
                 </header>
                 <main>
                     <section class="stats-overview-grid">
@@ -606,6 +632,7 @@
             </div>
         </div>
     </div>
+    <!-- --- MODIFIED: Sidebar slides from left, not right --- -->
     <div class="settings-sidebar" id="settingsSidebar">
         <!-- --- NEW: Close Icon Button --- -->
         <button id="closeSidebarBtn" style="position:absolute;top:18px;right:18px;background:none;border:none;cursor:pointer;padding:0;z-index:10;" title="Close Settings">
@@ -961,6 +988,7 @@ async function fetchAndApplyToggleStates() {
         const settingsOptions = document.getElementById('settingsOptions');
         const sidebarSettingsForm = document.getElementById('sidebarSettingsForm');
         
+        // --- MODIFIED: settingsBtn is now in nav, not header ---
         document.getElementById('settingsBtn').addEventListener('click', async () => {
             sidebar.classList.add('open');
             await fetchAndApplyToggleStates();
