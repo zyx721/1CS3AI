@@ -108,7 +108,7 @@ class _NewLeadStep1State extends State<NewLeadStep1>
               child: SlideTransition(
                 position: _slideAnimation,
                 child: ListView(
-                  padding: const EdgeInsets.fromLTRB(24, 120, 24, 32),
+                  padding: const EdgeInsets.fromLTRB(24, 120, 24, 90), // increased bottom padding
                   children: [
                     // Progress Header
                     _buildProgressHeader(),
@@ -229,15 +229,6 @@ class _NewLeadStep1State extends State<NewLeadStep1>
                   Color(0xFF34D399).withOpacity(0.8),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            "33%",
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
-              fontSize: 12,
-              fontWeight: FontWeight.w300,
             ),
           ),
         ],
