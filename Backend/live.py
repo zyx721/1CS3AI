@@ -2,9 +2,8 @@ import asyncio
 import os
 import pyaudio
 from dotenv import load_dotenv
-
 from google import genai
-from google.genai.types import LiveConnectConfig, SpeechConfig, VoiceConfig, PrebuiltVoiceConfig
+from google.genai.types import Blob
 
 # Load API key
 load_dotenv()
@@ -18,19 +17,42 @@ FORMAT = pyaudio.paInt16
 CHANNELS = 1
 IN_RATE = 16000
 OUT_RATE = 24000
-CHUNK = int(IN_RATE * 0.1)  # 100ms frames
-SEND_DURATION_SEC = 5       # how long user can speak per turn
-RESPONSE_SILENCE_TIMEOUT = 2.0
+CHUNK = int(IN_RATE * 0.1)
+SEND_DURATION_SEC = 5
+RESPONSE_SILENCE_TIMEOUT = 3.0  # Increased for slower connections
+INITIAL_PROMPT_DELAY = 1.0      # Wait before first prompt
+
+# System instruction
+SYSTEM_INSTRUCTION = (
+    "You are a professional sales representative. Follow these instructions exactly:\n\n"
+    "1. Begin the conversation ONLY with: \"Hello, am I speaking with someone from Smith and Company?\" Do not add any other text to your first response.\n"
+    "2. Listen to their responses and ask relevant follow‑up questions about their current IT setup or challenges.\n"
+    "3. Keep your responses concise, professional, and friendly. Aim for 2‑3 short sentences, suitable for a spoken conversation.\n"
+    "4. Do not reveal you are an AI unless specifically asked. Sound human and conversational.\n"
+    "5. Focus on understanding their business needs and IT challenges."
+)
 
 async def main():
-    config = LiveConnectConfig(
-        response_modalities=["AUDIO"],
-        speech_config=SpeechConfig(
-            voice_config=VoiceConfig(
-                prebuilt_voice_config=PrebuiltVoiceConfig(voice_name="puck")
-            )
-        )
-    )
+    # Create configuration
+    config = {
+        "response_modalities": ["AUDIO"],
+        "system_instruction": SYSTEM_INSTRUCTION,
+        "speech_config": {
+            "voice_config": {
+                "prebuilt_voice_config": {
+                    "voice_name": "puck"
+                }
+            }
+        },
+        # Optimized VAD settings for better conversation flow
+        "realtime_input_config": {
+            "automatic_activity_detection": {
+                "start_of_speech_sensitivity": "START_SENSITIVITY_LOW",
+                "end_of_speech_sensitivity": "END_SENSITIVITY_LOW",
+                "silence_duration_ms": 500
+            }
+        }
+    }
 
     client = genai.Client(api_key=API_KEY)
     pa = pyaudio.PyAudio()
@@ -40,43 +62,79 @@ async def main():
     speaker = pa.open(format=FORMAT, channels=CHANNELS, rate=OUT_RATE,
                       output=True)
 
-    print("🟢 Live connection ready. Start speaking.")
+    print("🟢 Live connection ready. Agent will speak first.")
 
     async with client.aio.live.connect(model=MODEL, config=config) as sess:
+        # Trigger the agent's first message
+        await sess.send_client_content(
+            turns={"role": "user", "parts": [{"text": "Start the conversation"}]},
+            turn_complete=True
+        )
+        await asyncio.sleep(INITIAL_PROMPT_DELAY)  # Allow model processing time
 
         async def send_audio_turn():
-            print("🎤 Sending audio for this turn...")
+            """Capture and send user audio"""
+            print("\n🎤 Listening... (Press Ctrl+C to stop)")
             start_time = asyncio.get_event_loop().time()
+            frames_sent = 0
+            
             while True:
-                if asyncio.get_event_loop().time() - start_time > SEND_DURATION_SEC:
-                    print("🛑 Done sending this turn.")
+                # Check duration limit
+                elapsed = asyncio.get_event_loop().time() - start_time
+                if elapsed > SEND_DURATION_SEC:
+                    print("🛑 Finished listening")
                     break
-                frame = mic.read(CHUNK, exception_on_overflow=False)
-                await sess.send(input={"data": frame, "mime_type": "audio/pcm"})
+                
+                # Read and send audio
+                try:
+                    frame = mic.read(CHUNK, exception_on_overflow=False)
+                    await sess.send_realtime_input(
+                        audio=Blob(data=frame, mime_type="audio/pcm;rate=16000")
+                    )
+                    frames_sent += 1
+                except Exception as e:
+                    print(f"⚠️ Audio send error: {str(e)}")
+                    break
+                
                 await asyncio.sleep(0.01)
 
         async def receive_audio_turn():
-            print("🔊 Waiting for Gemini response...")
+            """Receive and play agent's response"""
+            print("🔊 Processing response...")
             last_audio_time = asyncio.get_event_loop().time()
             speaking = False
-
+            response_started = False
+            
             async for msg in sess.receive():
-                if msg.server_content and msg.server_content.model_turn:
-                    for part in msg.server_content.model_turn.parts:
-                        if part.inline_data and part.inline_data.data:
-                            speaker.write(part.inline_data.data)
-                            last_audio_time = asyncio.get_event_loop().time()
-                            speaking = True
-
+                # Handle audio data
+                if msg.data:
+                    if not response_started:
+                        print("💬 Agent speaking...")
+                        response_started = True
+                    speaker.write(msg.data)
+                    last_audio_time = asyncio.get_event_loop().time()
+                    speaking = True
+                
+                # Handle interruptions
+                if msg.server_content and getattr(msg.server_content, 'interrupted', False):
+                    print("⏹️ Response interrupted")
+                    break
+                
+                # Check for silence timeout
                 now = asyncio.get_event_loop().time()
                 if speaking and now - last_audio_time > RESPONSE_SILENCE_TIMEOUT:
-                    print("✅ Gemini finished speaking.")
                     break
+            
+            if response_started:
+                print("✅ Agent finished speaking")
 
-        # Main loop
+        # Conversation flow: Agent first, then alternating turns
+        await receive_audio_turn()  # Play agent's first message
+        
+        # Main conversation loop
         while True:
-            await send_audio_turn()
-            await receive_audio_turn()
+            await send_audio_turn()    # User speaks
+            await receive_audio_turn()  # Agent responds
 
     # Cleanup
     mic.stop_stream()
@@ -90,6 +148,6 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("\n🛑 Interrupted by user.")
+        print("\n🛑 Conversation ended")
     except Exception as e:
         print(f"\n❌ Error occurred: {e}")
