@@ -271,6 +271,7 @@
 </head>
 <body>
     <div class="dashboard-body-wrapper">
+        <div id="dashboardError" style="display:none;color:#ff6b6b;background:#2a2a2e;padding:12px 18px;border-radius:8px;margin-bottom:18px;font-weight:600;"></div>
         <div class="dashboard-content">
             <header class="dashboard-header">
                 <div class="header-main-title">
@@ -344,15 +345,22 @@
         let professionalChartInstance;
         let dashboardData = null;
 
+        // --- AGENT INFO STATE ---
+        let agentInfo = null;
+
         async function fetchDashboardData() {
             try {
                 const resp = await fetch("http://localhost:8000/dashboard-data");
+                if (!resp.ok) throw new Error("HTTP " + resp.status);
                 dashboardData = await resp.json();
+                console.log("Dashboard data received:", dashboardData); // <-- Add this line
+                document.getElementById('dashboardError').style.display = "none";
                 updateDashboardFields();
                 initializeProfessionalChart();
                 updateLeadsTable();
             } catch (e) {
-                // fallback: show error or keep placeholders
+                document.getElementById('dashboardError').textContent = "Failed to load dashboard data. Please check your backend server.";
+                document.getElementById('dashboardError').style.display = "block";
                 console.error("Failed to load dashboard data", e);
             }
         }
@@ -480,33 +488,32 @@
             });
         }
 
-        document.addEventListener('DOMContentLoaded', fetchDashboardData);
+        // --- AGENT INFO HANDLING ---
+        async function fetchAgentInfo() {
+            try {
+                const resp = await fetch("http://localhost:8000/agent-info");
+                if (!resp.ok) throw new Error("HTTP " + resp.status);
+                agentInfo = await resp.json();
+                // Fill the form with agent info
+                document.getElementById('sidebarBusinessName').value = agentInfo.business_name || '';
+                document.getElementById('sidebarDomain').value = agentInfo.domain || '';
+                document.getElementById('sidebarLocation').value = Array.isArray(agentInfo.location)
+                    ? agentInfo.location.join(', ')
+                    : (agentInfo.location || '');
+                document.getElementById('sidebarServices').value = agentInfo.services || '';
+                document.getElementById('sidebarDescription').value = agentInfo.description || '';
+            } catch (e) {
+                agentInfo = null;
+                document.getElementById('sidebarBusinessName').value = '';
+                document.getElementById('sidebarDomain').value = '';
+                document.getElementById('sidebarLocation').value = '';
+                document.getElementById('sidebarServices').value = '';
+                document.getElementById('sidebarDescription').value = '';
+                alert("Failed to load agent info from server.");
+            }
+        }
 
-        const sidebar = document.getElementById('settingsSidebar');
-        document.getElementById('settingsBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            sidebar.classList.add('open');
-        });
-        const settingsOptions = document.getElementById('settingsOptions');
-        const sidebarSettingsForm = document.getElementById('sidebarSettingsForm');
-        document.getElementById('editAgentInfoBtn').addEventListener('click', function() {
-            // Load last info from localStorage if available
-            const info = JSON.parse(localStorage.getItem('agentInfo') || '{}');
-            document.getElementById('sidebarBusinessName').value = info.business_name || '';
-            document.getElementById('sidebarDomain').value = info.domain || '';
-            document.getElementById('sidebarLocation').value = Array.isArray(info.location) ? info.location.join(', ') : (info.location || '');
-            document.getElementById('sidebarServices').value = info.services || '';
-            document.getElementById('sidebarDescription').value = info.description || '';
-            settingsOptions.style.display = 'none';
-            sidebarSettingsForm.style.display = 'block';
-        });
-        document.getElementById('cancelSidebarSettings').addEventListener('click', function() {
-            sidebarSettingsForm.style.display = 'none';
-            settingsOptions.style.display = 'block';
-            sidebar.classList.remove('open');
-        });
-        document.getElementById('saveSidebarSettings').addEventListener('click', function() {
-            // Save info to localStorage
+        async function saveAgentInfo() {
             const info = {
                 business_name: document.getElementById('sidebarBusinessName').value,
                 domain: document.getElementById('sidebarDomain').value,
@@ -514,14 +521,63 @@
                 services: document.getElementById('sidebarServices').value,
                 description: document.getElementById('sidebarDescription').value
             };
-            localStorage.setItem('agentInfo', JSON.stringify(info));
-            sidebar.classList.remove('open');
-            sidebarSettingsForm.style.display = 'none';
-            settingsOptions.style.display = 'block';
-            // Optionally show a toast/notification
-        });
-        document.getElementById('cancelSettingsBtn').addEventListener('click', function() {
-            document.getElementById('settingsSidebar').classList.remove('open');
+            try {
+                const resp = await fetch("http://localhost:8000/agent-info", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(info)
+                });
+                if (!resp.ok) throw new Error("HTTP " + resp.status);
+                // Optionally show a toast/notification
+                sidebar.classList.remove('open');
+                sidebarSettingsForm.style.display = 'none';
+                settingsOptions.style.display = 'block';
+            } catch (e) {
+                alert("Failed to save agent info to server.");
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchDashboardData();
+
+            const sidebar = document.getElementById('settingsSidebar');
+            const settingsBtn = document.getElementById('settingsBtn');
+            if (settingsBtn) {
+                settingsBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    sidebar.classList.add('open');
+                });
+            }
+            const settingsOptions = document.getElementById('settingsOptions');
+            const sidebarSettingsForm = document.getElementById('sidebarSettingsForm');
+            const editAgentInfoBtn = document.getElementById('editAgentInfoBtn');
+            if (editAgentInfoBtn) {
+                editAgentInfoBtn.addEventListener('click', async function() {
+                    await fetchAgentInfo();
+                    settingsOptions.style.display = 'none';
+                    sidebarSettingsForm.style.display = 'block';
+                });
+            }
+            const cancelSidebarSettings = document.getElementById('cancelSidebarSettings');
+            if (cancelSidebarSettings) {
+                cancelSidebarSettings.addEventListener('click', function() {
+                    sidebarSettingsForm.style.display = 'none';
+                    settingsOptions.style.display = 'block';
+                    sidebar.classList.remove('open');
+                });
+            }
+            const saveSidebarSettings = document.getElementById('saveSidebarSettings');
+            if (saveSidebarSettings) {
+                saveSidebarSettings.addEventListener('click', async function() {
+                    await saveAgentInfo();
+                });
+            }
+            const cancelSettingsBtn = document.getElementById('cancelSettingsBtn');
+            if (cancelSettingsBtn) {
+                cancelSettingsBtn.addEventListener('click', function() {
+                    document.getElementById('settingsSidebar').classList.remove('open');
+                });
+            }
         });
     </script>
 </body>

@@ -20,7 +20,9 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://337a-105-235-133-238.ngrok-free.app"
+        "https://337a-105-235-133-238.ngrok-free.app",
+        "http://127.0.0.1:5500",  # <-- add this line for local dev
+        "http://localhost:5500"    # <-- add this line for local dev
     ],  # Only allow your frontend's ngrok URL
     allow_credentials=True,
     allow_methods=["*"],
@@ -249,3 +251,41 @@ async def get_dashboard_data():
         return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to load dashboard data: {e}")
+
+@app.get("/agent-info")
+async def get_agent_info():
+    """
+    Returns the current agent (business) info from business_config.json.
+    """
+    config_path = os.path.join(os.path.dirname(__file__), "business_config.json")
+    if not os.path.exists(config_path):
+        # Return default info if file doesn't exist
+        return {
+            "business_name": "",
+            "domain": "",
+            "location": "",
+            "services": "",
+            "description": ""
+        }
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load agent info: {e}")
+
+@app.post("/agent-info")
+async def update_agent_info(info: dict):
+    """
+    Updates the agent (business) info and saves to business_config.json.
+    """
+    config_path = os.path.join(os.path.dirname(__file__), "business_config.json")
+    try:
+        # Save to file
+        with open(config_path, "w", encoding="utf-8") as f:
+            json.dump(info, f, indent=2)
+        # Update in-memory BUSINESS_INFO as well
+        BUSINESS_INFO.update(info)
+        return {"status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save agent info: {e}")
