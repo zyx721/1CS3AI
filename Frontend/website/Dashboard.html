@@ -129,7 +129,6 @@
             color: var(--text-light);
         }
         
-        /* Chart Styles */
         .chart-wrapper { position: relative; }
         .custom-legend { display: flex; gap: 20px; margin-bottom: 20px; }
         .legend-item { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-muted); }
@@ -154,7 +153,6 @@
         #chartjs-tooltip .tooltip-item { display: flex; align-items: center; gap: 8px; }
         #chartjs-tooltip .tooltip-dot { width: 8px; height: 8px; border-radius: 50%; }
 
-        /* Table Styles */
         .table-container { width: 100%; overflow-x: auto; }
         .results-table { width: 100%; border-collapse: collapse; font-size: 14px; }
         .results-table th, .results-table td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
@@ -164,7 +162,6 @@
         .status-pill { display: inline-block; padding: 4px 12px; border-radius: 50px; font-weight: 500; font-size: 12px; }
         .status-interested { color: var(--green-accent); background-color: rgba(121, 178, 102, 0.1); }
 
-        /* Settings Sidebar Styles */
         .settings-sidebar {
             position: fixed;
             top: 0;
@@ -178,10 +175,14 @@
             padding: 32px 28px 24px 28px;
             display: flex;
             flex-direction: column;
-            gap: 24px;
         }
         .settings-sidebar.open {
             right: 0;
+        }
+        #settingsOptions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
         .settings-sidebar h2 {
             font-size: 22px;
@@ -206,10 +207,12 @@
             margin-bottom: 14px;
             font-family: inherit;
         }
+        
         .settings-sidebar .sidebar-actions {
             display: flex;
             gap: 12px;
-            margin-top: 10px;
+            margin-top: auto; /* Push actions to the bottom */
+            padding-top: 20px;
         }
         .settings-sidebar button {
             padding: 10px 22px;
@@ -248,10 +251,7 @@
             font-family: inherit;
             font-weight: 500;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 12px;
+            text-align: left;
             transition: background 0.2s, border-color 0.2s;
         }
         .sidebar-option-btn:hover {
@@ -259,46 +259,173 @@
             color: var(--bg-dark);
             border-color: var(--green-accent);
         }
-        /* Toast Notification Styles */
-        #toastNotification {
-            position: fixed;
-            top: 32px;
-            right: 32px;
-            z-index: 9999;
-            min-width: 220px;
-            max-width: 340px;
-            background: #232325;
-            color: #fff;
-            border-radius: 10px;
-            padding: 16px 24px;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.18);
-            font-size: 15px;
+
+        .styled-select {
+            width: 100%;
+            background-color: rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px 18px;
+            color: var(--text-light);
+            font-family: inherit;
+            font-size: 1rem;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            padding-right: 40px;
+            background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="%239E9E9E" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            cursor: pointer;
+            margin-bottom: 14px;
+        }
+        .styled-select option {
+            background: var(--card-bg);
+            color: var(--text-light);
+        }
+        select optgroup {
+            color: #000 !important;
+            font-weight: bold;
+        }
+
+        .custom-multiselect {
+            min-height: 48px;
+            background: rgba(0,0,0,0.18);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 6px 10px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            cursor: text;
+            position: relative;
+            color: var(--text-light);
+        }
+        .custom-multiselect:focus-within {
+            border-color: var(--green-accent);
+            box-shadow: 0 0 0 3px rgba(121, 178, 102, 0.2);
+        }
+        .custom-multiselect .selected-country {
+            background: var(--green-accent);
+            color: var(--bg-dark);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 14px;
             font-weight: 500;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s, transform 0.3s;
-            transform: translateY(-30px);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        #toastNotification.show {
+        .custom-multiselect .remove-country {
+            cursor: pointer;
+            color: var(--bg-dark);
+            font-weight: bold;
+            font-size: 16px;
+            opacity: 0.7;
+            transition: opacity 0.15s;
+        }
+        .custom-multiselect .remove-country:hover {
             opacity: 1;
-            pointer-events: auto;
-            transform: translateY(0);
         }
-        #toastNotification.success {
+        .custom-multiselect input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-light);
+            font-size: 1em;
+            min-width: 150px;
+            flex: 1;
+            padding: 6px 4px;
+            font-family: inherit;
+        }
+        .custom-multiselect-dropdown {
+            position: absolute;
+            left: 0; right: 0; top: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            z-index: 10;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            margin-top: -1px;
+            max-height: 180px;
+            overflow-y: auto;
+            display: none;
+        }
+        .custom-multiselect.open .custom-multiselect-dropdown {
+            display: block;
+        }
+        .custom-multiselect-dropdown .dropdown-option {
+            padding: 10px 16px;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: background 0.18s, color 0.18s;
+        }
+        .custom-multiselect-dropdown .dropdown-option.active,
+        .custom-multiselect-dropdown .dropdown-option:hover {
             background: var(--green-accent);
             color: var(--bg-dark);
         }
-        #toastNotification.error {
-            background: #ff6b6b;
-            color: #fff;
+
+        /* --- NEW: Toggle Switch Styles --- */
+        .toggle-switch-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.12);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 16px;
         }
-        @media (max-width: 600px) {
-            #toastNotification {
-                right: 10px;
-                left: 10px;
-                max-width: unset;
-            }
+        .toggle-switch-container .toggle-label {
+            font-weight: 500;
+            color: var(--text-light);
+            margin-bottom: 0; /* Override default label style */
         }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #333;
+            -webkit-transition: .3s;
+            transition: .3s;
+            border-radius: 24px;
+        }
+        .toggle-thumb {
+            position: absolute;
+            height: 20px;
+            width: 20px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            -webkit-transition: .3s;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider {
+            background-color: var(--green-accent);
+        }
+        input:checked + .toggle-slider .toggle-thumb {
+            -webkit-transform: translateX(20px);
+            -ms-transform: translateX(20px);
+            transform: translateX(20px);
+        }
+
         @media (max-width: 900px) {
             .settings-sidebar { width: 100vw; max-width: 100vw; right: -100vw; }
             .settings-sidebar.open { right: 0; }
@@ -311,7 +438,6 @@
 </head>
 <body>
     <div class="dashboard-body-wrapper">
-        <div id="dashboardError" style="display:none;color:#ff6b6b;background:#2a2a2e;padding:12px 18px;border-radius:8px;margin-bottom:18px;font-weight:600;"></div>
         <div class="dashboard-content">
             <header class="dashboard-header">
                 <div class="header-main-title">
@@ -319,7 +445,7 @@
                     <p>Welcome back! Here's a summary of your activities.</p>
                 </div>
                 <div class="settings-bar">
-                    <button id="settingsBtn" title="Edit Agent Settings"><i class="fas fa-cog"></i> Settings</button>
+                    <button id="settingsBtn" title="Edit Agent Settings">Settings</button>
                 </div>
             </header>
             <main>
@@ -346,9 +472,7 @@
                         <div class="table-container">
                             <table class="results-table" id="leadsTable">
                                 <thead><tr><th>Business Name</th><th>Contact</th><th>Status</th></tr></thead>
-                                <tbody>
-                                    <!-- Will be filled dynamically -->
-                                </tbody>
+                                <tbody></tbody>
                             </table>
                         </div>
                     </section>
@@ -358,18 +482,68 @@
         <div class="settings-sidebar" id="settingsSidebar">
             <h2>Settings</h2>
             <div id="settingsOptions">
-                <button type="button" class="sidebar-option-btn" id="editAgentInfoBtn"><i class="fas fa-user-edit"></i> Edit Agent Information</button>
-                <button type="button" class="sidebar-option-btn" id="changePasswordBtn"><i class="fas fa-key"></i> Change Password</button>
-                <button type="button" class="sidebar-option-btn" id="notificationSettingsBtn"><i class="fas fa-bell"></i> Notification Preferences</button>
-                <button type="button" class="sidebar-option-btn" id="exportDataBtn"><i class="fas fa-file-export"></i> Export Data</button>
+                <!-- NEW: Toggle Switch HTML -->
+                <div class="toggle-switch-container">
+                    <label for="searchEngineToggle" class="toggle-label">Search Engine</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="searchEngineToggle">
+                        <span class="toggle-slider"><span class="toggle-thumb"></span></span>
+                    </label>
+                </div>
+                <!-- End of New HTML -->
+
+                <button type="button" class="sidebar-option-btn" id="editAgentInfoBtn">Edit Agent Information</button>
+                <button type="button" class="sidebar-option-btn" id="changePasswordBtn">Change Password</button>
+                <button type="button" class="sidebar-option-btn" id="notificationSettingsBtn">Notification Preferences</button>
+                <button type="button" class="sidebar-option-btn" id="exportDataBtn">Export Data</button>
             </div>
             <form id="sidebarSettingsForm" autocomplete="off" style="display:none;">
                 <label for="sidebarBusinessName">Business Name</label>
                 <input type="text" id="sidebarBusinessName" placeholder="Business Name" />
                 <label for="sidebarDomain">Industry / Niche</label>
-                <input type="text" id="sidebarDomain" placeholder="Industry / Niche" />
+                <select id="sidebarDomain" class="styled-select" style="margin-bottom:14px;">
+                    <option value="" disabled selected>Select your industry...</option>
+                    <optgroup label="Technology">
+                        <option value="SaaS (Software as a Service)">SaaS (Software as a Service)</option>
+                        <option value="AI / Machine Learning">AI / Machine Learning</option>
+                        <option value="FinTech">FinTech</option>
+                        <option value="EdTech">EdTech</option>
+                        <option value="IT Services & Consulting">IT Services & Consulting</option>
+                        <option value="Web Development & Design">Web Development & Design</option>
+                    </optgroup>
+                    <optgroup label="E-commerce & Retail">
+                        <option value="E-commerce (General)">E-commerce (General)</option>
+                        <option value="Fashion & Apparel">Fashion & Apparel</option>
+                        <option value="Home Goods & Decor">Home Goods & Decor</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Beauty & Cosmetics">Beauty & Cosmetics</option>
+                    </optgroup>
+                    <optgroup label="Professional Services">
+                        <option value="Marketing & Advertising Agency">Marketing & Advertising Agency</option>
+                        <option value="Business Consulting">Business Consulting</option>
+                        <option value="Real Estate">Real Estate</option>
+                        <option value="Legal Services">Legal Services</option>
+                        <option value="Accounting & Financial Services">Accounting & Financial Services</option>
+                    </optgroup>
+                    <optgroup label="Health & Wellness">
+                        <option value="Health & Fitness">Health & Fitness</option>
+                        <option value="Medical & Dental Clinics">Medical & Dental Clinics</option>
+                        <option value="Wellness & Spas">Wellness & Spas</option>
+                    </optgroup>
+                    <optgroup label="Creative & Media">
+                        <option value="Content Creation & Media">Content Creation & Media</option>
+                        <option value="Graphic Design">Graphic Design</option>
+                        <option value="Photography & Videography">Photography & Videography</option>
+                    </optgroup>
+                    <optgroup label="Local Services">
+                        <option value="Restaurants & Cafes">Restaurants & Cafes</option>
+                        <option value="Home Improvement & Repair">Home Improvement & Repair</option>
+                        <option value="Salons & Barbershops">Salons & Barbershops</option>
+                    </optgroup>
+                    <option value="Other">Other (Please specify in description)</option>
+                </select>
                 <label for="sidebarLocation">Target Location(s)</label>
-                <input type="text" id="sidebarLocation" placeholder="e.g. United States, France" />
+                <div id="sidebarLocationMulti" class="custom-multiselect" tabindex="0" style="margin-bottom:14px; position:relative;"></div>
                 <label for="sidebarServices">Products / Services</label>
                 <textarea id="sidebarServices" rows="2" placeholder="Products / Services"></textarea>
                 <label for="sidebarDescription">Company Description</label>
@@ -380,30 +554,25 @@
                 </div>
             </form>
         </div>
-        <!-- Toast Notification -->
-        <div id="toastNotification"></div>
     </div>
+    
     <script type="module">
         let professionalChartInstance;
         let dashboardData = null;
 
-        // --- AGENT INFO STATE ---
-        let agentInfo = null;
-
         async function fetchDashboardData() {
-            try {
+             try {
                 const resp = await fetch("http://localhost:8000/dashboard-data");
-                if (!resp.ok) throw new Error("HTTP " + resp.status);
+                if (!resp.ok) {
+                    throw new Error(`Server responded with status: ${resp.status}`);
+                }
                 dashboardData = await resp.json();
-                console.log("Dashboard data received:", dashboardData); // <-- Add this line
-                document.getElementById('dashboardError').style.display = "none";
                 updateDashboardFields();
                 initializeProfessionalChart();
                 updateLeadsTable();
             } catch (e) {
-                document.getElementById('dashboardError').textContent = "Failed to load dashboard data. Please check your backend server.";
-                document.getElementById('dashboardError').style.display = "block";
-                console.error("Failed to load dashboard data", e);
+                console.error("Failed to load dashboard data:", e);
+                initializeProfessionalChart(); 
             }
         }
 
@@ -419,13 +588,16 @@
         function updateLeadsTable() {
             const tbody = document.querySelector("#leadsTable tbody");
             tbody.innerHTML = "";
-            if (!dashboardData || !dashboardData.leads_table) return;
+            if (!dashboardData || !dashboardData.leads_table || dashboardData.leads_table.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted);">No data available</td></tr>';
+                return;
+            }
             dashboardData.leads_table.forEach(row => {
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
                     <td>${row.business_name ?? ""}</td>
                     <td>${row.contact ?? ""}</td>
-                    <td><span class="status-pill${row.status === "Interested" ? " status-interested" : ""}">${row.status ?? ""}</span></td>
+                    <td><span class="status-pill status-${row.status?.toLowerCase() ?? ''}${row.status === "Interested" ? " status-interested" : ""}">${row.status ?? ""}</span></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -434,10 +606,7 @@
         function initializeProfessionalChart() {
             const canvas = document.getElementById('professionalLeadsChart');
             if (!canvas) return;
-            if (professionalChartInstance) {
-                professionalChartInstance.destroy();
-                professionalChartInstance = null;
-            }
+            if (professionalChartInstance) { professionalChartInstance.destroy(); }
             const ctx = canvas.getContext('2d');
             const style = getComputedStyle(document.body);
 
@@ -451,13 +620,9 @@
                 gradientEnd: 'rgba(121, 178, 102, 0)'
             };
 
-            // Use dashboardData.performance if available, else fallback to dummy data
-            const labels = dashboardData?.performance?.labels ?? Array.from({ length: 30 }, (_, i) => {
-                const d = new Date(); d.setDate(d.getDate() - (29 - i));
-                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            });
-            const leadsData = dashboardData?.performance?.leads ?? Array.from({ length: 30 }, () => Math.floor(Math.random() * 30) + 10);
-            const successData = dashboardData?.performance?.success ?? leadsData.map(lead => Math.max(0, Math.floor(lead * (Math.random() * 0.4 + 0.1) - Math.random() * 5)));
+            const labels = dashboardData?.performance?.labels ?? Array.from({ length: 30 }, (_, i) => { const d = new Date(); d.setDate(d.getDate() - (29 - i)); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); });
+            const leadsData = dashboardData?.performance?.leads ?? Array(30).fill(0);
+            const successData = dashboardData?.performance?.success ?? Array(30).fill(0);
 
             const gradient = ctx.createLinearGradient(0, 0, 0, 350);
             gradient.addColorStop(0, colors.gradientStart);
@@ -505,143 +670,167 @@
                     }
                 }
             };
-
             if (!Chart.registry.plugins.get('crosshair')) Chart.register(crosshairPlugin);
 
             professionalChartInstance = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        { label: 'New Leads', data: leadsData, borderColor: colors.accent, backgroundColor: gradient, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 0 },
-                        { label: 'Successful Calls', data: successData, borderColor: colors.muted, borderDash: [5, 5], fill: false, tension: 0.4, pointRadius: 0, pointHoverRadius: 0 }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { intersect: false, mode: 'index' },
-                    plugins: { legend: { display: false }, tooltip: { enabled: false, external: externalTooltipHandler }},
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: colors.grid }, ticks: { color: colors.font, padding: 10 }, border: { display: false } },
-                        x: { grid: { display: false }, ticks: { color: colors.font, maxRotation: 0, autoSkipPadding: 20 }, border: { display: false } }
-                    }
-                }
+                data: { labels: labels, datasets: [ { label: 'New Leads', data: leadsData, borderColor: colors.accent, backgroundColor: gradient, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 0 }, { label: 'Successful Calls', data: successData, borderColor: colors.muted, borderDash: [5, 5], fill: false, tension: 0.4, pointRadius: 0, pointHoverRadius: 0 } ] },
+                options: { responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: 'index' }, plugins: { legend: { display: false }, tooltip: { enabled: false, external: externalTooltipHandler }}, scales: { y: { beginAtZero: true, grid: { color: colors.grid }, ticks: { color: colors.font, padding: 10 }, border: { display: false } }, x: { grid: { display: false }, ticks: { color: colors.font, maxRotation: 0, autoSkipPadding: 20 }, border: { display: false } } } }
             });
         }
-
-        // --- AGENT INFO HANDLING ---
-        async function fetchAgentInfo() {
-            try {
-                const resp = await fetch("http://localhost:8000/agent-info");
-                if (!resp.ok) throw new Error("HTTP " + resp.status);
-                agentInfo = await resp.json();
-                // Fill the form with agent info
-                document.getElementById('sidebarBusinessName').value = agentInfo.business_name || '';
-                document.getElementById('sidebarDomain').value = agentInfo.domain || '';
-                document.getElementById('sidebarLocation').value = Array.isArray(agentInfo.location)
-                    ? agentInfo.location.join(', ')
-                    : (agentInfo.location || '');
-                document.getElementById('sidebarServices').value = agentInfo.services || '';
-                document.getElementById('sidebarDescription').value = agentInfo.description || '';
-            } catch (e) {
-                agentInfo = null;
-                document.getElementById('sidebarBusinessName').value = '';
-                document.getElementById('sidebarDomain').value = '';
-                document.getElementById('sidebarLocation').value = '';
-                document.getElementById('sidebarServices').value = '';
-                document.getElementById('sidebarDescription').value = '';
-                alert("Failed to load agent info from server.");
-            }
-        }
-
-        async function saveAgentInfo() {
-            const info = {
-                business_name: document.getElementById('sidebarBusinessName').value,
-                domain: document.getElementById('sidebarDomain').value,
-                location: document.getElementById('sidebarLocation').value.split(',').map(s => s.trim()).filter(Boolean),
-                services: document.getElementById('sidebarServices').value,
-                description: document.getElementById('sidebarDescription').value
-            };
-            try {
-                const resp = await fetch("http://localhost:8000/agent-info", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(info)
-                });
-                if (!resp.ok) {
-                    let msg = "Failed to save agent info to server.";
-                    try {
-                        const err = await resp.json();
-                        if (err && err.detail) msg = err.detail;
-                    } catch {}
-                    showToast(msg, "error");
-                    return;
-                }
-                // Success
-                sidebar.classList.remove('open');
-                sidebarSettingsForm.style.display = 'none';
-                settingsOptions.style.display = 'block';
-                showToast("Agent info saved successfully!", "success");
-            } catch (e) {
-                showToast("Failed to save agent info to server.", "error");
-            }
-        }
-
-        // --- TOAST NOTIFICATION ---
-        function showToast(message, type = "success") {
-            const toast = document.getElementById('toastNotification');
-            toast.textContent = message;
-            toast.className = '';
-            toast.classList.add('show');
-            toast.classList.add(type);
-            clearTimeout(toast._timeout);
-            toast._timeout = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2600);
+        
+        // --- NEW: Function to load all settings from localStorage ---
+        function loadAllSettings() {
+            // Load toggle state, defaulting to 'true' (on) if not set
+            const isEngineOn = localStorage.getItem('searchEngineStatus') !== 'false';
+            document.getElementById('searchEngineToggle').checked = isEngineOn;
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             fetchDashboardData();
+            loadAllSettings();
+        });
 
-            const sidebar = document.getElementById('settingsSidebar');
-            const settingsBtn = document.getElementById('settingsBtn');
-            if (settingsBtn) {
-                settingsBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    sidebar.classList.add('open');
-                });
+        // --- Sidebar and Settings Form Logic ---
+        const sidebar = document.getElementById('settingsSidebar');
+        const settingsOptions = document.getElementById('settingsOptions');
+        const sidebarSettingsForm = document.getElementById('sidebarSettingsForm');
+        
+        document.getElementById('settingsBtn').addEventListener('click', () => sidebar.classList.add('open'));
+        document.getElementById('cancelSidebarSettings').addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            sidebarSettingsForm.style.display = 'none';
+            settingsOptions.style.display = 'block';
+        });
+
+        // --- NEW: Toggle Switch Event Listener ---
+        document.getElementById('searchEngineToggle').addEventListener('change', (e) => {
+            localStorage.setItem('searchEngineStatus', e.target.checked);
+        });
+
+        // --- Multi-Select Country Component Logic ---
+        const allCountries = ["Global","Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo, Democratic Republic of the","Congo, Republic of the","Costa Rica","Cote d'Ivoire","Croatia","Cuba","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Korea, North","Korea, South","Kosovo","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"];
+        const sidebarLocationMulti = document.getElementById('sidebarLocationMulti');
+        let selectedCountries = [];
+
+        function renderSelectedCountries() {
+            const input = sidebarLocationMulti.querySelector('input');
+            sidebarLocationMulti.querySelectorAll('.selected-country').forEach(e => e.remove());
+            selectedCountries.forEach(country => {
+                const tag = document.createElement('span');
+                tag.className = 'selected-country';
+                tag.textContent = country;
+                const removeBtn = document.createElement('span');
+                removeBtn.className = 'remove-country';
+                removeBtn.innerHTML = '×';
+                removeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    selectedCountries = selectedCountries.filter(c => c !== country);
+                    renderSelectedCountries();
+                    if (document.activeElement === input) {
+                        renderCountryDropdown(input.value);
+                    }
+                };
+                tag.appendChild(removeBtn);
+                sidebarLocationMulti.insertBefore(tag, input);
+            });
+        }
+
+        function renderCountryDropdown(filter = '') {
+            let dropdown = sidebarLocationMulti.querySelector('.custom-multiselect-dropdown');
+            if (!dropdown) {
+                dropdown = document.createElement('div');
+                dropdown.className = 'custom-multiselect-dropdown';
+                sidebarLocationMulti.appendChild(dropdown);
             }
-            const settingsOptions = document.getElementById('settingsOptions');
-            const sidebarSettingsForm = document.getElementById('sidebarSettingsForm');
-            const editAgentInfoBtn = document.getElementById('editAgentInfoBtn');
-            if (editAgentInfoBtn) {
-                editAgentInfoBtn.addEventListener('click', async function() {
-                    await fetchAgentInfo();
-                    settingsOptions.style.display = 'none';
-                    sidebarSettingsForm.style.display = 'block';
-                });
+            dropdown.innerHTML = '';
+            const filtered = allCountries
+                .filter(c => c.toLowerCase().includes(filter.toLowerCase()) && !selectedCountries.includes(c))
+                .slice(0, 10);
+            
+            filtered.forEach(country => {
+                const option = document.createElement('div');
+                option.className = 'dropdown-option';
+                option.textContent = country;
+                option.onclick = () => {
+                    selectedCountries.push(country);
+                    renderSelectedCountries();
+                    const input = sidebarLocationMulti.querySelector('input');
+                    if (input) {
+                        input.value = '';
+                        input.focus();
+                    }
+                    sidebarLocationMulti.classList.remove('open');
+                };
+                dropdown.appendChild(option);
+            });
+
+            if (filtered.length > 0) {
+                 sidebarLocationMulti.classList.add('open');
+            } else {
+                 sidebarLocationMulti.classList.remove('open');
             }
-            const cancelSidebarSettings = document.getElementById('cancelSidebarSettings');
-            if (cancelSidebarSettings) {
-                cancelSidebarSettings.addEventListener('click', function() {
-                    sidebarSettingsForm.style.display = 'none';
-                    settingsOptions.style.display = 'block';
-                    sidebar.classList.remove('open');
-                });
+        }
+
+        function setupCountryInput() {
+            if (sidebarLocationMulti.querySelector('input')) return;
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = 'Type to search...';
+            input.autocomplete = 'off';
+            sidebarLocationMulti.appendChild(input);
+
+            input.addEventListener('focus', () => renderCountryDropdown(input.value));
+            input.addEventListener('input', () => renderCountryDropdown(input.value));
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && input.value === '' && selectedCountries.length > 0) {
+                    selectedCountries.pop();
+                    renderSelectedCountries();
+                }
+            });
+        }
+        
+        document.addEventListener('click', (e) => {
+            if (!sidebarLocationMulti.contains(e.target)) {
+                sidebarLocationMulti.classList.remove('open');
             }
-            const saveSidebarSettings = document.getElementById('saveSidebarSettings');
-            if (saveSidebarSettings) {
-                saveSidebarSettings.addEventListener('click', async function() {
-                    await saveAgentInfo();
-                });
+        });
+        
+        sidebarLocationMulti.addEventListener('click', () => {
+            const input = sidebarLocationMulti.querySelector('input');
+if (input) {
+                input.focus();
             }
-            const cancelSettingsBtn = document.getElementById('cancelSettingsBtn');
-            if (cancelSettingsBtn) {
-                cancelSettingsBtn.addEventListener('click', function() {
-                    document.getElementById('settingsSidebar').classList.remove('open');
-                });
-            }
+        });
+
+        document.getElementById('editAgentInfoBtn').addEventListener('click', function() {
+            const info = JSON.parse(localStorage.getItem('agentInfo') || '{}');
+            document.getElementById('sidebarBusinessName').value = info.business_name || '';
+            document.getElementById('sidebarDomain').value = info.domain || '';
+            selectedCountries = Array.isArray(info.location) ? info.location : [];
+            document.getElementById('sidebarServices').value = info.services || '';
+            document.getElementById('sidebarDescription').value = info.description || '';
+            
+            setupCountryInput(); 
+            renderSelectedCountries();
+            
+            settingsOptions.style.display = 'none';
+            sidebarSettingsForm.style.display = 'block';
+        });
+
+        document.getElementById('saveSidebarSettings').addEventListener('click', function() {
+            const info = {
+                business_name: document.getElementById('sidebarBusinessName').value,
+                domain: document.getElementById('sidebarDomain').value,
+                location: selectedCountries,
+                services: document.getElementById('sidebarServices').value,
+                description: document.getElementById('sidebarDescription').value
+            };
+            localStorage.setItem('agentInfo', JSON.stringify(info));
+            sidebar.classList.remove('open');
+            sidebarSettingsForm.style.display = 'none';
+            settingsOptions.style.display = 'block';
         });
     </script>
 </body>

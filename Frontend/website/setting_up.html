@@ -154,7 +154,8 @@
             outline: none;
             min-width: 120px;
             font-size: 1em;
-            padding: 4px 0;
+            padding: 4px 0 4px 12px; /* top right bottom left */
+            margin-left: 6px; /* shift input a bit to the left */
         }
         .custom-multiselect-dropdown {
             position: absolute;
@@ -201,6 +202,11 @@
         @keyframes stroke { 100% { stroke-dashoffset: 0; } }
         @keyframes scale { 0%, 100% { transform: none; } 50% { transform: scale3d(1.1, 1.1, 1); } }
         @keyframes fill { 100% { box-shadow: inset 0px 0px 0px 50px var(--gradient-end); } }
+
+        /* Add a small space between the left arrow and 'Back' */
+        #prevBtn i {
+            margin-right: 6px;
+        }
     </style>
 </head>
 <body>
