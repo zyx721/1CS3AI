@@ -331,6 +331,21 @@
             let currentStep = 1;
             const totalFormSteps = steps.length - 1;
 
+            // --- AGENT INFO LOCALSTORAGE KEY ---
+            const AGENT_INFO_KEY = 'agent_info';
+
+            // --- Prefill logic ---
+            function loadAgentInfo() {
+                const info = JSON.parse(localStorage.getItem(AGENT_INFO_KEY) || '{}');
+                if (info.business_name) document.getElementById('business_name').value = info.business_name;
+                if (info.domain) document.getElementById('domain').value = info.domain;
+                if (info.services) document.getElementById('services').value = info.services;
+                if (info.description) document.getElementById('description').value = info.description;
+                if (Array.isArray(info.location) && info.location.length) {
+                    selectedCountries = info.location.slice();
+                }
+            }
+
             const updateWizard = () => {
                 steps.forEach((step, index) => step.classList.toggle('active', index + 1 === currentStep));
                 const progress = currentStep > totalFormSteps ? 100 : ((currentStep - 1) / (totalFormSteps - 1)) * 100;
@@ -441,20 +456,27 @@
                 input.focus();
             });
 
-            const oldCollect = collectAndSubmitData;
-            window.collectAndSubmitData = function() {
-                const BUSINESS_INFO = {
-                    business_name: document.getElementById('business_name').value || "Your Company",
-                    domain: document.getElementById('domain').value || "B2B service",
-                    location: selectedCountries.length ? selectedCountries : ["Global"],
-                    services: document.getElementById('services').value || "",
-                    description: document.getElementById('description').value || ""
-                };
-                console.log("--- FINAL BUSINESS INFO ---");
-                console.log(JSON.stringify(BUSINESS_INFO, null, 2));
-            };
+            // --- Load agent info on page load ---
+            loadAgentInfo();
             renderSelectedCountries();
             updateWizard();
+
+            // --- Save/merge agent info on submit ---
+            window.collectAndSubmitData = function() {
+                const prev = JSON.parse(localStorage.getItem(AGENT_INFO_KEY) || '{}');
+                const BUSINESS_INFO = {
+                    business_name: document.getElementById('business_name').value || prev.business_name || "Your Company",
+                    domain: document.getElementById('domain').value || prev.domain || "B2B service",
+                    location: selectedCountries.length ? selectedCountries : (prev.location || ["Global"]),
+                    services: document.getElementById('services').value || prev.services || "",
+                    description: document.getElementById('description').value || prev.description || ""
+                };
+                localStorage.setItem(AGENT_INFO_KEY, JSON.stringify(BUSINESS_INFO));
+                // Optionally, show a success message or animation here
+                setTimeout(function() {
+                    window.location.href = "dashboard.html";
+                }, 600);
+            };
         });
     </script>
 </body>
