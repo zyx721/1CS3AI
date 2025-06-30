@@ -16,9 +16,83 @@
             --border-color: rgba(245, 244, 240, 0.1);
             --top-glow-1: #2E402B;
             --top-glow-2: #5A7C50;
+            --nav-width: 80px; /* NEW: Side nav width variable */
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: var(--text-light); -webkit-font-smoothing: antialiased; }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            color: var(--text-light); 
+            -webkit-font-smoothing: antialiased;
+            /* --- UPDATED: Multi-layered gradient background --- */
+  
+  background: 
+    radial-gradient(circle at 20% 30%, #145b31 0%, transparent 40%),
+    radial-gradient(circle at 80% 20%, #354337 0%, transparent 50%),
+    conic-gradient(from 90deg at 50% 50%, #0a2e19, #0f3d26, #000000, #234832),
+    linear-gradient(135deg, #0a2e19 0%, rgba(255,255,255,0.05) 30%, #000000 100%);
+  background-blend-mode: overlay, overlay, screen, normal;
+  background-color: #0a2e19;
+
+
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+
+        /* --- NEW: Main Side Navigation --- */
+        .main-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--nav-width);
+            height: 100vh;
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 0;
+            gap: 20px;
+        }
+        .main-nav .logo {
+            width: 40px;
+            height: 40px;
+            background-color: var(--green-accent);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            color: var(--text-muted);
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .nav-link svg {
+            width: 24px;
+            height: 24px;
+        }
+        .nav-link:hover {
+            color: var(--text-light);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .nav-link.active {
+            color: var(--bg-dark);
+            background-color: var(--green-accent);
+        }
+
+        .page-container {
+            margin-left: var(--nav-width);
+        }
 
         .dashboard-body-wrapper {
             padding: 40px;
@@ -27,18 +101,7 @@
             min-height: 100vh;
             position: relative;
         }
-        .dashboard-body-wrapper::before {
-            content: '';
-            position: absolute;
-            top: -100px;
-            left: 0;
-            right: 0;
-            height: 300px;
-            background: radial-gradient(circle at 50% 0%, var(--top-glow-1), transparent 50%);
-            opacity: 0.5;
-            z-index: 0;
-            pointer-events: none;
-        }
+        
         .dashboard-content { position: relative; z-index: 1; }
 
         .dashboard-header {
@@ -368,7 +431,7 @@
             color: var(--bg-dark);
         }
 
-        /* --- NEW: Toggle Switch Styles --- */
+        /* --- MODERN TOGGLE SWITCH STYLES --- */
         .toggle-switch-container {
             display: flex;
             justify-content: space-between;
@@ -377,6 +440,10 @@
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 12px 16px;
+            transition: border-color 0.2s;
+        }
+        .toggle-switch-container:hover {
+            border-color: rgba(245, 244, 240, 0.2);
         }
         .toggle-switch-container .toggle-label {
             font-weight: 500;
@@ -414,7 +481,7 @@
             bottom: 2px;
             background-color: white;
             -webkit-transition: .3s;
-            transition: .3s;
+            transition: .3s cubic-bezier(0.25, 0.1, 0.25, 1.5); /* Added bounce effect */
             border-radius: 50%;
         }
         input:checked + .toggle-slider {
@@ -431,134 +498,171 @@
             .settings-sidebar.open { right: 0; }
         }
         @media (max-width: 768px) {
+             /* --- NEW: Responsive styles for nav --- */
+            .main-nav { display: none; }
+            .page-container { margin-left: 0; }
+
             .dashboard-body-wrapper { padding: 24px; }
             .settings-bar { top: 16px; right: 16px; }
         }
     </style>
 </head>
 <body>
-    <div class="dashboard-body-wrapper">
-        <div class="dashboard-content">
-            <header class="dashboard-header">
-                <div class="header-main-title">
-                    <h1>Agent Dashboard</h1>
-                    <p>Welcome back! Here's a summary of your activities.</p>
-                </div>
-                <div class="settings-bar">
-                    <button id="settingsBtn" title="Edit Agent Settings">Settings</button>
-                </div>
-            </header>
-            <main>
-                <section class="stats-overview-grid">
-                    <div class="overview-card"><p class="label">Total Calls Made</p><p class="value" id="totalCalls">-</p></div>
-                    <div class="overview-card"><p class="label">Calls This Week</p><p class="value" id="callsThisWeek">-</p></div>
-                    <div class="overview-card"><p class="label">Success Rate</p><p class="value"><span class="highlight" id="successRate">-</span></p></div>
-                    <div class="overview-card"><p class="label">New Leads Found</p><p class="value" id="newLeads">-</p></div>
-                </section>
-                <div class="dashboard-main-layout">
-                    <section class="dash-card">
-                         <div class="dash-card-header"><h3>Performance Over Time (Last 30 Days)</h3></div>
-                         <div class="chart-wrapper">
-                            <div class="custom-legend">
-                               <div class="legend-item"><span class="legend-dot" style="background-color: var(--green-accent);"></span>New Leads</div>
-                               <div class="legend-item"><span class="legend-dot" style="background-color: var(--text-muted);"></span>Successful Calls</div>
+    <!-- --- NEW: MAIN SIDE NAVIGATION --- -->
+    <nav class="main-nav">
+        <div class="logo"></div>
+        <div class="nav-links">
+            <a href="#" class="nav-link active" title="Dashboard">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            </a>
+            <a href="#" class="nav-link" title="Leads">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            </a>
+            <a href="#" class="nav-link" title="Analytics">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"></path><path d="M18 20V4"></path><path d="M6 20V16"></path></svg>
+            </a>
+        </div>
+    </nav>
+    
+    <div class="page-container">
+        <div class="dashboard-body-wrapper">
+            <div class="dashboard-content">
+                <header class="dashboard-header">
+                    <div class="header-main-title">
+                        <h1>Agent Dashboard</h1>
+                        <p>Welcome back! Here's a summary of your activities.</p>
+                    </div>
+                    <div class="settings-bar">
+                        <button id="settingsBtn" title="Edit Agent Settings">Settings</button>
+                    </div>
+                </header>
+                <main>
+                    <section class="stats-overview-grid">
+                        <div class="overview-card"><p class="label">Total Calls Made</p><p class="value" id="totalCalls">-</p></div>
+                        <div class="overview-card"><p class="label">Calls This Week</p><p class="value" id="callsThisWeek">-</p></div>
+                        <div class="overview-card"><p class="label">Success Rate</p><p class="value"><span class="highlight" id="successRate">-</span></p></div>
+                        <div class="overview-card"><p class="label">New Leads Found</p><p class="value" id="newLeads">-</p></div>
+                    </section>
+                    <div class="dashboard-main-layout">
+                        <section class="dash-card">
+                            <div class="dash-card-header"><h3>Performance Over Time (Last 30 Days)</h3></div>
+                            <div class="chart-wrapper">
+                                <div class="custom-legend">
+                                <div class="legend-item"><span class="legend-dot" style="background-color: var(--green-accent);"></span>New Leads</div>
+                                <div class="legend-item"><span class="legend-dot" style="background-color: var(--text-muted);"></span>Successful Calls</div>
+                                </div>
+                                <div id="professionalChartContainer"><canvas id="professionalLeadsChart"></canvas></div>
+                                <div id="chartjs-tooltip"></div>
                             </div>
-                            <div id="professionalChartContainer"><canvas id="professionalLeadsChart"></canvas></div>
-                            <div id="chartjs-tooltip"></div>
-                         </div>
-                    </section>
-                    <section class="dash-card">
-                        <div class="dash-card-header"><h3>Lead Search Results</h3></div>
-                        <div class="table-container">
-                            <table class="results-table" id="leadsTable">
-                                <thead><tr><th>Business Name</th><th>Contact</th><th>Status</th></tr></thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </section>
-                </div>
-            </main>
-        </div>
-        <div class="settings-sidebar" id="settingsSidebar">
-            <h2>Settings</h2>
-            <div id="settingsOptions">
-                <!-- NEW: Toggle Switch HTML -->
-                <div class="toggle-switch-container">
-                    <label for="searchEngineToggle" class="toggle-label">Search Engine</label>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="searchEngineToggle">
-                        <span class="toggle-slider"><span class="toggle-thumb"></span></span>
-                    </label>
-                </div>
-                <!-- End of New HTML -->
-
-                <button type="button" class="sidebar-option-btn" id="editAgentInfoBtn">Edit Agent Information</button>
-                <button type="button" class="sidebar-option-btn" id="changePasswordBtn">Change Password</button>
-                <button type="button" class="sidebar-option-btn" id="notificationSettingsBtn">Notification Preferences</button>
-                <button type="button" class="sidebar-option-btn" id="exportDataBtn">Export Data</button>
+                        </section>
+                        <section class="dash-card">
+                            <div class="dash-card-header"><h3>Lead Search Results</h3></div>
+                            <div class="table-container">
+                                <table class="results-table" id="leadsTable">
+                                    <thead><tr><th>Business Name</th><th>Contact</th><th>Status</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+                </main>
             </div>
-            <form id="sidebarSettingsForm" autocomplete="off" style="display:none;">
-                <label for="sidebarBusinessName">Business Name</label>
-                <input type="text" id="sidebarBusinessName" placeholder="Business Name" />
-                <label for="sidebarDomain">Industry / Niche</label>
-                <select id="sidebarDomain" class="styled-select" style="margin-bottom:14px;">
-                    <option value="" disabled selected>Select your industry...</option>
-                    <optgroup label="Technology">
-                        <option value="SaaS (Software as a Service)">SaaS (Software as a Service)</option>
-                        <option value="AI / Machine Learning">AI / Machine Learning</option>
-                        <option value="FinTech">FinTech</option>
-                        <option value="EdTech">EdTech</option>
-                        <option value="IT Services & Consulting">IT Services & Consulting</option>
-                        <option value="Web Development & Design">Web Development & Design</option>
-                    </optgroup>
-                    <optgroup label="E-commerce & Retail">
-                        <option value="E-commerce (General)">E-commerce (General)</option>
-                        <option value="Fashion & Apparel">Fashion & Apparel</option>
-                        <option value="Home Goods & Decor">Home Goods & Decor</option>
-                        <option value="Electronics">Electronics</option>
-                        <option value="Beauty & Cosmetics">Beauty & Cosmetics</option>
-                    </optgroup>
-                    <optgroup label="Professional Services">
-                        <option value="Marketing & Advertising Agency">Marketing & Advertising Agency</option>
-                        <option value="Business Consulting">Business Consulting</option>
-                        <option value="Real Estate">Real Estate</option>
-                        <option value="Legal Services">Legal Services</option>
-                        <option value="Accounting & Financial Services">Accounting & Financial Services</option>
-                    </optgroup>
-                    <optgroup label="Health & Wellness">
-                        <option value="Health & Fitness">Health & Fitness</option>
-                        <option value="Medical & Dental Clinics">Medical & Dental Clinics</option>
-                        <option value="Wellness & Spas">Wellness & Spas</option>
-                    </optgroup>
-                    <optgroup label="Creative & Media">
-                        <option value="Content Creation & Media">Content Creation & Media</option>
-                        <option value="Graphic Design">Graphic Design</option>
-                        <option value="Photography & Videography">Photography & Videography</option>
-                    </optgroup>
-                    <optgroup label="Local Services">
-                        <option value="Restaurants & Cafes">Restaurants & Cafes</option>
-                        <option value="Home Improvement & Repair">Home Improvement & Repair</option>
-                        <option value="Salons & Barbershops">Salons & Barbershops</option>
-                    </optgroup>
-                    <option value="Other">Other (Please specify in description)</option>
-                </select>
-                <label for="sidebarLocation">Target Location(s)</label>
-                <div id="sidebarLocationMulti" class="custom-multiselect" tabindex="0" style="margin-bottom:14px; position:relative;"></div>
-                <label for="sidebarServices">Products / Services</label>
-                <textarea id="sidebarServices" rows="2" placeholder="Products / Services"></textarea>
-                <label for="sidebarDescription">Company Description</label>
-                <textarea id="sidebarDescription" rows="3" placeholder="Company Description"></textarea>
-                <div class="sidebar-actions">
-                    <button type="button" class="save-btn" id="saveSidebarSettings">Save</button>
-                    <button type="button" class="cancel-btn" id="cancelSidebarSettings">Cancel</button>
-                </div>
-            </form>
         </div>
+    </div>
+    <div class="settings-sidebar" id="settingsSidebar">
+        <h2>Settings</h2>
+        <div id="settingsOptions">
+            <!-- --- NEW: MODERN TOGGLE SWITCHES --- -->
+            <div class="toggle-switch-container">
+                <label for="searchEngineToggle" class="toggle-label">Search Engine</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="searchEngineToggle" checked>
+                    <span class="toggle-slider"><span class="toggle-thumb"></span></span>
+                </label>
+            </div>
+            <div class="toggle-switch-container">
+                <label for="aiCallsToggle" class="toggle-label">AI Calls</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="aiCallsToggle" checked>
+                    <span class="toggle-slider"><span class="toggle-thumb"></span></span>
+                </label>
+            </div>
+            <!-- --- End of Toggles --- -->
+
+            <button type="button" class="sidebar-option-btn" id="editAgentInfoBtn">Edit Agent Information</button>
+            <button type="button" class="sidebar-option-btn" id="changePasswordBtn">Change Password</button>
+            <button type="button" class="sidebar-option-btn" id="notificationSettingsBtn">Notification Preferences</button>
+            <button type="button" class="sidebar-option-btn" id="exportDataBtn">Export Data</button>
+        </div>
+        <form id="sidebarSettingsForm" autocomplete="off" style="display:none;">
+            <label for="sidebarBusinessName">Business Name</label>
+            <input type="text" id="sidebarBusinessName" placeholder="Business Name" />
+            <label for="sidebarDomain">Industry / Niche</label>
+            <select id="sidebarDomain" class="styled-select" style="margin-bottom:14px;">
+                <option value="" disabled selected>Select your industry...</option>
+                <optgroup label="Technology">
+                    <option value="SaaS (Software as a Service)">SaaS (Software as a Service)</option>
+                    <option value="AI / Machine Learning">AI / Machine Learning</option>
+                    <option value="FinTech">FinTech</option>
+                    <option value="EdTech">EdTech</option>
+                    <option value="IT Services & Consulting">IT Services & Consulting</option>
+                    <option value="Web Development & Design">Web Development & Design</option>
+                </optgroup>
+                <optgroup label="E-commerce & Retail">
+                    <option value="E-commerce (General)">E-commerce (General)</option>
+                    <option value="Fashion & Apparel">Fashion & Apparel</option>
+                    <option value="Home Goods & Decor">Home Goods & Decor</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Beauty & Cosmetics">Beauty & Cosmetics</option>
+                </optgroup>
+                <optgroup label="Professional Services">
+                    <option value="Marketing & Advertising Agency">Marketing & Advertising Agency</option>
+                    <option value="Business Consulting">Business Consulting</option>
+                    <option value="Real Estate">Real Estate</option>
+                    <option value="Legal Services">Legal Services</option>
+                    <option value="Accounting & Financial Services">Accounting & Financial Services</option>
+                </optgroup>
+                <optgroup label="Health & Wellness">
+                    <option value="Health & Fitness">Health & Fitness</option>
+                    <option value="Medical & Dental Clinics">Medical & Dental Clinics</option>
+                    <option value="Wellness & Spas">Wellness & Spas</option>
+                </optgroup>
+                <optgroup label="Creative & Media">
+                    <option value="Content Creation & Media">Content Creation & Media</option>
+                    <option value="Graphic Design">Graphic Design</option>
+                    <option value="Photography & Videography">Photography & Videography</option>
+                </optgroup>
+                <optgroup label="Local Services">
+                    <option value="Restaurants & Cafes">Restaurants & Cafes</option>
+                    <option value="Home Improvement & Repair">Home Improvement & Repair</option>
+                    <option value="Salons & Barbershops">Salons & Barbershops</option>
+                </optgroup>
+                <option value="Other">Other (Please specify in description)</option>
+            </select>
+            <label for="sidebarLocation">Target Location(s)</label>
+            <div id="sidebarLocationMulti" class="custom-multiselect" tabindex="0" style="margin-bottom:14px; position:relative;"></div>
+            <label for="sidebarServices">Products / Services</label>
+            <textarea id="sidebarServices" rows="2" placeholder="Products / Services"></textarea>
+            <label for="sidebarDescription">Company Description</label>
+            <textarea id="sidebarDescription" rows="3" placeholder="Company Description"></textarea>
+            <div class="sidebar-actions">
+                <button type="button" class="save-btn" id="saveSidebarSettings">Save</button>
+                <button type="button" class="cancel-btn" id="cancelSidebarSettings">Cancel</button>
+            </div>
+        </form>
     </div>
     
     <script type="module">
         let professionalChartInstance;
         let dashboardData = null;
+        let rankedLeads = [];
+        let aiCallsLoading = false;
+
+        // --- NEW: Show loading in leads table ---
+        function showLeadsLoading() {
+            const tbody = document.querySelector("#leadsTable tbody");
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted);">Loading...</td></tr>';
+        }
 
         async function fetchDashboardData() {
              try {
@@ -569,11 +673,81 @@
                 dashboardData = await resp.json();
                 updateDashboardFields();
                 initializeProfessionalChart();
-                updateLeadsTable();
+                // updateLeadsTable(); // REMOVE this line, handled below
             } catch (e) {
                 console.error("Failed to load dashboard data:", e);
                 initializeProfessionalChart(); 
             }
+            // Fetch ranked leads after dashboard data
+            await fetchRankedLeads();
+        }
+
+        // --- NEW: Fetch /run-agent when AI Calls is ON ---
+        async function runAgentAndRefreshLeads() {
+            aiCallsLoading = true;
+            showLeadsLoading();
+            try {
+                const resp = await fetch("http://localhost:8000/run-agent", { method: "POST" });
+                // Ignore result, just refresh leads after
+            } catch (e) {
+                // Optionally show error
+                console.error("Failed to run agent:", e);
+            }
+            await fetchRankedLeads();
+            aiCallsLoading = false;
+        }
+
+        // --- Fetch /ranked-leads and update table ---
+        async function fetchRankedLeads() {
+            try {
+                const resp = await fetch("http://localhost:8000/ranked-leads");
+                if (!resp.ok) throw new Error(`Server responded with status: ${resp.status}`);
+                const data = await resp.json();
+                // Filter: only include rows with at least 2 non-null fields
+                rankedLeads = data.filter(row => {
+                    const keys = ['niche', 'description', 'email', 'phone', 'url', 'company_name'];
+                    let nonNullCount = keys.reduce((acc, k) => acc + (row[k] != null && row[k] !== "" ? 1 : 0), 0);
+                    return nonNullCount >= 2;
+                });
+                updateLeadsTable();
+            } catch (e) {
+                console.error("Failed to load ranked leads:", e);
+                rankedLeads = [];
+                updateLeadsTable();
+            }
+        }
+
+        // --- updateLeadsTable to use rankedLeads ---
+        function updateLeadsTable() {
+            const tbody = document.querySelector("#leadsTable tbody");
+            if (aiCallsLoading) {
+                showLeadsLoading();
+                return;
+            }
+            tbody.innerHTML = "";
+            if (!rankedLeads || rankedLeads.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted);">No data available</td></tr>';
+                return;
+            }
+            rankedLeads.forEach(row => {
+                const business = row.company_name || row.url || "";
+                const contact = row.email || row.phone || "";
+                let status = row.niche || row.description || row.url || "";
+                if (status && status.length > 60) status = status.slice(0, 57) + "...";
+                let businessCell = business;
+                if (row.url && !row.company_name) {
+                    businessCell = `<a href="${row.url}" target="_blank" style="color:var(--green-accent);text-decoration:underline;">${row.url}</a>`;
+                } else if (row.company_name && row.url) {
+                    businessCell = `<a href="${row.url}" target="_blank" style="color:var(--green-accent);text-decoration:underline;">${row.company_name}</a>`;
+                }
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${businessCell}</td>
+                        <td>${contact}</td>
+                        <td><span class="status-pill">${status}</span></td>
+                    </tr>
+                `;
+            });
         }
 
         function updateDashboardFields() {
@@ -583,24 +757,6 @@
             document.getElementById('successRate').textContent = (dashboardData.success_rate !== undefined)
                 ? `${dashboardData.success_rate}%` : "-";
             document.getElementById('newLeads').textContent = dashboardData.new_leads ?? "-";
-        }
-
-        function updateLeadsTable() {
-            const tbody = document.querySelector("#leadsTable tbody");
-            tbody.innerHTML = "";
-            if (!dashboardData || !dashboardData.leads_table || dashboardData.leads_table.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted);">No data available</td></tr>';
-                return;
-            }
-            dashboardData.leads_table.forEach(row => {
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td>${row.business_name ?? ""}</td>
-                    <td>${row.contact ?? ""}</td>
-                    <td><span class="status-pill status-${row.status?.toLowerCase() ?? ''}${row.status === "Interested" ? " status-interested" : ""}">${row.status ?? ""}</span></td>
-                `;
-                tbody.appendChild(tr);
-            });
         }
 
         function initializeProfessionalChart() {
@@ -681,9 +837,12 @@
         
         // --- NEW: Function to load all settings from localStorage ---
         function loadAllSettings() {
-            // Load toggle state, defaulting to 'true' (on) if not set
+            // Load toggle states, defaulting to 'true' (on) if not set
             const isEngineOn = localStorage.getItem('searchEngineStatus') !== 'false';
             document.getElementById('searchEngineToggle').checked = isEngineOn;
+            
+            const areAiCallsOn = localStorage.getItem('aiCallsStatus') !== 'false';
+            document.getElementById('aiCallsToggle').checked = areAiCallsOn;
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -703,9 +862,29 @@
             settingsOptions.style.display = 'block';
         });
 
-        // --- NEW: Toggle Switch Event Listener ---
-        document.getElementById('searchEngineToggle').addEventListener('change', (e) => {
+        // --- NEW: Toggle Switch Event Listeners ---
+        document.getElementById('searchEngineToggle').addEventListener('change', async (e) => {
+            console.log('Search Engine status:', e.target.checked);
             localStorage.setItem('searchEngineStatus', e.target.checked);
+            if (e.target.checked) {
+                await runAgentAndRefreshLeads();
+            }
+        });
+
+        // --- MODIFIED: AI Calls toggle triggers agent if ON ---
+        document.getElementById('aiCallsToggle').addEventListener('change', async (e) => {
+            console.log('AI Calls status:', e.target.checked);
+            localStorage.setItem('aiCallsStatus', e.target.checked);
+            if (e.target.checked) {
+                await runAgentAndRefreshLeads();
+            }
+        });
+
+        // --- On page load, if AI Calls is ON, run agent ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (document.getElementById('aiCallsToggle').checked) {
+                await runAgentAndRefreshLeads();
+            }
         });
 
         // --- Multi-Select Country Component Logic ---
@@ -799,7 +978,7 @@
         
         sidebarLocationMulti.addEventListener('click', () => {
             const input = sidebarLocationMulti.querySelector('input');
-if (input) {
+            if (input) {
                 input.focus();
             }
         });
