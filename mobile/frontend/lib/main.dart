@@ -3,11 +3,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Add this import
 import 'auth/login_screen.dart';
 import 'auth/signup_screen.dart';
 import 'auth/forgot_password_screen.dart';
 import 'screens/navbar_screen.dart';
-import 'screens/select_country_screen.dart'; // Add this line
 import 'screens/fill_profile_screen.dart';
 import 'screens/new/ai_scanning_screen.dart'; // Add this import
 import 'screens/new/new_lead_step1.dart'; // Assuming this is a new lead creation screen
@@ -23,8 +23,24 @@ Future<String> _determineInitialRoute() async {
   final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
   final user = FirebaseAuth.instance.currentUser;
 
-  // Only consider logged in if both SharedPreferences flag is set AND user is authenticated
-  return (isLoggedIn && user != null) ? '/lead' : '/login';
+  if (isLoggedIn && user != null) {
+    // Check Firestore for isFirst flag
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      if (userDoc.exists && userDoc.data()?['isFirst'] == false) {
+        return '/navbar';
+      } else {
+        return '/select-country';
+      }
+    } catch (e) {
+      // fallback to navbar if error
+      return '/navbar';
+    }
+  }
+  return '/login';
 }
 
 void main() async {
@@ -76,13 +92,10 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => const SignupScreen(),
         '/forgot-password': (context) => const ForgotPasswordScreen(),
         '/navbar': (context) => const NavBarScreen(),
-        '/select-country': (context) =>
-            const SelectCountryScreen(), // Add this line
-        '/fill-profile': (context) =>
-            const FillProfileScreen(), // Add this line
+        '/fill-profile': (context) => const FillProfileScreen(),
         '/ai_scanning': (context) => const AIScanningScreen(), 
-        '/lead': (context) => const NewLeadStep1(), // Changed 'lead' to '/lead'
-        '/matches': (context) => const MatchesScreen(), // <-- fixed route key
+        '/lead': (context) => const AccountSetupScreen(),
+        '/matches': (context) => const MatchesScreen(),
       },
     );
   }
@@ -91,10 +104,13 @@ class MyApp extends StatelessWidget {
     switch (route) {
       case '/navbar':
         return const NavBarScreen();
-      case '/select-country':
-        return const SelectCountryScreen();
+
       case '/fill-profile':
         return const FillProfileScreen();
+      case '/lead':
+        return const AccountSetupScreen();
+      case '/matches':
+        return const MatchesScreen();
       default:
         return const LoginScreen();
     }

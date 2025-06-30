@@ -26,7 +26,7 @@ class _NavBarScreenState extends State<NavBarScreen>
     // const ChatScreen(),
     const CampaignsPage(), // Assuming this is the campaign list screen
     const ProfileScreen(),
-    const NewLeadStep1(), // Assuming this is a new lead creation screen
+    const AccountSetupScreen(), // Assuming this is a new lead creation screen
   ];
 
   @override
