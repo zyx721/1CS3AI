@@ -5,13 +5,11 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai.types import Blob
 
-# Load API key
 load_dotenv()
 API_KEY = os.getenv("GOOGLE_API_KEY")
 if not API_KEY:
     raise ValueError("GOOGLE_API_KEY not found in .env file")
 
-# Config
 MODEL = "gemini-2.0-flash-live-001"
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
@@ -19,10 +17,8 @@ IN_RATE = 16000
 OUT_RATE = 24000
 CHUNK = int(IN_RATE * 0.1)
 SEND_DURATION_SEC = 5
-RESPONSE_SILENCE_TIMEOUT = 3.0  # Increased for slower connections
-INITIAL_PROMPT_DELAY = 1.0      # Wait before first prompt
-
-# System instruction
+RESPONSE_SILENCE_TIMEOUT = 3.0  
+INITIAL_PROMPT_DELAY = 1.0      
 SYSTEM_INSTRUCTION = (
     "You are a professional sales representative. Follow these instructions exactly:\n\n"
     "1. Begin the conversation ONLY with: \"Hello, am I speaking with someone from Smith and Company?\" Do not add any other text to your first response.\n"
@@ -33,7 +29,6 @@ SYSTEM_INSTRUCTION = (
 )
 
 async def main():
-    # Create configuration
     config = {
         "response_modalities": ["AUDIO"],
         "system_instruction": SYSTEM_INSTRUCTION,
@@ -44,7 +39,6 @@ async def main():
                 }
             }
         },
-        # Optimized VAD settings for better conversation flow
         "realtime_input_config": {
             "automatic_activity_detection": {
                 "start_of_speech_sensitivity": "START_SENSITIVITY_LOW",
@@ -65,12 +59,11 @@ async def main():
     print("🟢 Live connection ready. Agent will speak first.")
 
     async with client.aio.live.connect(model=MODEL, config=config) as sess:
-        # Trigger the agent's first message
         await sess.send_client_content(
             turns={"role": "user", "parts": [{"text": "Start the conversation"}]},
             turn_complete=True
         )
-        await asyncio.sleep(INITIAL_PROMPT_DELAY)  # Allow model processing time
+        await asyncio.sleep(INITIAL_PROMPT_DELAY) 
 
         async def send_audio_turn():
             """Capture and send user audio"""
@@ -79,13 +72,11 @@ async def main():
             frames_sent = 0
             
             while True:
-                # Check duration limit
                 elapsed = asyncio.get_event_loop().time() - start_time
                 if elapsed > SEND_DURATION_SEC:
                     print("🛑 Finished listening")
                     break
                 
-                # Read and send audio
                 try:
                     frame = mic.read(CHUNK, exception_on_overflow=False)
                     await sess.send_realtime_input(
@@ -106,7 +97,6 @@ async def main():
             response_started = False
             
             async for msg in sess.receive():
-                # Handle audio data
                 if msg.data:
                     if not response_started:
                         print("💬 Agent speaking...")
@@ -115,12 +105,10 @@ async def main():
                     last_audio_time = asyncio.get_event_loop().time()
                     speaking = True
                 
-                # Handle interruptions
                 if msg.server_content and getattr(msg.server_content, 'interrupted', False):
                     print("⏹️ Response interrupted")
                     break
                 
-                # Check for silence timeout
                 now = asyncio.get_event_loop().time()
                 if speaking and now - last_audio_time > RESPONSE_SILENCE_TIMEOUT:
                     break
@@ -128,13 +116,10 @@ async def main():
             if response_started:
                 print("✅ Agent finished speaking")
 
-        # Conversation flow: Agent first, then alternating turns
-        await receive_audio_turn()  # Play agent's first message
-        
-        # Main conversation loop
+        await receive_audio_turn() 
         while True:
-            await send_audio_turn()    # User speaks
-            await receive_audio_turn()  # Agent responds
+            await send_audio_turn()    
+            await receive_audio_turn()  
 
     # Cleanup
     mic.stop_stream()
