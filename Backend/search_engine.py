@@ -1,4 +1,3 @@
-# search_engine.py
 import requests
 import google.generativeai as genai
 from bs4 import BeautifulSoup
@@ -10,10 +9,8 @@ import os
 SERPER_API_KEY = "42e856cc5ef002c1597514cd71b67fb2e5cd6428"
 GEMINI_API_KEY = "AIzaSyDTZhbhhS7o9a55vxaF53L1zpZ08xk2d-w"
 
-# Configure Gemini
 genai.configure(api_key=GEMINI_API_KEY)
-gemini_model = genai.GenerativeModel("gemini-2.5-flash") # Updated model name
-
+gemini_model = genai.GenerativeModel("gemini-2.5-flash") 
 def serper_search(query, max_results=10):
     """Performs a Google search using the Serper API."""
     print(f"[DEBUG] Serper searching for: '{query}'")
@@ -22,7 +19,7 @@ def serper_search(query, max_results=10):
     payload = {"q": query}
     try:
         res = requests.post(url, headers=headers, json=payload, timeout=10)
-        res.raise_for_status() # Raise an exception for bad status codes
+        res.raise_for_status() 
         data = res.json()
         return [r["link"] for r in data.get("organic", [])[:max_results]]
     except requests.exceptions.RequestException as e:
@@ -37,10 +34,9 @@ def scrape_page(url):
         soup = BeautifulSoup(res.text, "html.parser")
         text = soup.get_text()
         text = re.sub(r'\s+', ' ', text).strip()
-        # Find contact info (simplified for robustness)
         phones = list(set(re.findall(r'\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}', text)))
         emails = list(set(re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', text)))
-        return text[:4000], phones, emails # Return a larger chunk of text for better analysis
+        return text[:4000], phones, emails 
     except Exception as e:
         print(f"[!] Error scraping {url}: {e}")
         return "", [], []
@@ -85,15 +81,14 @@ def analyze_lead(url, text, phones, emails):
         print(f"    Response text was: {response.text}")
         return None
 
-def run_agent(service: str, location: str):
+def run_agent(service: str):
     """
     The main agent function that orchestrates the lead generation process.
     This is designed to be called from the LangGraph application.
     """
-    query = f'"{service}" B2B companies in {location}'
     
-    print(f"[🌐] Starting lead search with query: {query}")
-    links = serper_search(query)
+    print(f"[🌐] Starting lead search with query: {service}")
+    links = serper_search(service)
     if not links:
         print("[!] No links found from search.")
         return []
