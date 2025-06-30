@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/screens/map_screen.dart';
 import 'Chat_screen/chat_screen.dart';
 import 'Profile_screen/profile_screen.dart';
-import 'new/new_lead_step1.dart';
+import '../auth/new_lead_step1.dart';
 import 'dart:ui';
 import 'new/compaign_list.dart';
 

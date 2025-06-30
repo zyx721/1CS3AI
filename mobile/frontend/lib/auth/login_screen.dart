@@ -173,12 +173,12 @@ class _LoginScreenState extends State<LoginScreen>
         if (userDoc.exists && userDoc.data()?['isFirst'] == false) {
           Navigator.pushReplacementNamed(context, '/navbar');
         } else {
-          // First time login - update isFirst and go to country selection
+          // First time login - update isFirst and go to lead setup
           await FirebaseFirestore.instance
               .collection('users')
               .doc(user.uid)
               .update({'isFirst': false});
-          Navigator.pushReplacementNamed(context, '/select-country');
+          Navigator.pushReplacementNamed(context, '/lead');
         }
       }
     } catch (e) {

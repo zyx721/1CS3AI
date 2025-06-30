@@ -5,12 +5,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Add this import
 import 'auth/login_screen.dart';
-import 'auth/signup_screen.dart';
+
 import 'auth/forgot_password_screen.dart';
 import 'screens/navbar_screen.dart';
 import 'screens/fill_profile_screen.dart';
 import 'screens/new/ai_scanning_screen.dart'; // Add this import
-import 'screens/new/new_lead_step1.dart'; // Assuming this is a new lead creation screen
+import 'auth/new_lead_step1.dart'; // Assuming this is a new lead creation screen
 import 'screens/new/matches.dart'; // Assuming this is the matches screen
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -24,7 +24,7 @@ Future<String> _determineInitialRoute() async {
   final user = FirebaseAuth.instance.currentUser;
 
   if (isLoggedIn && user != null) {
-    // Check Firestore for isFirst flag
+    // Always check isFirst flag and route to /lead if not false
     try {
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
@@ -33,7 +33,8 @@ Future<String> _determineInitialRoute() async {
       if (userDoc.exists && userDoc.data()?['isFirst'] == false) {
         return '/navbar';
       } else {
-        return '/select-country';
+        // Always go to lead setup until isFirst is set to false
+        return '/lead';
       }
     } catch (e) {
       // fallback to navbar if error
@@ -89,7 +90,6 @@ class MyApp extends StatelessWidget {
       ),
       routes: {
         '/login': (context) => const LoginScreen(),
-        '/signup': (context) => const SignupScreen(),
         '/forgot-password': (context) => const ForgotPasswordScreen(),
         '/navbar': (context) => const NavBarScreen(),
         '/fill-profile': (context) => const FillProfileScreen(),
