@@ -103,6 +103,87 @@
             cursor: pointer;
         }
 
+        /* --- NEW: Style for the dropdown option list --- */
+        .form-group select option {
+            background: var(--card-bg);
+            color: var(--text-light);
+            padding: 8px; /* Some browsers support this */
+        }
+
+        /* Custom Tag-Based Multi-Select for Countries */
+        .form-group .custom-multiselect {
+            min-height: 48px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 10px 14px 6px 14px;
+            color: var(--text-light);
+            font-family: var(--font-primary);
+            font-size: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            cursor: pointer;
+            transition: border-color var(--transition);
+        }
+        .form-group .custom-multiselect:focus-within {
+            border-color: var(--gradient-end);
+            box-shadow: 0 0 0 3.5px rgba(var(--gradient-end-rgb), 0.3);
+        }
+        .custom-multiselect .selected-country {
+            background: var(--gradient-end);
+            color: var(--bg-dark);
+            border-radius: 8px;
+            padding: 3px 10px;
+            display: flex;
+            align-items: center;
+            font-size: 0.95em;
+            margin-bottom: 2px;
+        }
+        .custom-multiselect .remove-country {
+            margin-left: 6px;
+            color: var(--bg-dark);
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .custom-multiselect input {
+            border: none;
+            background: transparent;
+            color: var(--text-light);
+            outline: none;
+            min-width: 120px;
+            font-size: 1em;
+            padding: 4px 0;
+        }
+        .custom-multiselect-dropdown {
+            position: absolute;
+            z-index: 10;
+            background: var(--card-bg);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+            border-radius: 0 0 12px 12px;
+            max-height: 180px;
+            overflow-y: auto;
+            width: 100%;
+            left: 0;
+            top: 100%;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+            display: none;
+        }
+        .custom-multiselect.open .custom-multiselect-dropdown {
+            display: block;
+        }
+        .custom-multiselect-dropdown .dropdown-option {
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .custom-multiselect-dropdown .dropdown-option:hover {
+            background: var(--gradient-end);
+            color: var(--bg-dark);
+        }
+
         /* Navigation */
         .wizard-navigation { padding: 25px 40px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
         .btn { padding: 12px 30px; border-radius: var(--border-radius); font-family: var(--font-primary); font-weight: 600; font-size: 1rem; transition: all var(--transition); border: none; cursor: pointer; }
@@ -147,28 +228,54 @@
                         <label for="domain">Industry / Niche</label>
                         <select id="domain" required>
                             <option value="" disabled selected>Select your industry...</option>
-                            <option value="SaaS (Software as a Service)">SaaS (Software as a Service)</option>
-                            <option value="E-commerce">E-commerce</option>
-                            <option value="Marketing & Advertising">Marketing & Advertising</option>
-                            <option value="Real Estate">Real Estate</option>
-                            <option value="Health & Wellness">Health & Wellness</option>
-                            <option value="Financial Services">Financial Services</option>
-                            <option value="Local Services (Restaurants, Salons, etc.)">Local Services (Restaurants, Salons, etc.)</option>
+                            <optgroup label="Technology">
+                                <option value="SaaS (Software as a Service)">SaaS (Software as a Service)</option>
+                                <option value="AI / Machine Learning">AI / Machine Learning</option>
+                                <option value="FinTech">FinTech</option>
+                                <option value="EdTech">EdTech</option>
+                                <option value="IT Services & Consulting">IT Services & Consulting</option>
+                                <option value="Web Development & Design">Web Development & Design</option>
+                            </optgroup>
+                            <optgroup label="E-commerce & Retail">
+                                <option value="E-commerce (General)">E-commerce (General)</option>
+                                <option value="Fashion & Apparel">Fashion & Apparel</option>
+                                <option value="Home Goods & Decor">Home Goods & Decor</option>
+                                <option value="Electronics">Electronics</option>
+                                <option value="Beauty & Cosmetics">Beauty & Cosmetics</option>
+                            </optgroup>
+                            <optgroup label="Professional Services">
+                                <option value="Marketing & Advertising Agency">Marketing & Advertising Agency</option>
+                                <option value="Business Consulting">Business Consulting</option>
+                                <option value="Real Estate">Real Estate</option>
+                                <option value="Legal Services">Legal Services</option>
+                                <option value="Accounting & Financial Services">Accounting & Financial Services</option>
+                            </optgroup>
+                             <optgroup label="Health & Wellness">
+                                <option value="Health & Fitness">Health & Fitness</option>
+                                <option value="Medical & Dental Clinics">Medical & Dental Clinics</option>
+                                <option value="Wellness & Spas">Wellness & Spas</option>
+                            </optgroup>
+                            <optgroup label="Creative & Media">
+                                <option value="Content Creation & Media">Content Creation & Media</option>
+                                <option value="Graphic Design">Graphic Design</option>
+                                <option value="Photography & Videography">Photography & Videography</option>
+                            </optgroup>
+                            <optgroup label="Local Services">
+                                <option value="Restaurants & Cafes">Restaurants & Cafes</option>
+                                <option value="Home Improvement & Repair">Home Improvement & Repair</option>
+                                <option value="Salons & Barbershops">Salons & Barbershops</option>
+                            </optgroup>
                             <option value="Other">Other (Please specify in description)</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="location">Target Location</label>
-                         <select id="location" required>
-                            <option value="" disabled selected>Select your target location...</option>
-                            <option value="Global">Global</option>
-                            <option value="United States">United States</option>
-                            <option value="United Kingdom">United Kingdom</option>
-                            <option value="Canada">Canada</option>
-                            <option value="Australia">Australia</option>
-                            <option value="Europe (Region)">Europe (Region)</option>
-                            <option value="Asia (Region)">Asia (Region)</option>
-                        </select>
+                        <div id="customCountrySelect" class="custom-multiselect" tabindex="0">
+                            <!-- Selected countries will appear here as tags -->
+                            <input type="text" id="countryInput" placeholder="Type to search countries..." autocomplete="off" />
+                            <div class="custom-multiselect-dropdown" id="countryDropdown"></div>
+                        </div>
+                        <small style="color:var(--text-muted);margin-top:4px;display:block;">Type and select one or more countries. Click × to remove.</small>
                     </div>
                 </div>
 
@@ -260,18 +367,93 @@
             prevBtn.addEventListener('click', () => { if (currentStep > 1) { currentStep--; updateWizard(); } });
             goToDashboardBtn.addEventListener('click', () => { window.location.href = "dashboard.html"; });
             
-            const collectAndSubmitData = () => {
+            const allCountries = [
+                "Global","Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo, Democratic Republic of the","Congo, Republic of the","Costa Rica","Cote d'Ivoire","Croatia","Cuba","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Korea, North","Korea, South","Kosovo","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"
+            ];
+            const customSelect = document.getElementById('customCountrySelect');
+            const input = document.getElementById('countryInput');
+            const dropdown = document.getElementById('countryDropdown');
+            let selectedCountries = [];
+
+            function renderSelectedCountries() {
+                // Remove all tags except the input
+                customSelect.querySelectorAll('.selected-country').forEach(e => e.remove());
+                selectedCountries.forEach(country => {
+                    const tag = document.createElement('span');
+                    tag.className = 'selected-country';
+                    tag.textContent = country;
+                    const removeBtn = document.createElement('span');
+                    removeBtn.className = 'remove-country';
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.onclick = (e) => {
+                        selectedCountries = selectedCountries.filter(c => c !== country);
+                        renderSelectedCountries();
+                    };
+                    tag.appendChild(removeBtn);
+                    customSelect.insertBefore(tag, input);
+                });
+            }
+
+            function renderDropdown(filter = '') {
+                dropdown.innerHTML = '';
+                const filtered = allCountries.filter(c => c.toLowerCase().includes(filter.toLowerCase()) && !selectedCountries.includes(c));
+                filtered.slice(0, 10).forEach(country => {
+                    const option = document.createElement('div');
+                    option.className = 'dropdown-option';
+                    option.textContent = country;
+                    option.onclick = () => {
+                        selectedCountries.push(country);
+                        renderSelectedCountries();
+                        input.value = '';
+                        renderDropdown('');
+                    };
+                    dropdown.appendChild(option);
+                });
+                if (filtered.length === 0) {
+                    const noOpt = document.createElement('div');
+                    noOpt.className = 'dropdown-option';
+                    noOpt.style.opacity = 0.6;
+                    noOpt.textContent = 'No matches';
+                    dropdown.appendChild(noOpt);
+                }
+            }
+
+            input.addEventListener('focus', () => {
+                customSelect.classList.add('open');
+                renderDropdown(input.value);
+            });
+            input.addEventListener('input', () => {
+                renderDropdown(input.value);
+            });
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !input.value && selectedCountries.length) {
+                    selectedCountries.pop();
+                    renderSelectedCountries();
+                    renderDropdown(input.value);
+                }
+            });
+            document.addEventListener('click', (e) => {
+                if (!customSelect.contains(e.target)) {
+                    customSelect.classList.remove('open');
+                }
+            });
+            customSelect.addEventListener('click', () => {
+                input.focus();
+            });
+
+            const oldCollect = collectAndSubmitData;
+            window.collectAndSubmitData = function() {
                 const BUSINESS_INFO = {
                     business_name: document.getElementById('business_name').value || "Your Company",
                     domain: document.getElementById('domain').value || "B2B service",
-                    location: document.getElementById('location').value || "Global",
+                    location: selectedCountries.length ? selectedCountries : ["Global"],
                     services: document.getElementById('services').value || "",
                     description: document.getElementById('description').value || ""
                 };
                 console.log("--- FINAL BUSINESS INFO ---");
                 console.log(JSON.stringify(BUSINESS_INFO, null, 2));
             };
-
+            renderSelectedCountries();
             updateWizard();
         });
     </script>
