@@ -2,6 +2,10 @@ import os
 import json
 import logging
 from typing import Annotated, Sequence, TypedDict, Optional
+import sys
+import threading
+import io
+import builtins
 
 # --- LangChain & LangGraph Imports ---
 from langgraph.prebuilt import ToolNode
@@ -17,6 +21,8 @@ import uvicorn
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from fastapi.responses import StreamingResponse
+import asyncio
 
 # --- Dummy search_engine.run_agent for portability ---
 # In a real scenario, this would be your actual search module.
@@ -244,6 +250,143 @@ async def run_agent_endpoint():
         logging.error(f"Error running agent graph: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Agent execution failed: {str(e)}")
 
+# --- Helper: Async generator for SSE ---
+def sse_event(data: str):
+    return f"data: {data}\n\n"
+
+# --- NEW: Async run_agent with debug callback ---
+async def run_agent_with_debug(debug_callback):
+    if not llm:
+        await debug_callback("❌ LLM service is unavailable. Check server logs for API key issues.")
+        return
+    if not BUSINESS_INFO.get("services"):
+        await debug_callback("❌ Business services are not configured. Please set them via /agent-info or /upload-config.")
+        return
+
+    await debug_callback("Launching AI Lead Agent...\n")
+    try:
+        graph = build_graph()
+        initial_message = {"messages": [HumanMessage(content="Find potential leads for our business.")]}
+        final_state = None
+        async for event in graph.astream(initial_message, stream_mode="values"):
+            # Optionally, yield intermediate debug info here if available
+            await debug_callback("Agent step executed...")
+            final_state = event
+        final_message = final_state['messages'][-1].content
+        await debug_callback("✅ Agent finished: " + (final_message or 'Done.'))
+    except Exception as e:
+        await debug_callback(f"❌ Agent error: {str(e)}")
+
+# --- Helper: StreamToQueue for capturing all output ---
+class StreamToQueue(io.TextIOBase):
+    def __init__(self, queue, orig_stream):
+        self.queue = queue
+        self.orig_stream = orig_stream
+        self._buffer = ""
+
+    def write(self, s):
+        self.orig_stream.write(s)
+        self.orig_stream.flush()
+        self._buffer += s
+        while "\n" in self._buffer:
+            line, self._buffer = self._buffer.split("\n", 1)
+            if line.strip():
+                try:
+                    import asyncio
+                    loop = asyncio.get_event_loop()
+                    if loop.is_running():
+                        loop.call_soon_threadsafe(asyncio.create_task, self.queue.put(line))
+                except Exception:
+                    pass
+
+    def flush(self):
+        self.orig_stream.flush()
+
+# --- Patch sys.stdout/sys.stderr and print globally before importing search_engine ---
+def patch_global_output(queue):
+    orig_stdout = sys.stdout
+    orig_stderr = sys.stderr
+    orig_print = builtins.print
+
+    sys.stdout = StreamToQueue(queue, orig_stdout)
+    sys.stderr = StreamToQueue(queue, orig_stderr)
+
+    def print_flush(*args, **kwargs):
+        orig_print(*args, **kwargs)
+        orig_stdout.flush()
+    builtins.print = print_flush
+
+    return orig_stdout, orig_stderr, orig_print
+
+def restore_global_output(orig_stdout, orig_stderr, orig_print):
+    sys.stdout = orig_stdout
+    sys.stderr = orig_stderr
+    builtins.print = orig_print
+
+# --- FastAPI SSE endpoint ---
+@app.get("/run-agent-stream", tags=["Agent"])
+async def run_agent_stream():
+    """
+    Streams real-time agent debug output as Server-Sent Events (SSE).
+    Captures all print/logging output from the agent and search_engine.
+    """
+    queue = asyncio.Queue()
+
+    # Patch output globally (before import!)
+    orig_stdout, orig_stderr, orig_print = patch_global_output(queue)
+
+    # Now import search_engine (after patching)
+    try:
+        from search_engine import run_agent as real_run_agent
+    except ImportError:
+        real_run_agent = None
+
+    # Patch logging to also write to our queue
+    class QueueHandler(logging.Handler):
+        def emit(self, record):
+            msg = self.format(record)
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    loop.call_soon_threadsafe(asyncio.create_task, queue.put(msg))
+            except Exception:
+                pass
+
+    orig_handlers = logging.root.handlers[:]
+    queue_handler = QueueHandler()
+    queue_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    logging.root.handlers = [queue_handler] + orig_handlers
+
+    # --- Use the real run_agent for search_leads ---
+    global run_agent
+    if real_run_agent:
+        run_agent = real_run_agent
+
+    async def debug_callback(line):
+        await queue.put(line)
+
+    async def event_generator():
+        try:
+            agent_task = asyncio.create_task(run_agent_with_debug(debug_callback))
+            while True:
+                try:
+                    line = await asyncio.wait_for(queue.get(), timeout=0.5)
+                    yield sse_event(line)
+                    if "Agent finished" in line or line.startswith("❌"):
+                        break
+                except asyncio.TimeoutError:
+                    if agent_task.done():
+                        break
+                    continue
+            while not queue.empty():
+                line = queue.get_nowait()
+                yield sse_event(line)
+        finally:
+            restore_global_output(orig_stdout, orig_stderr, orig_print)
+            logging.root.handlers = orig_handlers
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
 @app.get("/dashboard-data", tags=["Dashboard"])
 async def get_dashboard_data():
     """Returns dashboard analytics data. Returns default data if file is missing."""
@@ -257,6 +400,8 @@ async def get_dashboard_data():
             "weekly_stats": {"Mon": 0, "Tue": 0, "Wed": 0, "Thu": 0, "Fri": 0},
             "success_rate": "0%",
             "lead_performance": [],
+            "search_agent": False,
+            "voice_agent":True
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error reading dashboard data: {str(e)}")

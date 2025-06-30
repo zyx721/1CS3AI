@@ -18,5 +18,7 @@
     { "business_name": "Sunrise Bakery", "contact": "555-123-4567", "status": "Interested" },
     { "business_name": "Quantum Tech", "contact": "555-987-6543", "status": "Contacted" },
     { "business_name": "Green Leaf Cafe", "contact": "555-222-3333", "status": "Not Contacted" }
-  ]
+  ],
+  "search_agent":false,
+  "voice_agent":true
 }

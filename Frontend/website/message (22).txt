@@ -126,16 +126,9 @@
             align-items: center;
         }
 
-        .logo-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 12px; /* This creates the space between the logo and text */
-        }
-
         .logo {
             font-size: 24px;
             font-weight: 700;
-            text-decoration: none;
         }
 
         .nav-links {
@@ -377,9 +370,10 @@
         }
 
         .header-logo-img {
-            width: 42px; /* MODIFIED: Made logo bigger */
-            height: 42px; /* MODIFIED: Made logo bigger */
+            width: 36px;
+            height: 36px;
             object-fit: contain;
+            margin-left: 10px;
             vertical-align: middle;
             display: inline-block;
             filter: drop-shadow(0 2px 8px #3B5428);
@@ -388,6 +382,7 @@
             .header-logo-img {
                 width: 26px;
                 height: 26px;
+                margin-left: 6px;
             }
         }
     </style>
@@ -395,11 +390,8 @@
 <body>
     <header class="main-header">
         <div class="container navbar">
-            <!-- MODIFICATION: Wrapped logo and text in a container to group them -->
-            <div class="logo-wrapper">
-                <img src="images/logo.png" alt="SellGem Logo" class="header-logo-img">
-                <a href="#" class="logo">SellGem</a>
-            </div>
+            <a class="logo">SellGem</a>
+            <img src="images/logo.png" alt="SellGem Logo" class="header-logo-img">
             <nav class="nav-links">
                 <a href="#">Products</a>
                 <a href="#">Pricing</a>
@@ -418,10 +410,12 @@
             <canvas id="diamond-background-canvas"></canvas>
             <!-- END: 3D Canvas element -->
 
+            <!-- SellGem Logo: Top Left of Hero Section -->
+            <img src="images/logo.png" alt="SellGem Logo" class="hero-logo-top-left">
 
             <div class="hero-content">
                 <p class="hero-subtitle">Google's favorite extension</p>
-                <h1 class="hero-title">A Salesperson Forged in   <span class="highlight-green"><br> Code.</span> <br></span>Trained to Close.</h1>
+                <h1 class="hero-title">The <span class="highlight-green">AI-Powered</span> <br> Sales Engine <br> for B2B Growth</h1>
                 <div class="hero-social-proof">
                     ⭐ 4.3/5 Rating / 3.5M+ Installs
                 </div>
