@@ -85,15 +85,14 @@ def analyze_lead(url, text, phones, emails):
         print(f"    Response text was: {response.text}")
         return None
 
-def run_agent(service: str, location: str):
+def run_agent(service: str):
     """
     The main agent function that orchestrates the lead generation process.
     This is designed to be called from the LangGraph application.
     """
-    query = f'"{service}" B2B companies in {location}'
     
-    print(f"[🌐] Starting lead search with query: {query}")
-    links = serper_search(query)
+    print(f"[🌐] Starting lead search with query: {service}")
+    links = serper_search(service)
     if not links:
         print("[!] No links found from search.")
         return []
