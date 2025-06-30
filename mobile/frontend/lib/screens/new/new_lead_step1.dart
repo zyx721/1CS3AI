@@ -71,13 +71,6 @@ class _NewLeadStep1State extends State<NewLeadStep1>
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.close_rounded,
-            color: Colors.white.withOpacity(0.9),
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
         centerTitle: true,
         title: Text(
           "New Lead",

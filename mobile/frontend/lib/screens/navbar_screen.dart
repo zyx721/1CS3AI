@@ -4,6 +4,7 @@ import 'Chat_screen/chat_screen.dart';
 import 'Profile_screen/profile_screen.dart';
 import 'new/new_lead_step1.dart';
 import 'dart:ui';
+import 'new/compaign_list.dart';
 
 class NavBarScreen extends StatefulWidget {
   const NavBarScreen({Key? key}) : super(key: key);
@@ -23,6 +24,7 @@ class _NavBarScreenState extends State<NavBarScreen>
   final List<Widget> _pages = [
     // const EnhancedMapScreen(),
     // const ChatScreen(),
+    const CampaignsPage(), // Assuming this is the campaign list screen
     const ProfileScreen(),
     const NewLeadStep1(), // Assuming this is a new lead creation screen
   ];
@@ -220,9 +222,10 @@ class _NavBarScreenState extends State<NavBarScreen>
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildNavItem(Icons.person_rounded, 0, 'Profile'),
-                  _buildNavItem(Icons.add_circle_outline_rounded, 1, 'New Lead'),
+                children: [    
+                  _buildNavItem(Icons.list_rounded, 0, 'Campaigns'),
+                  _buildNavItem(Icons.person_rounded, 1, 'Profile'),
+                  _buildNavItem(Icons.add_circle_outline_rounded, 2, 'New Lead'),
                 ],
               ),
             ),
