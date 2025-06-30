@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Chilbot</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        :root {
+            --bg-dark: #131414;
+            --card-bg: #1D1D1F;
+            --text-light: #F5F4F0;
+            --text-muted: #8a8a8e;
+            --green-accent: #79B266;
+            --border-color: rgba(245, 244, 240, 0.1);
+            --top-glow-1: #2E402B;
+            --top-glow-2: #5A7C50;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: var(--text-light); -webkit-font-smoothing: antialiased; }
+
+        .dashboard-body-wrapper {
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+        }
+        .dashboard-body-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            left: 0;
+            right: 0;
+            height: 300px;
+            background: radial-gradient(circle at 50% 0%, var(--top-glow-1), transparent 50%);
+            opacity: 0.5;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .dashboard-content { position: relative; z-index: 1; }
+
+        .dashboard-header {
+            margin-bottom: 32px;
+        }
+        .dashboard-header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+        .dashboard-header p {
+            font-size: 16px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .settings-bar {
+            position: absolute;
+            top: 32px;
+            right: 40px;
+            z-index: 2;
+        }
+        .settings-bar button {
+            background: var(--card-bg);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 18px;
+            font-size: 15px;
+            font-family: inherit;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .settings-bar button:hover {
+            background: var(--green-accent);
+            color: var(--bg-dark);
+            border-color: var(--green-accent);
+        }
+
+        .stats-overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .overview-card {
+            background-color: var(--card-bg);
+            padding: 24px;
+            border-radius: 16px;
+            border: none;
+        }
+        .overview-card .label {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .overview-card .value {
+            font-size: 40px;
+            font-weight: 600;
+            color: var(--text-light);
+            line-height: 1.1;
+        }
+        .overview-card .value .highlight {
+            color: var(--green-accent);
+        }
+        
+        .dashboard-main-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .dash-card {
+            background-color: var(--card-bg);
+            padding: 24px;
+            border-radius: 16px;
+            border: none;
+        }
+        .dash-card-header {
+            margin-bottom: 24px;
+        }
+        .dash-card-header h3 {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+        
+        /* Chart Styles */
+        .chart-wrapper { position: relative; }
+        .custom-legend { display: flex; gap: 20px; margin-bottom: 20px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-muted); }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+        #professionalChartContainer { height: 350px; }
+        #chartjs-tooltip {
+            opacity: 0;
+            position: absolute;
+            background: #2a2a2e;
+            color: var(--text-light);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            font-size: 12px;
+            width: 150px;
+        }
+        #chartjs-tooltip .tooltip-title { font-weight: 600; margin-bottom: 8px; }
+        #chartjs-tooltip .tooltip-body { display: flex; flex-direction: column; gap: 6px; }
+        #chartjs-tooltip .tooltip-item { display: flex; align-items: center; gap: 8px; }
+        #chartjs-tooltip .tooltip-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        /* Table Styles */
+        .table-container { width: 100%; overflow-x: auto; }
+        .results-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .results-table th, .results-table td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .results-table tbody tr:last-child td { border-bottom: none; }
+        .results-table thead th { color: var(--text-muted); font-weight: 500; text-transform: uppercase; font-size: 12px; }
+        .results-table tbody tr:hover { background-color: rgba(255, 255, 255, 0.02); }
+        .status-pill { display: inline-block; padding: 4px 12px; border-radius: 50px; font-weight: 500; font-size: 12px; }
+        .status-interested { color: var(--green-accent); background-color: rgba(121, 178, 102, 0.1); }
+
+        /* Settings Sidebar Styles */
+        .settings-sidebar {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 360px;
+            height: 100vh;
+            background: var(--card-bg);
+            box-shadow: -4px 0 24px rgba(0,0,0,0.18);
+            z-index: 100;
+            transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+            padding: 32px 28px 24px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        .settings-sidebar.open {
+            right: 0;
+        }
+        .settings-sidebar h2 {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 18px;
+        }
+        .settings-sidebar label {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: block;
+        }
+        .settings-sidebar input, .settings-sidebar textarea {
+            width: 100%;
+            background: rgba(0,0,0,0.18);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: var(--text-light);
+            font-size: 1em;
+            margin-bottom: 14px;
+            font-family: inherit;
+        }
+        .settings-sidebar .sidebar-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        .settings-sidebar button {
+            padding: 10px 22px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1em;
+            font-family: inherit;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .settings-sidebar .save-btn {
+            background: var(--green-accent);
+            color: var(--bg-dark);
+        }
+        .settings-sidebar .cancel-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+        }
+        .settings-sidebar .cancel-btn:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-light);
+        }
+        .settings-sidebar .save-btn:hover {
+            background: #6ca05a;
+        }
+        .sidebar-option-btn {
+            width: 100%;
+            background: rgba(0,0,0,0.12);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 1em;
+            font-family: inherit;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .sidebar-option-btn:hover {
+            background: var(--green-accent);
+            color: var(--bg-dark);
+            border-color: var(--green-accent);
+        }
+        @media (max-width: 900px) {
+            .settings-sidebar { width: 100vw; max-width: 100vw; right: -100vw; }
+            .settings-sidebar.open { right: 0; }
+        }
+        @media (max-width: 768px) {
+            .dashboard-body-wrapper { padding: 24px; }
+            .settings-bar { top: 16px; right: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-body-wrapper">
+        <div class="dashboard-content">
+            <header class="dashboard-header">
+                <div class="header-main-title">
+                    <h1>Agent Dashboard</h1>
+                    <p>Welcome back! Here's a summary of your activities.</p>
+                </div>
+                <div class="settings-bar">
+                    <button id="settingsBtn" title="Edit Agent Settings"><i class="fas fa-cog"></i> Settings</button>
+                </div>
+            </header>
+            <main>
+                <section class="stats-overview-grid">
+                    <div class="overview-card"><p class="label">Total Calls Made</p><p class="value">1,284</p></div>
+                    <div class="overview-card"><p class="label">Calls This Week</p><p class="value">76</p></div>
+                    <div class="overview-card"><p class="label">Success Rate</p><p class="value"><span class="highlight">21%</span></p></div>
+                    <div class="overview-card"><p class="label">New Leads Found</p><p class="value">18</p></div>
+                </section>
+                <div class="dashboard-main-layout">
+                    <section class="dash-card">
+                         <div class="dash-card-header"><h3>Performance Over Time (Last 30 Days)</h3></div>
+                         <div class="chart-wrapper">
+                            <div class="custom-legend">
+                               <div class="legend-item"><span class="legend-dot" style="background-color: var(--green-accent);"></span>New Leads</div>
+                               <div class="legend-item"><span class="legend-dot" style="background-color: var(--text-muted);"></span>Successful Calls</div>
+                            </div>
+                            <div id="professionalChartContainer"><canvas id="professionalLeadsChart"></canvas></div>
+                            <div id="chartjs-tooltip"></div>
+                         </div>
+                    </section>
+                    <section class="dash-card">
+                        <div class="dash-card-header"><h3>Lead Search Results</h3></div>
+                        <div class="table-container">
+                            <table class="results-table">
+                                <thead><tr><th>Business Name</th><th>Contact</th><th>Status</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Sunrise Bakery</td><td>555-123-4567</td><td><span class="status-pill status-interested">Interested</span></td></tr>
+                                    <tr><td>Quantum Tech</td><td>555-987-6543</td><td><span class="status-pill">Contacted</span></td></tr>
+                                    <tr><td>Green Leaf Cafe</td><td>555-222-3333</td><td><span class="status-pill">Not Contacted</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+        <div class="settings-sidebar" id="settingsSidebar">
+            <h2>Settings</h2>
+            <div id="settingsOptions">
+                <button type="button" class="sidebar-option-btn" id="editAgentInfoBtn"><i class="fas fa-user-edit"></i> Edit Agent Information</button>
+                <button type="button" class="sidebar-option-btn" id="changePasswordBtn"><i class="fas fa-key"></i> Change Password</button>
+                <button type="button" class="sidebar-option-btn" id="notificationSettingsBtn"><i class="fas fa-bell"></i> Notification Preferences</button>
+                <button type="button" class="sidebar-option-btn" id="exportDataBtn"><i class="fas fa-file-export"></i> Export Data</button>
+            </div>
+            <form id="sidebarSettingsForm" autocomplete="off" style="display:none;">
+                <label for="sidebarBusinessName">Business Name</label>
+                <input type="text" id="sidebarBusinessName" placeholder="Business Name" />
+                <label for="sidebarDomain">Industry / Niche</label>
+                <input type="text" id="sidebarDomain" placeholder="Industry / Niche" />
+                <label for="sidebarLocation">Target Location(s)</label>
+                <input type="text" id="sidebarLocation" placeholder="e.g. United States, France" />
+                <label for="sidebarServices">Products / Services</label>
+                <textarea id="sidebarServices" rows="2" placeholder="Products / Services"></textarea>
+                <label for="sidebarDescription">Company Description</label>
+                <textarea id="sidebarDescription" rows="3" placeholder="Company Description"></textarea>
+                <div class="sidebar-actions">
+                    <button type="button" class="save-btn" id="saveSidebarSettings">Save</button>
+                    <button type="button" class="cancel-btn" id="cancelSidebarSettings">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script type="module">
+        let professionalChartInstance;
+        function initializeProfessionalChart() {
+            const canvas = document.getElementById('professionalLeadsChart');
+            if (!canvas || professionalChartInstance) return;
+
+            const ctx = canvas.getContext('2d');
+            const style = getComputedStyle(document.body);
+
+            const colors = {
+                accent: style.getPropertyValue('--green-accent').trim(),
+                muted: style.getPropertyValue('--text-muted').trim(),
+                grid: 'rgba(245, 244, 240, 0.1)',
+                font: style.getPropertyValue('--text-muted').trim(),
+                crosshair: 'rgba(245, 244, 240, 0.25)',
+                gradientStart: 'rgba(121, 178, 102, 0.25)',
+                gradientEnd: 'rgba(121, 178, 102, 0)'
+            };
+
+            const labels = Array.from({ length: 30 }, (_, i) => { const d = new Date(); d.setDate(d.getDate() - (29 - i)); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); });
+            const leadsData = Array.from({ length: 30 }, () => Math.floor(Math.random() * 30) + 10);
+            const successData = leadsData.map(lead => Math.max(0, Math.floor(lead * (Math.random() * 0.4 + 0.1) - Math.random() * 5)));
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, 350);
+            gradient.addColorStop(0, colors.gradientStart);
+            gradient.addColorStop(1, colors.gradientEnd);
+
+            const externalTooltipHandler = (context) => {
+                const { chart, tooltip } = context;
+                const tooltipEl = document.getElementById('chartjs-tooltip');
+                if (tooltip.opacity === 0) { tooltipEl.style.opacity = 0; return; }
+                if (tooltip.body) {
+                    const title = tooltip.title[0] || '';
+                    const body = tooltip.body.map(b => b.lines);
+                    tooltipEl.innerHTML = `<div class="tooltip-title">${title}</div><div class="tooltip-body">${ body.map((line, i) => `<div class="tooltip-item"><span class="tooltip-dot" style="background-color: ${tooltip.labelColors[i].borderColor}"></span> ${line}</div>`).join('') }</div>`;
+                }
+                const { offsetLeft: positionX, offsetTop: positionY } = chart.canvas;
+                tooltipEl.style.opacity = 1;
+                tooltipEl.style.left = positionX + tooltip.caretX + 'px';
+                tooltipEl.style.top = positionY + tooltip.caretY + 'px';
+                tooltipEl.style.transform = 'translate(-50%, -120%)';
+            };
+            
+            const crosshairPlugin = {
+                id: 'crosshair',
+                afterDraw: (chart) => {
+                    if (chart.tooltip?.getActiveElements()?.length) {
+                        const activeElement = chart.tooltip.getActiveElements()[0];
+                        const { ctx } = chart;
+                        const x = activeElement.element.x;
+                        const topY = chart.scales.y.top;
+                        const bottomY = chart.scales.y.bottom;
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.moveTo(x, topY);
+                        ctx.lineTo(x, bottomY);
+                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = colors.crosshair;
+                        ctx.stroke();
+                        chart.tooltip.getActiveElements().forEach(active => {
+                            ctx.beginPath();
+                            ctx.arc(active.element.x, active.element.y, 5, 0, 2 * Math.PI, false);
+                            ctx.fillStyle = active.element.options.borderColor;
+                            ctx.fill();
+                        });
+                        ctx.restore();
+                    }
+                }
+            };
+            
+            if (!Chart.registry.plugins.get('crosshair')) Chart.register(crosshairPlugin);
+
+            professionalChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'New Leads', data: leadsData, borderColor: colors.accent, backgroundColor: gradient, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 0 },
+                        { label: 'Successful Calls', data: successData, borderColor: colors.muted, borderDash: [5, 5], fill: false, tension: 0.4, pointRadius: 0, pointHoverRadius: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { intersect: false, mode: 'index' },
+                    plugins: { legend: { display: false }, tooltip: { enabled: false, external: externalTooltipHandler }},
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: colors.grid }, ticks: { color: colors.font, padding: 10 }, border: { display: false } },
+                        x: { grid: { display: false }, ticks: { color: colors.font, maxRotation: 0, autoSkipPadding: 20 }, border: { display: false } }
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeProfessionalChart);
+        const sidebar = document.getElementById('settingsSidebar');
+        document.getElementById('settingsBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            sidebar.classList.add('open');
+        });
+        const settingsOptions = document.getElementById('settingsOptions');
+        const sidebarSettingsForm = document.getElementById('sidebarSettingsForm');
+        document.getElementById('editAgentInfoBtn').addEventListener('click', function() {
+            // Load last info from localStorage if available
+            const info = JSON.parse(localStorage.getItem('agentInfo') || '{}');
+            document.getElementById('sidebarBusinessName').value = info.business_name || '';
+            document.getElementById('sidebarDomain').value = info.domain || '';
+            document.getElementById('sidebarLocation').value = Array.isArray(info.location) ? info.location.join(', ') : (info.location || '');
+            document.getElementById('sidebarServices').value = info.services || '';
+            document.getElementById('sidebarDescription').value = info.description || '';
+            settingsOptions.style.display = 'none';
+            sidebarSettingsForm.style.display = 'block';
+        });
+        document.getElementById('cancelSidebarSettings').addEventListener('click', function() {
+            sidebarSettingsForm.style.display = 'none';
+            settingsOptions.style.display = 'block';
+            sidebar.classList.remove('open');
+        });
+        document.getElementById('saveSidebarSettings').addEventListener('click', function() {
+            // Save info to localStorage
+            const info = {
+                business_name: document.getElementById('sidebarBusinessName').value,
+                domain: document.getElementById('sidebarDomain').value,
+                location: document.getElementById('sidebarLocation').value.split(',').map(s => s.trim()).filter(Boolean),
+                services: document.getElementById('sidebarServices').value,
+                description: document.getElementById('sidebarDescription').value
+            };
+            localStorage.setItem('agentInfo', JSON.stringify(info));
+            sidebar.classList.remove('open');
+            sidebarSettingsForm.style.display = 'none';
+            settingsOptions.style.display = 'block';
+            // Optionally show a toast/notification
+        });
+        document.getElementById('cancelSettingsBtn').addEventListener('click', function() {
+            document.getElementById('settingsSidebar').classList.remove('open');
+        });
+    </script>
+</body>
+</html>

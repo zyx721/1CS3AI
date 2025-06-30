@@ -95,8 +95,6 @@ class MyApp extends StatelessWidget {
         return const SelectCountryScreen();
       case '/fill-profile':
         return const FillProfileScreen();
-      case '/lead':
-        return const NewLeadStep1(); // Added this case
       default:
         return const LoginScreen();
     }

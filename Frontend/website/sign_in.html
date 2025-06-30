@@ -384,9 +384,9 @@
         // --- AUTH STATE OBSERVER ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                console.log('User is logged in, redirecting to chat.html');
+                console.log('User is logged in, redirecting to setting_up.html');
                 // Make sure you have a 'chat.html' file or change this URL
-                window.location.href = 'chat.html';
+                window.location.href = 'setting_up.html';
             } else {
                 console.log('No user signed in, showing login screen.');
             }

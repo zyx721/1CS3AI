@@ -126,15 +126,6 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
         actions: [
           IconButton(
             icon: Icon(
-              Icons.share_outlined,
-              color: Colors.white.withOpacity(0.9),
-            ),
-            onPressed: () {
-              // TODO: Share functionality
-            },
-          ),
-          IconButton(
-            icon: Icon(
               Icons.bookmark_border,
               color: Colors.white.withOpacity(0.9),
             ),
@@ -163,45 +154,33 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
             builder: (context, child) {
               return FadeTransition(
                 opacity: _fadeAnimation,
-                child: SafeArea(
+                child: SlideTransition(
+                  position: _slideAnimation,
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(24),
-                    child: SlideTransition(
-                      position: _slideAnimation,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Hero Section
-                          _buildHeroSection(matchColor, scoreOutOf5),
-                          
-                          const SizedBox(height: 24),
-                          
-                          // Quick Stats
-                          _buildQuickStats(),
-                          
-                          const SizedBox(height: 24),
-                          
-                          // About Section
-                          _buildAboutSection(),
-                          
-                          const SizedBox(height: 24),
-                          
-                          // Match Analysis
-                          _buildMatchAnalysis(matchColor),
-                          
-                          const SizedBox(height: 24),
-                          
-                          // Contact Information
-                          _buildContactInfo(),
-                          
-                          const SizedBox(height: 24),
-                          
-                          // Action Buttons
-                          _buildActionButtons(matchColor),
-                          
-                          const SizedBox(height: 100),
-                        ],
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Hero Section
+                        _buildHeroSection(matchColor, scoreOutOf5),
+
+                        const SizedBox(height: 24),
+
+                        // Quick Stats
+                        _buildQuickStats(),
+
+                        const SizedBox(height: 24),
+
+                        // About Section
+                        _buildAboutSection(),
+
+                        const SizedBox(height: 24),
+
+                        // Contact Information
+                        _buildContactInfo(),
+
+                        const SizedBox(height: 24),
+                      ],
                     ),
                   ),
                 ),
@@ -452,46 +431,6 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
     );
   }
 
-  Widget _buildMatchAnalysis(Color matchColor) {
-    return TweenAnimationBuilder<double>(
-      duration: const Duration(milliseconds: 1800),
-      tween: Tween(begin: 0.0, end: _showContent ? 1.0 : 0.0),
-      curve: Curves.easeOutQuart,
-      builder: (context, value, child) {
-        return Transform.translate(
-          offset: Offset(0, 20 * (1 - value)),
-          child: Opacity(
-            opacity: value,
-            child: _buildGlassContainer(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Match Analysis",
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.95),
-                      fontSize: 18,
-                      fontWeight: FontWeight.w400,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  _buildMatchFactor("Industry Alignment", 0.95, matchColor),
-                  const SizedBox(height: 12),
-                  _buildMatchFactor("Company Size", 0.88, matchColor),
-                  const SizedBox(height: 12),
-                  _buildMatchFactor("Growth Stage", 0.92, matchColor),
-                  const SizedBox(height: 12),
-                  _buildMatchFactor("Geographic Presence", 0.85, matchColor),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildContactInfo() {
     return TweenAnimationBuilder<double>(
       duration: const Duration(milliseconds: 2000),
@@ -532,104 +471,6 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
     );
   }
 
-  Widget _buildActionButtons(Color matchColor) {
-    return TweenAnimationBuilder<double>(
-      duration: const Duration(milliseconds: 2200),
-      tween: Tween(begin: 0.0, end: _showContent ? 1.0 : 0.0),
-      curve: Curves.easeOutQuart,
-      builder: (context, value, child) {
-        return Transform.translate(
-          offset: Offset(0, 20 * (1 - value)),
-          child: Opacity(
-            opacity: value,
-            child: Column(
-              children: [
-                // Primary Action
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(28),
-                      gradient: LinearGradient(
-                        colors: [
-                          matchColor,
-                          matchColor.withOpacity(0.8),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: matchColor.withOpacity(0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        // TODO: Contact functionality
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(28),
-                        ),
-                        elevation: 0,
-                      ),
-                      icon: const Icon(
-                        Icons.send_outlined,
-                        color: Colors.black,
-                        size: 20,
-                      ),
-                      label: const Text(
-                        "Send Introduction",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(height: 12),
-                
-                // Secondary Actions
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildSecondaryButton(
-                        Icons.calendar_today_outlined,
-                        "Schedule Call",
-                        () {
-                          // TODO: Schedule functionality
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildSecondaryButton(
-                        Icons.note_add_outlined,
-                        "Add Notes",
-                        () {
-                          // TODO: Notes functionality
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
 
   Widget _buildStatItem(String label, String value) {
     return Column(

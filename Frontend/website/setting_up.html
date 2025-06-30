@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Setup | Chilbot</title>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Chilbot Theme Adapted for Setup Wizard */
+            --gradient-start: #2E402B; /* Dark Green */
+            --gradient-end: #79B266;   /* Accent Green */
+            --gradient-start-rgb: 46, 64, 43;
+            --gradient-end-rgb: 121, 178, 102;
+            --bg-dark: #131414;
+            --card-bg: #181818;
+            --card-bg-rgb: 24, 24, 24;
+            --text-light: #F5F4F0;
+            --text-muted: #9E9E9E;
+            --border-color: rgba(245, 244, 240, 0.15);
+            --font-primary: 'Inter', sans-serif;
+            --border-radius: 12px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-modal: 0 15px 45px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.05) inset;
+        }
+
+        /* Base & Animated Background */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--bg-dark);
+            color: var(--text-muted);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        .background-wrapper { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1; overflow: hidden; }
+        .background-wrapper::before {
+            content: ''; position: absolute; left: 0; right: 0; bottom: 0; top: 0; pointer-events: none;
+            background: radial-gradient(ellipse at 30% 70%, #2E402B 0%, transparent 60%),
+                        radial-gradient(ellipse at 70% 30%, #5A7C50 0%, transparent 50%);
+            opacity: 0.4;
+            animation: slowDrift 90s linear infinite alternate;
+        }
+        @keyframes slowDrift { from { transform: scale(1) translate(0, 0) rotate(0deg); } to { transform: scale(1.3) translate(50px, -30px) rotate(15deg); } }
+        
+        .setup-wizard-container {
+            width: 100%; max-width: 700px; max-height: 90vh;
+            background-color: rgba(var(--card-bg-rgb), 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: var(--shadow-modal);
+            overflow: hidden;
+            display: flex; flex-direction: column;
+            animation: floatIn 1s ease-out forwards;
+        }
+        @keyframes floatIn { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+
+        .wizard-header { padding: 25px 40px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
+        .logo { text-align: center; font-size: 1.8rem; font-weight: 700; color: var(--text-light); margin-bottom: 20px; }
+        .logo i { margin-right: 10px; color: var(--gradient-end); }
+        .progress-bar { width: 100%; height: 8px; background-color: rgba(0,0,0,0.2); border-radius: 4px; overflow: hidden; }
+        .progress-bar-inner { height: 100%; width: 0%; background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end)); border-radius: 4px; transition: width var(--transition); }
+
+        .wizard-body { padding: 40px; overflow-y: auto; flex-grow: 1; }
+        .wizard-step { display: none; animation: fadeInUp 0.5s var(--transition) forwards; }
+        .wizard-step.active { display: block; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .step-header { margin-bottom: 30px; text-align: center; }
+        .step-header h2 { font-size: 1.75rem; font-weight: 600; color: var(--text-light); margin-bottom: 8px; }
+        .step-header p { font-size: 1rem; color: var(--text-muted); max-width: 500px; margin: 0 auto; line-height: 1.6; }
+
+        /* Form Elements */
+        .form-group { margin-bottom: 25px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-light); font-size: 1rem; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; background-color: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: var(--border-radius);
+            padding: 14px 18px; color: var(--text-light); font-family: var(--font-primary); font-size: 1rem;
+            outline: none; transition: all var(--transition);
+        }
+        .form-group input::placeholder, .form-group textarea::placeholder { color: #666; }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--gradient-end); box-shadow: 0 0 0 3.5px rgba(var(--gradient-end-rgb), 0.3); }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+        
+        /* Custom Select Dropdown Style */
+        .form-group select {
+            appearance: none; -webkit-appearance: none; -moz-appearance: none;
+            padding-right: 40px; /* Make space for the arrow */
+            background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="%239E9E9E" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            cursor: pointer;
+        }
+
+        /* --- NEW: Style for the dropdown option list --- */
+        .form-group select option {
+            background: var(--card-bg);
+            color: var(--text-light);
+            padding: 8px; /* Some browsers support this */
+        }
+
+        /* Custom Tag-Based Multi-Select for Countries */
+        .form-group .custom-multiselect {
+            min-height: 48px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 10px 14px 6px 14px;
+            color: var(--text-light);
+            font-family: var(--font-primary);
+            font-size: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            cursor: pointer;
+            transition: border-color var(--transition);
+        }
+        .form-group .custom-multiselect:focus-within {
+            border-color: var(--gradient-end);
+            box-shadow: 0 0 0 3.5px rgba(var(--gradient-end-rgb), 0.3);
+        }
+        .custom-multiselect .selected-country {
+            background: var(--gradient-end);
+            color: var(--bg-dark);
+            border-radius: 8px;
+            padding: 3px 10px;
+            display: flex;
+            align-items: center;
+            font-size: 0.95em;
+            margin-bottom: 2px;
+        }
+        .custom-multiselect .remove-country {
+            margin-left: 6px;
+            color: var(--bg-dark);
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .custom-multiselect input {
+            border: none;
+            background: transparent;
+            color: var(--text-light);
+            outline: none;
+            min-width: 120px;
+            font-size: 1em;
+            padding: 4px 0;
+        }
+        .custom-multiselect-dropdown {
+            position: absolute;
+            z-index: 10;
+            background: var(--card-bg);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+            border-radius: 0 0 12px 12px;
+            max-height: 180px;
+            overflow-y: auto;
+            width: 100%;
+            left: 0;
+            top: 100%;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+            display: none;
+        }
+        .custom-multiselect.open .custom-multiselect-dropdown {
+            display: block;
+        }
+        .custom-multiselect-dropdown .dropdown-option {
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .custom-multiselect-dropdown .dropdown-option:hover {
+            background: var(--gradient-end);
+            color: var(--bg-dark);
+        }
+
+        /* Navigation */
+        .wizard-navigation { padding: 25px 40px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .btn { padding: 12px 30px; border-radius: var(--border-radius); font-family: var(--font-primary); font-weight: 600; font-size: 1rem; transition: all var(--transition); border: none; cursor: pointer; }
+        .btn-primary { background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end)); color: var(--text-light); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px 0 rgba(var(--gradient-end-rgb), 0.3); }
+        .btn-secondary { background-color: transparent; color: var(--text-muted); }
+        .btn-secondary:hover { background-color: rgba(255,255,255,0.1); color: var(--text-light); }
+
+        /* Success Step */
+        .success-step-content { text-align: center; padding: 40px 20px; }
+        .success-animation { width: 100px; height: 100px; margin: 0 auto 30px; }
+        .checkmark { width: 100px; height: 100px; border-radius: 50%; display: block; stroke-width: 4; stroke: var(--text-light); stroke-miterlimit: 10; box-shadow: inset 0px 0px 0px var(--gradient-end); animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both; }
+        .checkmark__circle { stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 4; stroke-miterlimit: 10; stroke: var(--gradient-end); fill: none; animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards; }
+        .checkmark__check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards; }
+        @keyframes stroke { 100% { stroke-dashoffset: 0; } }
+        @keyframes scale { 0%, 100% { transform: none; } 50% { transform: scale3d(1.1, 1.1, 1); } }
+        @keyframes fill { 100% { box-shadow: inset 0px 0px 0px 50px var(--gradient-end); } }
+    </style>
+</head>
+<body>
+    <div class="background-wrapper"></div>
+
+    <div class="setup-wizard-container">
+        <div class="wizard-header">
+            <div class="logo"><i class="fas fa-leaf"></i> Chilbot AI</div>
+            <div class="progress-bar"><div id="progressBar" class="progress-bar-inner"></div></div>
+        </div>
+
+        <div class="wizard-body">
+            <form id="setupForm">
+                <!-- STEP 1: BUSINESS PROFILE -->
+                <div class="wizard-step active" id="step1">
+                    <div class="step-header">
+                        <h2>Let's Configure Your Agent</h2>
+                        <p>This information helps your AI agent understand your business to find the most relevant leads.</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="business_name">Business Name</label>
+                        <input type="text" id="business_name" placeholder="e.g., Your Company LLC" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="domain">Industry / Niche</label>
+                        <select id="domain" required>
+                            <option value="" disabled selected>Select your industry...</option>
+                            <optgroup label="Technology">
+                                <option value="SaaS (Software as a Service)">SaaS (Software as a Service)</option>
+                                <option value="AI / Machine Learning">AI / Machine Learning</option>
+                                <option value="FinTech">FinTech</option>
+                                <option value="EdTech">EdTech</option>
+                                <option value="IT Services & Consulting">IT Services & Consulting</option>
+                                <option value="Web Development & Design">Web Development & Design</option>
+                            </optgroup>
+                            <optgroup label="E-commerce & Retail">
+                                <option value="E-commerce (General)">E-commerce (General)</option>
+                                <option value="Fashion & Apparel">Fashion & Apparel</option>
+                                <option value="Home Goods & Decor">Home Goods & Decor</option>
+                                <option value="Electronics">Electronics</option>
+                                <option value="Beauty & Cosmetics">Beauty & Cosmetics</option>
+                            </optgroup>
+                            <optgroup label="Professional Services">
+                                <option value="Marketing & Advertising Agency">Marketing & Advertising Agency</option>
+                                <option value="Business Consulting">Business Consulting</option>
+                                <option value="Real Estate">Real Estate</option>
+                                <option value="Legal Services">Legal Services</option>
+                                <option value="Accounting & Financial Services">Accounting & Financial Services</option>
+                            </optgroup>
+                             <optgroup label="Health & Wellness">
+                                <option value="Health & Fitness">Health & Fitness</option>
+                                <option value="Medical & Dental Clinics">Medical & Dental Clinics</option>
+                                <option value="Wellness & Spas">Wellness & Spas</option>
+                            </optgroup>
+                            <optgroup label="Creative & Media">
+                                <option value="Content Creation & Media">Content Creation & Media</option>
+                                <option value="Graphic Design">Graphic Design</option>
+                                <option value="Photography & Videography">Photography & Videography</option>
+                            </optgroup>
+                            <optgroup label="Local Services">
+                                <option value="Restaurants & Cafes">Restaurants & Cafes</option>
+                                <option value="Home Improvement & Repair">Home Improvement & Repair</option>
+                                <option value="Salons & Barbershops">Salons & Barbershops</option>
+                            </optgroup>
+                            <option value="Other">Other (Please specify in description)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Target Location</label>
+                        <div id="customCountrySelect" class="custom-multiselect" tabindex="0">
+                            <!-- Selected countries will appear here as tags -->
+                            <input type="text" id="countryInput" placeholder="Type to search countries..." autocomplete="off" />
+                            <div class="custom-multiselect-dropdown" id="countryDropdown"></div>
+                        </div>
+                        <small style="color:var(--text-muted);margin-top:4px;display:block;">Type and select one or more countries. Click × to remove.</small>
+                    </div>
+                </div>
+
+                <!-- STEP 2: BUSINESS DETAILS -->
+                <div class="wizard-step" id="step2">
+                    <div class="step-header">
+                        <h2>Tell Us More</h2>
+                        <p>Describe your offerings. The more detail you provide, the smarter your agent will be.</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="services">Products / Services Offered</label>
+                        <textarea id="services" rows="4" placeholder="List your key products or services, separated by commas..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Company Description</label>
+                        <textarea id="description" rows="5" placeholder="Describe your company in a few sentences. This is crucial for generating relevant outreach messages." required></textarea>
+                    </div>
+                </div>
+
+                <!-- STEP 3: SUCCESS -->
+                <div class="wizard-step" id="step3">
+                    <div class="success-step-content">
+                        <div class="success-animation">
+                            <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                                <circle class="checkmark__circle"/><path class="checkmark__check" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                            </svg>
+                        </div>
+                        <h2>Setup Complete!</h2>
+                        <p>Your Chilbot AI agent is configured and ready. Let's find some leads.</p>
+                        <button type="button" id="goToDashboardBtn" class="btn btn-primary" style="margin-top: 20px;">
+                            <i class="fas fa-chart-line"></i> Go to Dashboard
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="wizard-navigation" id="wizardNavigation">
+            <button type="button" class="btn btn-secondary" id="prevBtn"><i class="fas fa-arrow-left"></i> Back</button>
+            <button type="button" class="btn btn-primary" id="nextBtn">Next <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const steps = Array.from(document.querySelectorAll('.wizard-step'));
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const goToDashboardBtn = document.getElementById('goToDashboardBtn');
+            const progressBar = document.getElementById('progressBar');
+            const wizardNavigation = document.getElementById('wizardNavigation');
+            
+            let currentStep = 1;
+            const totalFormSteps = steps.length - 1;
+
+            // --- AGENT INFO LOCALSTORAGE KEY ---
+            const AGENT_INFO_KEY = 'agent_info';
+
+            // --- Prefill logic ---
+            function loadAgentInfo() {
+                const info = JSON.parse(localStorage.getItem(AGENT_INFO_KEY) || '{}');
+                if (info.business_name) document.getElementById('business_name').value = info.business_name;
+                if (info.domain) document.getElementById('domain').value = info.domain;
+                if (info.services) document.getElementById('services').value = info.services;
+                if (info.description) document.getElementById('description').value = info.description;
+                if (Array.isArray(info.location) && info.location.length) {
+                    selectedCountries = info.location.slice();
+                }
+            }
+
+            const updateWizard = () => {
+                steps.forEach((step, index) => step.classList.toggle('active', index + 1 === currentStep));
+                const progress = currentStep > totalFormSteps ? 100 : ((currentStep - 1) / (totalFormSteps - 1)) * 100;
+                progressBar.style.width = `${progress}%`;
+                prevBtn.style.display = (currentStep === 1) ? 'none' : 'inline-flex';
+                nextBtn.innerHTML = (currentStep === totalFormSteps) ? 'Finish <i class="fas fa-check"></i>' : 'Next <i class="fas fa-arrow-right"></i>';
+                wizardNavigation.style.display = (currentStep > totalFormSteps) ? 'none' : 'flex';
+            };
+
+            const validateStep = (stepNumber) => {
+                const currentStepElement = steps[stepNumber - 1];
+                const inputs = currentStepElement.querySelectorAll('input[required], textarea[required], select[required]');
+                let isValid = true;
+                inputs.forEach(input => {
+                    if (!input.value.trim()) {
+                         isValid = false;
+                         input.style.animation = 'shake 0.5s';
+                         setTimeout(() => { input.style.animation = ''; }, 500);
+                    }
+                });
+                return isValid;
+            };
+
+            nextBtn.addEventListener('click', () => {
+                if (validateStep(currentStep) && currentStep <= totalFormSteps) {
+                    currentStep++;
+                    updateWizard();
+                }
+                if (currentStep > totalFormSteps) {
+                    collectAndSubmitData();
+                }
+            });
+
+            prevBtn.addEventListener('click', () => { if (currentStep > 1) { currentStep--; updateWizard(); } });
+            goToDashboardBtn.addEventListener('click', () => { window.location.href = "dashboard.html"; });
+            
+            const allCountries = [
+                "Global","Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo, Democratic Republic of the","Congo, Republic of the","Costa Rica","Cote d'Ivoire","Croatia","Cuba","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Korea, North","Korea, South","Kosovo","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"
+            ];
+            const customSelect = document.getElementById('customCountrySelect');
+            const input = document.getElementById('countryInput');
+            const dropdown = document.getElementById('countryDropdown');
+            let selectedCountries = [];
+
+            function renderSelectedCountries() {
+                // Remove all tags except the input
+                customSelect.querySelectorAll('.selected-country').forEach(e => e.remove());
+                selectedCountries.forEach(country => {
+                    const tag = document.createElement('span');
+                    tag.className = 'selected-country';
+                    tag.textContent = country;
+                    const removeBtn = document.createElement('span');
+                    removeBtn.className = 'remove-country';
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.onclick = (e) => {
+                        selectedCountries = selectedCountries.filter(c => c !== country);
+                        renderSelectedCountries();
+                    };
+                    tag.appendChild(removeBtn);
+                    customSelect.insertBefore(tag, input);
+                });
+            }
+
+            function renderDropdown(filter = '') {
+                dropdown.innerHTML = '';
+                const filtered = allCountries.filter(c => c.toLowerCase().includes(filter.toLowerCase()) && !selectedCountries.includes(c));
+                filtered.slice(0, 10).forEach(country => {
+                    const option = document.createElement('div');
+                    option.className = 'dropdown-option';
+                    option.textContent = country;
+                    option.onclick = () => {
+                        selectedCountries.push(country);
+                        renderSelectedCountries();
+                        input.value = '';
+                        renderDropdown('');
+                    };
+                    dropdown.appendChild(option);
+                });
+                if (filtered.length === 0) {
+                    const noOpt = document.createElement('div');
+                    noOpt.className = 'dropdown-option';
+                    noOpt.style.opacity = 0.6;
+                    noOpt.textContent = 'No matches';
+                    dropdown.appendChild(noOpt);
+                }
+            }
+
+            input.addEventListener('focus', () => {
+                customSelect.classList.add('open');
+                renderDropdown(input.value);
+            });
+            input.addEventListener('input', () => {
+                renderDropdown(input.value);
+            });
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !input.value && selectedCountries.length) {
+                    selectedCountries.pop();
+                    renderSelectedCountries();
+                    renderDropdown(input.value);
+                }
+            });
+            document.addEventListener('click', (e) => {
+                if (!customSelect.contains(e.target)) {
+                    customSelect.classList.remove('open');
+                }
+            });
+            customSelect.addEventListener('click', () => {
+                input.focus();
+            });
+
+            // --- Load agent info on page load ---
+            loadAgentInfo();
+            renderSelectedCountries();
+            updateWizard();
+
+            // --- Save/merge agent info on submit ---
+            window.collectAndSubmitData = function() {
+                const prev = JSON.parse(localStorage.getItem(AGENT_INFO_KEY) || '{}');
+                const BUSINESS_INFO = {
+                    business_name: document.getElementById('business_name').value || prev.business_name || "Your Company",
+                    domain: document.getElementById('domain').value || prev.domain || "B2B service",
+                    location: selectedCountries.length ? selectedCountries : (prev.location || ["Global"]),
+                    services: document.getElementById('services').value || prev.services || "",
+                    description: document.getElementById('description').value || prev.description || ""
+                };
+                localStorage.setItem(AGENT_INFO_KEY, JSON.stringify(BUSINESS_INFO));
+                // Optionally, show a success message or animation here
+                setTimeout(function() {
+                    window.location.href = "dashboard.html";
+                }, 600);
+            };
+        });
+    </script>
+</body>
+</html>
