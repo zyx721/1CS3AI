@@ -75,8 +75,11 @@ def search_agent(state: AgentState) -> AgentState:
         - Services: "{BUSINESS_INFO['services']}"
         - Location: "{BUSINESS_INFO['location']}"
         - Description: "{BUSINESS_INFO['description']}"
-
-        Your job is to determine the best service and location parameters for the search tool and then call it.
+        note: 
+            you can call the tool mutliple time in same responde.
+            do not make description of mutliple target. each one search should have it well direct query 
+            description = search query
+        Your job is to determine the best descreptions parameters for the search tool and then call it.
         search_leads(description:str) is the tool 
     """)
     response = search_llm.invoke([sys_prompt] + state["messages"])
