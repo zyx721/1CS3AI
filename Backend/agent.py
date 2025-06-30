@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 # --- FastAPI Server Imports ---
 import uvicorn
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 # --- Dummy search_engine.run_agent for portability ---
@@ -180,6 +181,15 @@ app = FastAPI(
     title="AI Lead Generation Agent Server",
     description="An API to manage and run an AI lead-finding agent.",
     version="1.0.0",
+)
+
+# --- ADD: CORS middleware for frontend access ---
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Or restrict to ["http://127.0.0.1:5500"] for more security
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 class BusinessInfoUpdate(BaseModel):

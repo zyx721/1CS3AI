@@ -1,42 +1,30 @@
 [
     {
-        "niche": null,
-        "description": null,
-        "email": null,
-        "phone": null,
-        "url": "https://www.academia.edu/91406980/Poultry_production_in_Algeria_current_situation_and_future_prospects",
-        "company_name": null
+        "relevance": "high",
+        "company_name": "Sarl El Redhouane"
     },
     {
-        "niche": "Academic Publishing",
-        "description": "Cambridge University Press is a global academic publisher that provides scholarly content, including journals, books, and educational resources, across various subjects through its Cambridge Core platform.",
-        "email": null,
-        "phone": "0043933913",
-        "url": "https://www.cambridge.org/core/journals/world-s-poultry-science-journal/article/poultry-production-in-algeria-current-situation-and-future-prospects/B0E31BD81859A346D478E50FCC058FEF",
-        "company_name": "Cambridge University Press"
+        "relevance": "high",
+        "company_name": "Arbor Acres Algeria"
     },
     {
-        "niche": "Academic Journal Publisher",
-        "description": "Arcc Journals is an academic publisher that provides platforms for scientific journals, including Agricultural Science Digest, focusing on various scientific disciplines.",
-        "email": null,
-        "phone": null,
-        "url": "https://arccjournals.com/journal/agricultural-science-digest/DF-584",
-        "company_name": "Arcc Journals"
+        "relevance": "high",
+        "company_name": "SARL ARBOR ACRES ALGERIE"
     },
     {
-        "niche": "Agricultural Technology Insights and Publishing",
-        "description": "AgriTech Insights publishes articles and provides insights on agricultural technology, covering topics such as industry challenges and trends.",
-        "email": null,
-        "phone": null,
-        "url": "https://www.linkedin.com/posts/agritechinsights_algerias-poultry-industry-faces-antibiotic-activity-7280319928543449088-AZh4",
-        "company_name": "AgriTech Insights"
+        "relevance": "medium",
+        "company_name": "Algeria Poultry Farm"
     },
     {
-        "niche": null,
-        "description": null,
-        "email": null,
-        "phone": null,
-        "company_name": null,
-        "url": "https://orbi.uliege.be/bitstream/2268/125083/1/AGR50-87-96.pdf"
+        "relevance": "low",
+        "company_name": "African Land"
+    },
+    {
+        "relevance": "low",
+        "company_name": "Arbor Acres Alg\\u00e9rie"
+    },
+    {
+        "relevance": "low",
+        "company_name": "Vencomatic Group"
     }
 ]
