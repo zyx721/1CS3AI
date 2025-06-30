@@ -2,6 +2,9 @@ import os
 import json
 import logging
 from typing import Annotated, Sequence, TypedDict
+from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from langgraph.prebuilt import ToolNode
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage, ToolMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -13,6 +16,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://337a-105-235-133-238.ngrok-free.app"
+    ],  # Only allow your frontend's ngrok URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 BUSINESS_INFO = {
     "business_name": "",
@@ -22,20 +35,23 @@ BUSINESS_INFO = {
     "description": ""
 }
 
-def load_business_config(path: str):
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"Business config not found: {path}")
-    with open(path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-        BUSINESS_INFO.update({
-            "business_name": data.get("business_name", "Your Company"),
-            "domain": data.get("domain", "B2B service"),
-            "location": data.get("location", "Global"),
-            "services": data.get("services", ""),
-            "description": data.get("description", "")
-        })
+def load_business_config_from_dict(data: dict):
+    BUSINESS_INFO.update({
+        "business_name": data.get("business_name", "Your Company"),
+        "domain": data.get("domain", "B2B service"),
+        "location": data.get("location", "Global"),
+        "services": data.get("services", ""),
+        "description": data.get("description", "")
+    })
     print("✅ Business config loaded successfully.")
     print(json.dumps(BUSINESS_INFO, indent=2))
+    # Save updated config to business_config.json
+    try:
+        with open("business_config.json", "w", encoding="utf-8") as f:
+            json.dump(BUSINESS_INFO, f, indent=2)
+        print("✅ business_config.json updated.")
+    except Exception as e:
+        print(f"❌ Failed to update business_config.json: {e}")
 
 
 
@@ -68,7 +84,8 @@ def search_agent(state: AgentState) -> AgentState:
 
         1. Understand our service from the information provided below.
         2. Identify what kinds of businesses would need our service.
-        3. Use your search tool to find leads. You can call the tool multiple times with different queries if needed.
+        3. Use your search tool to find leads. You can call the tool multiple times with different queries if needed but at max try only 2 times a time.
+        4- you should be more smarter then searching by direct same keywords of our service . your description for search should describle those people that would need our service and search for them by simple queries and smart
 
         Our business information:
         - Domain: "{BUSINESS_INFO['domain']}"
@@ -77,7 +94,7 @@ def search_agent(state: AgentState) -> AgentState:
         - Description: "{BUSINESS_INFO['description']}"
         note: 
             you can call the tool mutliple time in same responde.
-            do not make description of mutliple target. each one search should have it well direct query 
+            do not make description of mutliple target. each one search should have it well direct query not very long
             description = search query
         Your job is to determine the best descreptions parameters for the search tool and then call it.
         search_leads(description:str) is the tool 
@@ -118,7 +135,7 @@ def organization_agent(state: AgentState)-> AgentState:
         1. Analyze the full list of leads provided in the previous tool message.
         2. Based on our company's profile (Services: '{BUSINESS_INFO['services']}', Description: '{BUSINESS_INFO['description']}'), reorder the *entire* list of leads from most relevant to least relevant. Do NOT filter or remove any leads.
         3. Call the `save_ranked_leads` tool, passing the complete, newly reordered list of all leads. The list must contain all original information for each lead (url, phone, etc.).
-
+        note: you can remove any one that dosen't need to our service
         Your output must be a single call to the `save_ranked_leads` tool.
     """)
     response = organization_llm.invoke([sys_prompt] + state["messages"])
@@ -175,18 +192,60 @@ def build_graph():
 
     return graph.compile()
 
-if __name__ == "__main__":
-    load_business_config("business_config.json")
+@app.post("/upload-config")
+async def upload_config(file: UploadFile = File(...)):
+    try:
+        contents = await file.read()
+        data = json.loads(contents)
+        load_business_config_from_dict(data)
+        return {"status": "success", "message": "Business config uploaded and loaded."}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to load config: {e}")
 
-    app = build_graph()
-    print("\n--- Graph Compiled. Starting Execution... ---")
+@app.post("/run-agent")
+async def run_agent_endpoint():
+    try:
+        app_graph = build_graph()
+        initial_message = {"messages": [HumanMessage(content="Find potential leads for our business.")]}
+        final_state = None
+        for event in app_graph.stream(initial_message, stream_mode="values"):
+            final_state = event
+        result = final_state['messages'][-1].content
+        try:
+            result_json = json.loads(result)
+            return JSONResponse(content=result_json)
+        except Exception:
+            return {"result": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Agent execution failed: {e}")
 
-    initial_message = {"messages": [HumanMessage(content="Find potential leads for our business.")]}
+from fastapi import Request
 
-    final_state = None
-    for event in app.stream(initial_message, stream_mode="values"):
-        final_state = event
-
-    print("\n--- Execution Finished ---")
-    print("Final State:")
-    print(final_state['messages'][-1].content)
+@app.get("/dashboard-data")
+async def get_dashboard_data():
+    """
+    Loads dashboard data from dashboard_data.json and returns it.
+    If the file does not exist, returns default dashboard data.
+    """
+    dashboard_path = os.path.join(os.path.dirname(__file__), "dashboard_data.json")
+    if not os.path.exists(dashboard_path):
+        # Default dashboard data structure
+        default_data = {
+            "total_calls": 0,
+            "calls_this_week": 0,
+            "success_rate": 0,
+            "new_leads": 0,
+            "performance": {
+                "labels": [],
+                "leads": [],
+                "success": []
+            },
+            "leads_table": []
+        }
+        return default_data
+    try:
+        with open(dashboard_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load dashboard data: {e}")

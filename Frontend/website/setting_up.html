@@ -305,7 +305,7 @@
                         </div>
                         <h2>Setup Complete!</h2>
                         <p>Your Chilbot AI agent is configured and ready. Let's find some leads.</p>
-                        <button type="button" id="goToDashboardBtn" class="btn btn-primary" style="margin-top: 20px;">
+                        <button type="button" id="goToDashboardBtn" class="btn btn-primary" style="margin-top: 20px; cursor:pointer;">
                             <i class="fas fa-chart-line"></i> Go to Dashboard
                         </button>
                     </div>
@@ -333,6 +333,7 @@
 
             // --- AGENT INFO LOCALSTORAGE KEY ---
             const AGENT_INFO_KEY = 'agent_info';
+            const BACKEND_URL = "https://337a-105-235-133-238.ngrok-free.app";
 
             // --- Prefill logic ---
             function loadAgentInfo() {
@@ -348,6 +349,7 @@
 
             const updateWizard = () => {
                 steps.forEach((step, index) => step.classList.toggle('active', index + 1 === currentStep));
+                // Fix progress bar calculation for correct fill
                 const progress = currentStep > totalFormSteps ? 100 : ((currentStep - 1) / (totalFormSteps - 1)) * 100;
                 progressBar.style.width = `${progress}%`;
                 prevBtn.style.display = (currentStep === 1) ? 'none' : 'inline-flex';
@@ -421,6 +423,7 @@
                         renderSelectedCountries();
                         input.value = '';
                         renderDropdown('');
+                        customSelect.classList.remove('open'); // Close dropdown after selection
                     };
                     dropdown.appendChild(option);
                 });
@@ -446,6 +449,13 @@
                     renderSelectedCountries();
                     renderDropdown(input.value);
                 }
+                // Prevent form submit on Enter in country input
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (dropdown.firstChild && dropdown.firstChild.classList.contains('dropdown-option')) {
+                        dropdown.firstChild.click();
+                    }
+                }
             });
             document.addEventListener('click', (e) => {
                 if (!customSelect.contains(e.target)) {
@@ -456,13 +466,18 @@
                 input.focus();
             });
 
+            // Prevent form submission from reloading the page
+            document.getElementById('setupForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+            });
+
             // --- Load agent info on page load ---
             loadAgentInfo();
             renderSelectedCountries();
             updateWizard();
 
             // --- Save/merge agent info on submit ---
-            window.collectAndSubmitData = function() {
+            window.collectAndSubmitData = async function() {
                 const prev = JSON.parse(localStorage.getItem(AGENT_INFO_KEY) || '{}');
                 const BUSINESS_INFO = {
                     business_name: document.getElementById('business_name').value || prev.business_name || "Your Company",
@@ -472,10 +487,24 @@
                     description: document.getElementById('description').value || prev.description || ""
                 };
                 localStorage.setItem(AGENT_INFO_KEY, JSON.stringify(BUSINESS_INFO));
-                // Optionally, show a success message or animation here
-                setTimeout(function() {
-                    window.location.href = "dashboard.html";
-                }, 600);
+                // Upload config to backend
+                try {
+                    const config = {
+                        ...BUSINESS_INFO,
+                        location: Array.isArray(BUSINESS_INFO.location) ? BUSINESS_INFO.location.join(', ') : BUSINESS_INFO.location
+                    };
+                    const file = new File([JSON.stringify(config)], "config.json", { type: "application/json" });
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    await fetch(`${BACKEND_URL}/upload-config`, {
+                        method: "POST",
+                        body: formData
+                    });
+                } catch (e) {
+                    // Silently fail, do not show alert
+                }
+                // Always redirect to dashboard after finishing
+                window.location.href = "dashboard.html";
             };
         });
     </script>

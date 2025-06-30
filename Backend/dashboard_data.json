@@ -1,0 +1,22 @@
+{
+  "total_calls": 1284,
+  "calls_this_week": 76,
+  "success_rate": 21,
+  "new_leads": 18,
+  "performance": {
+    "labels": [
+      "May 1", "May 2", "May 3", "May 4", "May 5", "May 6", "May 7",
+      "May 8", "May 9", "May 10", "May 11", "May 12", "May 13", "May 14",
+      "May 15", "May 16", "May 17", "May 18", "May 19", "May 20", "May 21",
+      "May 22", "May 23", "May 24", "May 25", "May 26", "May 27", "May 28",
+      "May 29", "May 30"
+    ],
+    "leads": [12, 15, 18, 20, 22, 25, 28, 30, 27, 24, 22, 20, 18, 16, 15, 17, 19, 21, 23, 25, 27, 29, 28, 26, 24, 22, 20, 18, 16, 14],
+    "success": [2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 3, 4, 5, 6, 7, 8, 9, 10, 9, 8, 7, 6, 5, 4, 3, 2]
+  },
+  "leads_table": [
+    { "business_name": "Sunrise Bakery", "contact": "555-123-4567", "status": "Interested" },
+    { "business_name": "Quantum Tech", "contact": "555-987-6543", "status": "Contacted" },
+    { "business_name": "Green Leaf Cafe", "contact": "555-222-3333", "status": "Not Contacted" }
+  ]
+}
