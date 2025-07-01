@@ -9,6 +9,7 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'business.dart'; // Add this import for BusinessDetailScreen
+import 'package:http/http.dart' as http;
 
 // --- Color Palette from CSS Variables ---
 class AppColors {
@@ -27,6 +28,11 @@ class DashboardPage extends StatefulWidget {
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
+
+  // Make settings sidebar accessible as a static method
+  static Widget buildSettingsSidebar(BuildContext context) {
+    return _DashboardPageState.buildSettingsSidebarStatic(context);
+  }
 }
 
 class _DashboardPageState extends State<DashboardPage> {
@@ -48,6 +54,17 @@ class _DashboardPageState extends State<DashboardPage> {
   List<Map<String, dynamic>> _favorites = [];
   bool _loadingFavorites = false;
 
+  // --- DASHBOARD DATA STATE ---
+  Map<String, dynamic>? _dashboardData;
+  List<dynamic> _rankedLeads = [];
+  bool _loadingDashboard = true;
+  bool _loadingLeads = true;
+  String? _dashboardError;
+  String? _leadsError;
+
+  // --- API BASE URL ---
+  static const String apiBase = "http://192.168.100.5:8000";
+
   @override
   void dispose() {
     _businessNameController.dispose();
@@ -62,6 +79,8 @@ class _DashboardPageState extends State<DashboardPage> {
   void initState() {
     super.initState();
     _initUser();
+    _fetchDashboardData();
+    _fetchRankedLeads();
   }
 
   Future<void> _initUser() async {
@@ -160,6 +179,58 @@ class _DashboardPageState extends State<DashboardPage> {
     Navigator.of(context).pop(); // Close drawer
   }
 
+  Future<void> _fetchDashboardData() async {
+    setState(() {
+      _loadingDashboard = true;
+      _dashboardError = null;
+    });
+    try {
+      final res = await http.get(Uri.parse("$apiBase/dashboard-data"));
+      if (res.statusCode == 200) {
+        setState(() {
+          _dashboardData = Map<String, dynamic>.from(jsonDecode(res.body));
+          _loadingDashboard = false;
+        });
+      } else {
+        setState(() {
+          _dashboardError = "Failed to load dashboard data";
+          _loadingDashboard = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _dashboardError = "Error: $e";
+        _loadingDashboard = false;
+      });
+    }
+  }
+
+  Future<void> _fetchRankedLeads() async {
+    setState(() {
+      _loadingLeads = true;
+      _leadsError = null;
+    });
+    try {
+      final res = await http.get(Uri.parse("$apiBase/ranked-leads"));
+      if (res.statusCode == 200) {
+        setState(() {
+          _rankedLeads = List<dynamic>.from(jsonDecode(res.body));
+          _loadingLeads = false;
+        });
+      } else {
+        setState(() {
+          _leadsError = "Failed to load leads";
+          _loadingLeads = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _leadsError = "Error: $e";
+        _loadingLeads = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -203,21 +274,25 @@ class _DashboardPageState extends State<DashboardPage> {
                     index: _tabIndex,
                     children: [
                       // Dashboard
-                      SingleChildScrollView(
-                        padding: EdgeInsets.all(padding),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildHeader(isTablet),
-                            SizedBox(height: isTablet ? 32 : 20),
-                            _buildStatsGrid(isTablet),
-                            const SizedBox(height: 20),
-                            _buildPerformanceChartCard(isTablet),
-                            const SizedBox(height: 20),
-                            _buildResultsTableCard(isTablet),
-                          ],
-                        ),
-                      ),
+                      _loadingDashboard
+                          ? const Center(child: CircularProgressIndicator())
+                          : _dashboardError != null
+                              ? Center(child: Text(_dashboardError!, style: TextStyle(color: Colors.red)))
+                              : SingleChildScrollView(
+                                  padding: EdgeInsets.all(padding),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      _buildHeader(isTablet),
+                                      SizedBox(height: isTablet ? 32 : 20),
+                                      _buildStatsGrid(isTablet),
+                                      const SizedBox(height: 20),
+                                      _buildPerformanceChartCard(isTablet),
+                                      const SizedBox(height: 20),
+                                      _buildResultsTableCard(isTablet),
+                                    ],
+                                  ),
+                                ),
                       // Favorites
                       _loadingFavorites
                           ? const Center(child: CircularProgressIndicator())
@@ -301,7 +376,6 @@ class _DashboardPageState extends State<DashboardPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(child: _buildHeaderContent()),
-          _buildSettingsButton(),
         ],
       );
     } else {
@@ -312,7 +386,6 @@ class _DashboardPageState extends State<DashboardPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(child: _buildHeaderContent()),
-              _buildSettingsButton(),
             ],
           ),
         ],
@@ -341,34 +414,18 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildSettingsButton() {
-    return ElevatedButton.icon(
-      onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
-      icon: const FaIcon(FontAwesomeIcons.gear, size: 14),
-      label: const Text("Settings"),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.cardBg,
-        foregroundColor: AppColors.textLight,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-          side: const BorderSide(color: AppColors.borderColor),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        textStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 14),
-      ).copyWith(
-        overlayColor: MaterialStateProperty.resolveWith<Color?>((states) {
-          if (states.contains(MaterialState.hovered)) return AppColors.greenAccent.withOpacity(0.8);
-          return null;
-        }),
-        foregroundColor: MaterialStateProperty.resolveWith<Color?>((states) {
-           if (states.contains(MaterialState.hovered)) return AppColors.bgDark;
-           return AppColors.textLight;
-        })
-      ),
-    );
-  }
+
 
   Widget _buildStatsGrid(bool isTablet) {
+    // Use real dashboard data if available
+    final totalCalls = _dashboardData?["total_calls"]?.toString() ?? "-";
+    final weeklyStats = _dashboardData?["weekly_stats"] as Map<String, dynamic>? ?? {};
+    final callsThisWeek = weeklyStats.values.fold<int>(0, (a, b) => a + (b is int ? b : 0)).toString();
+    final successRate = _dashboardData?["success_rate"]?.toString() ?? "-";
+    final newLeads = _dashboardData?["lead_performance"] is List
+        ? (_dashboardData!["lead_performance"] as List).length.toString()
+        : "-";
+
     return LayoutBuilder(
       builder: (context, constraints) {
         // Responsive grid: 2 columns on mobile, up to 4 on larger screens
@@ -386,10 +443,10 @@ class _DashboardPageState extends State<DashboardPage> {
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           children: [
-            _buildStatCard("Total Calls Made", "1,284", isTablet),
-            _buildStatCard("Calls This Week", "76", isTablet),
-            _buildStatCard("Success Rate", "21%", isHighlighted: true, isTablet),
-            _buildStatCard("New Leads Found", "18", isTablet),
+            _buildStatCard("Total Calls Made", totalCalls, isTablet),
+            _buildStatCard("Calls This Week", callsThisWeek, isTablet),
+            _buildStatCard("Success Rate", successRate, isHighlighted: true, isTablet),
+            _buildStatCard("New Leads Found", newLeads, isTablet),
           ],
         );
       },
@@ -432,6 +489,8 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildPerformanceChartCard(bool isTablet) {
+    // Pass real lead performance data if available
+    final leadPerformance = _dashboardData?["lead_performance"] as List<dynamic>? ?? [];
     return _DashCard(
       title: "Performance Over Time (Last 30 Days)",
       isTablet: isTablet,
@@ -441,7 +500,10 @@ class _DashboardPageState extends State<DashboardPage> {
           SizedBox(height: isTablet ? 20 : 16),
           SizedBox(
             height: isTablet ? 300 : 250,
-            child: _ProfessionalLineChart(isTablet: isTablet),
+            child: _ProfessionalLineChart(
+              isTablet: isTablet,
+              leadPerformance: leadPerformance,
+            ),
           ),
         ],
       ),
@@ -481,6 +543,13 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildResultsTableCard(bool isTablet) {
+    // Use real ranked leads data
+    if (_loadingLeads) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_leadsError != null) {
+      return Center(child: Text(_leadsError!, style: TextStyle(color: Colors.red)));
+    }
     return _DashCard(
       title: "Lead Search Results",
       isTablet: isTablet,
@@ -511,29 +580,62 @@ class _DashboardPageState extends State<DashboardPage> {
               DataColumn(label: Text("CONTACT")),
               DataColumn(label: Text("STATUS")),
             ],
-            rows: [
-              DataRow(cells: [
-                const DataCell(Text("Sunrise Bakery")),
-                const DataCell(Text("555-123-4567")),
-                DataCell(_StatusPill("Interested", isSuccess: true, isTablet: isTablet)),
-              ]),
-              DataRow(cells: [
-                const DataCell(Text("Quantum Tech")),
-                const DataCell(Text("555-987-6543")),
-                DataCell(_StatusPill("Contacted", isTablet: isTablet)),
-              ]),
-              DataRow(cells: [
-                const DataCell(Text("Green Leaf Cafe")),
-                const DataCell(Text("555-222-3333")),
-                DataCell(_StatusPill("Not Contacted", isTablet: isTablet)),
-              ]),
-            ],
+            rows: _rankedLeads.isEmpty
+                ? []
+                : _rankedLeads.map<DataRow>((lead) {
+                    return DataRow(cells: [
+                      DataCell(Text(lead["company_name"] ?? lead["name"] ?? "")),
+                      DataCell(Text(lead["phone"] ?? lead["email"] ?? "-")),
+                      DataCell(_StatusPill("Qualified", isSuccess: true, isTablet: isTablet)),
+                    ]);
+                  }).toList(),
           ),
         ),
       ),
     );
   }
   
+  // Move the sidebar builder logic to a static method for external access
+  static Widget buildSettingsSidebarStatic(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final sidebarWidth = screenWidth < 400 ? screenWidth * 0.9 : 400.0;
+    
+    return Drawer(
+      width: sidebarWidth,
+      backgroundColor: AppColors.cardBg,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 50, 20, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Settings",
+              style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.textLight),
+            ),
+            const SizedBox(height: 24),
+            // You can add more static content here if needed
+            Expanded(
+              child: Column(
+                children: [
+                  _SidebarOptionButton(
+                    icon: FontAwesomeIcons.solidUser,
+                    label: "Edit Agent Information",
+                    onPressed: () {},
+                  ),
+                  _SidebarOptionButton(
+                    icon: FontAwesomeIcons.key,
+                    label: "Change Password",
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildSettingsSidebar() {
     final screenWidth = MediaQuery.of(context).size.width;
     final sidebarWidth = screenWidth < 400 ? screenWidth * 0.9 : 400.0;
@@ -788,10 +890,11 @@ class _SidebarOptionButton extends StatelessWidget {
 }
 
 // --- Chart Widget ---
+// Accepts real lead performance data if provided
 class _ProfessionalLineChart extends StatefulWidget {
   final bool isTablet;
-  
-  const _ProfessionalLineChart({required this.isTablet});
+  final List<dynamic> leadPerformance;
+  const _ProfessionalLineChart({required this.isTablet, this.leadPerformance = const []});
 
   @override
   State<_ProfessionalLineChart> createState() => _ProfessionalLineChartState();
@@ -804,11 +907,22 @@ class _ProfessionalLineChartState extends State<_ProfessionalLineChart> {
   @override
   void initState() {
     super.initState();
-    // Generate random data similar to the JS example
-    final random = Random();
-    final tempLeads = List.generate(30, (i) => random.nextDouble() * 20 + 10);
-    leadsData = List.generate(30, (i) => FlSpot(i.toDouble(), tempLeads[i]));
-    successData = List.generate(30, (i) => FlSpot(i.toDouble(), max(0, tempLeads[i] * (random.nextDouble() * 0.4 + 0.1) - random.nextDouble() * 5)));
+    if (widget.leadPerformance.isNotEmpty) {
+      // Use real data if available
+      leadsData = [];
+      successData = [];
+      for (int i = 0; i < widget.leadPerformance.length; i++) {
+        final item = widget.leadPerformance[i];
+        leadsData.add(FlSpot(i.toDouble(), (item["leads"] ?? 0).toDouble()));
+        successData.add(FlSpot(i.toDouble(), (item["success"] ?? 0).toDouble()));
+      }
+    } else {
+      // Fallback to random data
+      final random = Random();
+      final tempLeads = List.generate(30, (i) => random.nextDouble() * 20 + 10);
+      leadsData = List.generate(30, (i) => FlSpot(i.toDouble(), tempLeads[i]));
+      successData = List.generate(30, (i) => FlSpot(i.toDouble(), max(0, tempLeads[i] * (random.nextDouble() * 0.4 + 0.1) - random.nextDouble() * 5)));
+    }
   }
 
   @override

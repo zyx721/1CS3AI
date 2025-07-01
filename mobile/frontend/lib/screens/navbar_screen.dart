@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/map_screen.dart';
-import 'Chat_screen/chat_screen.dart';
+import 'new/voice_chat_page.dart';
 import 'Profile_screen/profile_screen.dart';
 import '../auth/new_lead_step1.dart';
 import 'dart:ui';
@@ -24,10 +24,10 @@ class _NavBarScreenState extends State<NavBarScreen>
 
   final List<Widget> _pages = [
     // const EnhancedMapScreen(),
-    // const ChatScreen(),
-    const DashboardPage(), // Assuming this is the campaign list screen
-    AIScanningScreen(),
-    const ProfileScreen(),
+    const DashboardPage(), // 0: Dashboard
+    AIScanningScreen(),    // 1: Scan
+    VoiceChatPage(),       // 2: Chat
+    const ProfileScreen(), // 3: Profile
   ];
 
   @override
@@ -226,7 +226,8 @@ class _NavBarScreenState extends State<NavBarScreen>
                 children: [    
                   _buildNavItem(Icons.list_rounded, 0, 'dashboard'),
                   _buildNavItem(Icons.search_rounded, 1, 'Scan'),
-                  _buildNavItem(Icons.person_rounded, 2, 'Profile'),
+                  _buildNavItem(Icons.chat_bubble_outline_rounded, 2, 'Chat'),
+                  _buildNavItem(Icons.person_rounded, 3, 'Profile'),
                 ],
               ),
             ),
