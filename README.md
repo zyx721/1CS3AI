@@ -37,7 +37,10 @@ GEMSELL is a full-stack platform that automates:
 
 ## 🎨 Screenshots & Mockups
 
-### 💡 Landing Page
+### 💡 Landing Page (mobile)
+![Landing](./landing_mockup_laptop.png)
+
+### 💡 Landing Page (mobile)
 ![Landing](./landing_mockup.png)
 
 ### 📊 Dashboard UI
