@@ -190,30 +190,29 @@ class _NavBarScreenState extends State<NavBarScreen>
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10), // less padding
               decoration: BoxDecoration(
+                // Black glass effect: use dark color with opacity and subtle gradient
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Colors.white.withOpacity(0.18),
-                    Colors.white.withOpacity(0.08),
-                    const Color(0xFF10B981).withOpacity(0.05), // emerald green accent
-                    Colors.blue.withOpacity(0.08),
+                    Colors.black.withOpacity(0.65),
+                    Colors.black.withOpacity(0.45),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.18),
+                  color: Colors.white.withOpacity(0.10),
                   width: 1.2,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
+                    color: Colors.black.withOpacity(0.01),
                     blurRadius: 14,
                     spreadRadius: 0,
                     offset: const Offset(0, 7),
                   ),
                   BoxShadow(
-                    color: Colors.white.withOpacity(0.08),
+                    color: Colors.white.withOpacity(0.04),
                     blurRadius: 0,
                     spreadRadius: 0,
                     offset: const Offset(0, -1),

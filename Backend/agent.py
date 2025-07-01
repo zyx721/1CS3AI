@@ -438,4 +438,4 @@ if __name__ == "__main__":
     print("--- Starting Uvicorn Server ---")
     print("Access the API at http://192.168.203.163:8000")
     print("API documentation available at http://192.168.203.163:8000/docs")
-    uvicorn.run(app, host="192.168.203.163", port=8000)
+    uvicorn.run(app, host="10.48.173.163", port=8000)

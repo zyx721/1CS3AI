@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
+import 'dart:ui';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -451,112 +452,132 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       context: context,
       barrierDismissible: true,
       builder: (context) => Dialog(
-        backgroundColor: AppColors.cardBg,
+        backgroundColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.add_circle, color: AppColors.greenAccent, size: 28),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Add Funds',
-                      style: GoogleFonts.inter(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textLight,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: Icon(Icons.close, color: AppColors.textMuted),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.cardBg.withOpacity(0.92),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.greenAccent.withOpacity(0.18), width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.18),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _amountController,
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-                style: GoogleFonts.inter(color: AppColors.textLight, fontSize: 16),
-                decoration: InputDecoration(
-                  labelText: 'Amount (DZD)',
-                  labelStyle: GoogleFonts.inter(color: AppColors.textMuted),
-                  prefixIcon: Icon(Icons.attach_money, color: AppColors.textMuted),
-                  filled: true,
-                  fillColor: Colors.black.withOpacity(0.18),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.borderColor),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.borderColor),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.greenAccent, width: 2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.textMuted,
-                        side: const BorderSide(color: AppColors.borderColor),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        textStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 14),
+                  Row(
+                    children: [
+                      Icon(Icons.add_circle, color: AppColors.greenAccent, size: 28),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Add Funds',
+                          style: GoogleFonts.inter(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textLight,
+                          ),
+                        ),
                       ),
-                      child: const Text('Cancel'),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: Icon(Icons.close, color: AppColors.textMuted),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: _amountController,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    style: GoogleFonts.inter(color: AppColors.textLight, fontSize: 16),
+                    decoration: InputDecoration(
+                      labelText: 'Amount (DZD)',
+                      labelStyle: GoogleFonts.inter(color: AppColors.textMuted),
+                      prefixIcon: Icon(Icons.attach_money, color: AppColors.textMuted),
+                      filled: true,
+                      fillColor: Colors.black.withOpacity(0.18),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.borderColor),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.borderColor),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.greenAccent, width: 2),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        final amount = double.tryParse(_amountController.text);
-                        if (amount != null && amount > 0) {
-                          Navigator.of(context).pop();
-                          showPaymentDialog(
-                            context,
-                            amount: amount,
-                            purpose: 'add_funds',
-                          );
-                          _amountController.clear();
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Please enter a valid amount'),
-                              backgroundColor: Colors.orange,
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                          );
-                        }
-                      },
-                      icon: Icon(Icons.payment, color: AppColors.bgDark),
-                      label: Text("Continue"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.greenAccent,
-                        foregroundColor: AppColors.bgDark,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        textStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 14),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.textMuted,
+                            side: const BorderSide(color: AppColors.borderColor),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            textStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 14),
+                            backgroundColor: Colors.transparent,
+                          ),
+                          child: const Text('Cancel'),
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            final amount = double.tryParse(_amountController.text);
+                            if (amount != null && amount > 0) {
+                              Navigator.of(context).pop();
+                              showPaymentDialog(
+                                context,
+                                amount: amount,
+                                purpose: 'add_funds',
+                              );
+                              _amountController.clear();
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Please enter a valid amount'),
+                                  backgroundColor: Colors.orange,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                ),
+                              );
+                            }
+                          },
+                          icon: Icon(Icons.payment, color: AppColors.bgDark),
+                          label: Text("Continue"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.greenAccent,
+                            foregroundColor: AppColors.bgDark,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            textStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 14),
+                            elevation: 0,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -576,7 +597,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   Future<void> _fetchAgentInfo() async {
     setState(() => _isAgentInfoLoading = true);
     try {
-      final res = await http.get(Uri.parse('http://192.168.203.163:8000/agent-info'));
+      final res = await http.get(Uri.parse('http://10.48.173.163:8000/agent-info'));
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
         _businessNameController.text = data['business_name'] ?? '';
@@ -599,7 +620,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
     setState(() => _isAgentInfoLoading = true);
     try {
       final res = await http.post(
-        Uri.parse('http://192.168.203.163:8000/agent-info'),
+        Uri.parse('http://10.48.173.163:8000/agent-info'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'business_name': _businessNameController.text,
@@ -1582,13 +1603,13 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
                                 controller: _confirmPasswordController,
                                 decoration: InputDecoration(
                                   labelText: "Confirm New Password",
-                                  labelStyle: TextStyle(color: Colors.purple[700]),
+                                  labelStyle: TextStyle(color: const Color.fromARGB(255, 31, 162, 92)),
                                   focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.purple[700]!),
+                                    borderSide: BorderSide(color: const Color.fromARGB(255, 31, 162, 61)!),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.purple[200]!),
+                                    borderSide: BorderSide(color: const Color.fromARGB(255, 147, 216, 180)!),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   suffixIcon: IconButton(
@@ -1596,7 +1617,7 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
                                       _showConfirmPassword
                                           ? Icons.visibility_off
                                           : Icons.visibility,
-                                      color: Colors.purple[700],
+                                      color: const Color.fromARGB(255, 31, 162, 94),
                                     ),
                                     onPressed: () {
                                       setState(() {
@@ -1620,7 +1641,7 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
                               ElevatedButton(
                                 onPressed: _isLoading ? null : _changePassword,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.purple[700],
+                                  backgroundColor: const Color.fromARGB(255, 31, 162, 68),
                                   padding: const EdgeInsets.symmetric(vertical: 16),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),

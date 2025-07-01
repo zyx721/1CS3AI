@@ -63,7 +63,7 @@ class _DashboardPageState extends State<DashboardPage> {
   String? _leadsError;
 
   // --- API BASE URL ---
-  static const String apiBase = "http://192.168.203.163:8000";
+  static const String apiBase = "http://10.48.173.163:8000";
 
   @override
   void dispose() {
