@@ -294,6 +294,7 @@
     </div>
 
     <div class="container" id="container">
+        <!-- SIGN UP FORM -->
         <div class="form-container sign-up-container">
             <form id="signUpForm">
                 <h1>Create Account</h1>
@@ -312,6 +313,7 @@
             </form>
         </div>
         
+        <!-- SIGN IN FORM -->
         <div class="form-container sign-in-container">
             <form id="signInForm">
                 <h1>Sign in</h1>
@@ -330,6 +332,7 @@
             </form>
         </div>
         
+        <!-- OVERLAYS -->
         <div class="overlay-container">
             <div class="overlay">
                 <div class="overlay-panel overlay-left">
@@ -354,21 +357,19 @@
             signInWithEmailAndPassword,
             onAuthStateChanged,
             GoogleAuthProvider,
-            signInWithPopup
+            signInWithPopup,
+            getAdditionalUserInfo
         } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+        // *** NEW: Import Firestore modules ***
+        import {
+            getFirestore,
+            doc,
+            setDoc,
+            getDoc
+        } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-        // ===================================================================================
-        //  FIX FOR 'auth/internal-error'
-        //  This error is caused by project configuration, not code. Follow these steps:
-        //  1. FIREBASE CONSOLE: Go to Authentication > Sign-in method > Enable Google provider and add a support email.
-        //  2. FIREBASE CONSOLE: Under Authentication > Sign-in method, add 'localhost' to Authorized Domains for testing.
-        //  3. GOOGLE CLOUD CONSOLE: Go to "APIs & Services" > "OAuth consent screen". Fill out the required fields, save, and PUBLISH the app.
-        //  4. GOOGLE CLOUD CONSOLE: Go to "APIs & Services" > "Credentials". Restrict your API key to your web domains.
-        // ===================================================================================
-        
-        // --- IMPORTANT ---
-        // Replace this with your web app's Firebase configuration
-        // Get this from your Firebase project settings
+        // --- IMPORTANT: Firebase Configuration ---
+        // Replace with your Firebase project's configuration
         const firebaseConfig = {
         apiKey: "AIzaSyBu8k7nwXPBq2ryXansUiBCsSCBWT3QLVk",
         authDomain: "ncs2025-d7a20.firebaseapp.com",
@@ -377,31 +378,65 @@
         messagingSenderId: "9180440703",
         appId: "1:9180440703:web:5b2c4e634ac00ad7c3374a",
         measurementId: "G-GTBQJZL00D"};
-
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app); // *** NEW: Initialize Firestore ***
 
-        // --- AUTH STATE OBSERVER ---
+        // *** NEW & REWRITTEN: Auth state observer with routing logic ***
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                console.log('User is logged in, redirecting to setting_up.html');
-                // Make sure you have a 'chat.html' file or change this URL
-                window.location.href = 'setting_up.html';
+                // User is signed in. Check if they have completed the setup.
+                const userDocRef = doc(db, 'users', user.uid);
+                
+                getDoc(userDocRef).then(docSnap => {
+                    if (docSnap.exists() && docSnap.data().setupComplete === true) {
+                        // User exists and has completed setup, go to dashboard
+                        console.log('User has completed setup. Redirecting to dashboard...');
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        // User is new or hasn't completed setup, go to setup page
+                        console.log('User has not completed setup. Redirecting to setup page...');
+                        window.location.href = 'setting_up.html';
+                    }
+                }).catch(error => {
+                    console.error("Error checking user setup status:", error);
+                    // Fallback: if we can't check, send to setup page
+                    window.location.href = 'setting_up.html';
+                });
+
             } else {
-                console.log('No user signed in, showing login screen.');
+                // No user is signed in.
+                console.log('No user signed in. Showing login screen.');
             }
         });
 
-        // --- EMAIL & PASSWORD SIGN UP ---
+        // *** NEW: Function to create a user profile in Firestore ***
+        const createUserProfile = async (user, name) => {
+            const userDocRef = doc(db, 'users', user.uid);
+            await setDoc(userDocRef, {
+                uid: user.uid,
+                email: user.email,
+                name: name || user.displayName, // Use provided name or Google display name
+                createdAt: new Date(),
+                setupComplete: false // *** The crucial flag ***
+            });
+            console.log('User profile created in Firestore for UID:', user.uid);
+        };
+
+        // --- EMAIL & PASSWORD SIGN UP (MODIFIED) ---
         const signUpForm = document.getElementById('signUpForm');
         signUpForm.addEventListener('submit', (e) => {
             e.preventDefault();
+            const name = document.getElementById('signUpName').value;
             const email = document.getElementById('signUpEmail').value;
             const password = document.getElementById('signUpPassword').value;
 
             createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
+                .then(async (userCredential) => {
                     console.log('User created:', userCredential.user);
+                    // *** NEW: Create their profile in Firestore ***
+                    await createUserProfile(userCredential.user, name);
+                    // The onAuthStateChanged observer will handle the redirect.
                 })
                 .catch((error) => {
                     alert(`Sign Up Error: ${error.message}`);
@@ -418,44 +453,42 @@
             signInWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
                     console.log('User signed in:', userCredential.user);
+                    // The onAuthStateChanged observer will handle the redirect.
                 })
                 .catch((error) => {
                     alert(`Sign In Error: ${error.message}`);
                 });
         });
 
-        // --- GOOGLE SIGN-IN ---
+        // --- GOOGLE SIGN-IN (MODIFIED) ---
         const googleProvider = new GoogleAuthProvider();
-        const googleSignInBtn = document.getElementById('googleSignInBtn');
-        const googleSignUpBtn = document.getElementById('googleSignUpBtn');
-        const googleButtons = [googleSignInBtn, googleSignUpBtn];
-
         const handleGoogleSignIn = (e) => {
             e.preventDefault();
-            
-            googleButtons.forEach(btn => btn.classList.add('disabled'));
-
             signInWithPopup(auth, googleProvider)
-                .then((result) => {
-                    console.log('Signed in with Google:', result.user);
+                .then(async (result) => {
+                    const user = result.user;
+                    const additionalInfo = getAdditionalUserInfo(result);
+                    
+                    // *** NEW: Check if it's a new user and create a profile if so ***
+                    if (additionalInfo.isNewUser) {
+                        console.log('New user signed up with Google:', user);
+                        await createUserProfile(user);
+                    } else {
+                        console.log('Existing user signed in with Google:', user);
+                    }
+                    // The onAuthStateChanged observer will handle the redirect.
                 })
                 .catch((error) => {
                     if (error.code !== 'auth/cancelled-popup-request') {
                         console.error('Google Sign-In Error:', error);
                         alert(`Google Sign-In Error: ${error.message}`);
-                    } else {
-                        console.log('Google Sign-In popup closed by user.');
                     }
-                })
-                .finally(() => {
-                    googleButtons.forEach(btn => btn.classList.remove('disabled'));
                 });
         };
+        document.getElementById('googleSignInBtn').addEventListener('click', handleGoogleSignIn);
+        document.getElementById('googleSignUpBtn').addEventListener('click', handleGoogleSignIn);
 
-        googleSignInBtn.addEventListener('click', handleGoogleSignIn);
-        googleSignUpBtn.addEventListener('click', handleGoogleSignIn);
-
-        // --- UI & ANIMATION SCRIPT ---
+        // --- UI & ANIMATION SCRIPT (UNCHANGED) ---
         const signUpButton = document.getElementById('signUp');
         const signInButton = document.getElementById('signIn');
         const signUpMobileButton = document.getElementById('signUpMobile');
