@@ -100,11 +100,12 @@ class _AIScanningScreenState extends State<AIScanningScreen>
       }
       final List<dynamic> leads = json.decode(leadsResp.body);
       companies = leads.map<Map<String, dynamic>>((lead) {
+        final idx = leads.indexOf(lead);
         return {
           "name": lead["company_name"] ?? "Unknown",
-          "logo": "assets/logo${(leads.indexOf(lead) % 5) + 1}.png",
-          "relevance": 3 + (leads.indexOf(lead) % 3),
-          "sector": lead["sector"] ?? "Unknown",
+          "logo": "assets/logo${idx % 5 + 1}.png",
+          "relevance": 3 + (idx % 3),
+          "niche": lead["niche"] ?? lead["sector"] ?? "Unknown",
           "website": lead["url"] ?? "",
           "match": (lead["score"] ?? 80), // Use backend score if available
           "description": lead["description"] ?? "",
@@ -177,9 +178,6 @@ class _AIScanningScreenState extends State<AIScanningScreen>
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: BackButton(
-          color: Colors.white.withOpacity(0.9),
-        ),
         centerTitle: true,
         title: Text(
           "AI Business Scanner",
@@ -233,7 +231,7 @@ class _AIScanningScreenState extends State<AIScanningScreen>
                           ),
                         )
                       : ListView(
-                          padding: const EdgeInsets.fromLTRB(24, 120, 24, 32),
+                          padding: const EdgeInsets.fromLTRB(24, 120, 24, 80), // <-- increased bottom padding
                           children: [
                             _buildScanningHeader(),
                             const SizedBox(height: 40),
@@ -592,11 +590,11 @@ class _AIScanningScreenState extends State<AIScanningScreen>
                     ),
                   ],
                 ),
-                if (company?["sector"] != null)
+                if (company?["niche"] != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 4.0),
                     child: Text(
-                      company!["sector"],
+                      company!["niche"],
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.5),
                         fontSize: 11,

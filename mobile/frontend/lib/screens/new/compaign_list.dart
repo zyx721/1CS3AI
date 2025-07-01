@@ -5,6 +5,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
 import 'dart:convert';
+import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'business.dart'; // Add this import for BusinessDetailScreen
 
 // --- Color Palette from CSS Variables ---
 class AppColors {
@@ -37,6 +41,13 @@ class _DashboardPageState extends State<DashboardPage> {
   final _servicesController = TextEditingController();
   final _descriptionController = TextEditingController();
 
+  int _tabIndex = 0; // 0 = Dashboard, 1 = Favorites
+
+  // --- FAVORITES LOGIC ---
+  String? _userId;
+  List<Map<String, dynamic>> _favorites = [];
+  bool _loadingFavorites = false;
+
   @override
   void dispose() {
     _businessNameController.dispose();
@@ -45,6 +56,50 @@ class _DashboardPageState extends State<DashboardPage> {
     _servicesController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initUser();
+  }
+
+  Future<void> _initUser() async {
+    final user = FirebaseAuth.instance.currentUser;
+    setState(() {
+      _userId = user?.uid ?? "guest";
+    });
+    if (_userId != null) {
+      _fetchFavorites();
+    }
+  }
+
+  Future<void> _fetchFavorites() async {
+    if (_userId == null) return;
+    setState(() => _loadingFavorites = true);
+    final favSnap = await FirebaseFirestore.instance
+        .collection('favorites')
+        .doc(_userId)
+        .collection('items')
+        .get();
+    setState(() {
+      _favorites = favSnap.docs.map((d) => d.data()).toList();
+      _loadingFavorites = false;
+    });
+  }
+
+  Future<void> _removeFavorite(Map<String, dynamic> business) async {
+    if (_userId == null) return;
+    final favKey = (business["website"] ?? business["name"] ?? "")
+        .toString()
+        .replaceAll(RegExp(r'[^\w]'), '_');
+    await FirebaseFirestore.instance
+        .collection('favorites')
+        .doc(_userId)
+        .collection('items')
+        .doc(favKey)
+        .delete();
+    _fetchFavorites();
   }
 
   // --- Methods for Settings Persistence (like localStorage) ---
@@ -130,23 +185,109 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
           // --- Main Scrollable Content ---
           SafeArea(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(padding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(isTablet),
-                  SizedBox(height: isTablet ? 32 : 20),
-                  _buildStatsGrid(isTablet),
-                  const SizedBox(height: 20),
-                  _buildPerformanceChartCard(isTablet),
-                  const SizedBox(height: 20),
-                  _buildResultsTableCard(isTablet),
-                ],
-              ),
+            child: Column(
+              children: [
+                // --- Tabs ---
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: padding, vertical: 8),
+                  child: Row(
+                    children: [
+                      _buildTabButton("Dashboard", 0),
+                      const SizedBox(width: 12),
+                      _buildTabButton("Favorites", 1),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: IndexedStack(
+                    index: _tabIndex,
+                    children: [
+                      // Dashboard
+                      SingleChildScrollView(
+                        padding: EdgeInsets.all(padding),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildHeader(isTablet),
+                            SizedBox(height: isTablet ? 32 : 20),
+                            _buildStatsGrid(isTablet),
+                            const SizedBox(height: 20),
+                            _buildPerformanceChartCard(isTablet),
+                            const SizedBox(height: 20),
+                            _buildResultsTableCard(isTablet),
+                          ],
+                        ),
+                      ),
+                      // Favorites
+                      _loadingFavorites
+                          ? const Center(child: CircularProgressIndicator())
+                          : _favorites.isEmpty
+                              ? Center(
+                                  child: Text(
+                                    "No favorites yet.",
+                                    style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 16),
+                                  ),
+                                )
+                              : Padding(
+                                  padding: EdgeInsets.all(padding),
+                                  child: GridView.builder(
+                                    itemCount: _favorites.length,
+                                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: isTablet ? 2 : 1,
+                                      crossAxisSpacing: 24,
+                                      mainAxisSpacing: 24,
+                                      childAspectRatio: isTablet ? 2.7 : 2.2,
+                                    ),
+                                    itemBuilder: (context, i) {
+                                      final business = _favorites[i];
+                                      return _FavoriteBusinessCard(
+                                        business: business,
+                                        onRemove: () => _removeFavorite(business),
+                                        onTap: () {
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (_) => BusinessDetailScreen(business: business),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTabButton(String label, int index) {
+    final selected = _tabIndex == index;
+    return GestureDetector(
+      onTap: () => setState(() => _tabIndex = index),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.greenAccent.withOpacity(0.13) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: selected ? AppColors.greenAccent : AppColors.borderColor,
+            width: 1.2,
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            color: selected ? AppColors.greenAccent : AppColors.textMuted,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+            fontSize: 15,
+          ),
+        ),
       ),
     );
   }
@@ -801,6 +942,176 @@ class _ProfessionalLineChartState extends State<_ProfessionalLineChart> {
             isStrokeCapRound: true,
             dotData: const FlDotData(show: false),
             dashArray: [5, 5], // Dashed line effect
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// --- Favorite Business Card Widget ---
+class _FavoriteBusinessCard extends StatelessWidget {
+  final Map<String, dynamic> business;
+  final VoidCallback onRemove;
+  final VoidCallback onTap;
+  const _FavoriteBusinessCard({
+    required this.business,
+    required this.onRemove,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Helper for website shortening
+    String _shortWebsite(String url) {
+      if (url.isEmpty) return "";
+      try {
+        Uri uri = Uri.parse(url.startsWith('http') ? url : 'https://$url');
+        return uri.host.replaceFirst('www.', '');
+      } catch (_) {
+        return url.length > 22 ? url.substring(0, 20) + "..." : url;
+      }
+    }
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Stack(
+        children: [
+          // Glass effect background
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.18),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.07),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: AppColors.greenAccent.withOpacity(0.13), width: 1.2),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Logo
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                          color: Colors.black.withOpacity(0.10),
+                          border: Border.all(color: AppColors.greenAccent.withOpacity(0.13)),
+                        ),
+                        child: business["logo"] != null && business["logo"].toString().isNotEmpty
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.asset(
+                                  business["logo"],
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (c, e, s) => Icon(Icons.domain, color: AppColors.textMuted, size: 36),
+                                ),
+                              )
+                            : Icon(Icons.domain, color: AppColors.textMuted, size: 36),
+                      ),
+                      const SizedBox(width: 20),
+                      // Info
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Business Name
+                            Text(
+                              business["name"] ?? "",
+                              style: GoogleFonts.inter(
+                                color: AppColors.textLight,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 18,
+                                letterSpacing: 0.2,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            // Sector
+                            if ((business["sector"] ?? "").toString().isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4.0, bottom: 2.0),
+                                child: Text(
+                                  business["sector"],
+                                  style: GoogleFonts.inter(
+                                    color: AppColors.greenAccent,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.2,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            // Website
+                            if ((business["website"] ?? "").toString().isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2.0),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.language, size: 14, color: AppColors.textMuted.withOpacity(0.8)),
+                                    const SizedBox(width: 4),
+                                    Flexible(
+                                      child: Text(
+                                        _shortWebsite(business["website"]),
+                                        style: GoogleFonts.inter(
+                                          color: AppColors.textMuted.withOpacity(0.85),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      // Remove button
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0, top: 2.0),
+                        child: IconButton(
+                          icon: const Icon(Icons.bookmark_remove, color: AppColors.greenAccent),
+                          tooltip: "Remove from Favorites",
+                          onPressed: () {
+                            onRemove();
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Ripple effect for tap
+          Positioned.fill(
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(18),
+                splashColor: AppColors.greenAccent.withOpacity(0.08),
+                highlightColor: Colors.transparent,
+                onTap: onTap,
+              ),
+            ),
           ),
         ],
       ),
