@@ -344,12 +344,16 @@ class _MatchesScreenState extends State<MatchesScreen>
                   size: 14,
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  match["website"],
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
-                    fontSize: 13,
-                    letterSpacing: 0.3,
+                Flexible(
+                  child: Text(
+                    match["website"],
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.7),
+                      fontSize: 13,
+                      letterSpacing: 0.3,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
