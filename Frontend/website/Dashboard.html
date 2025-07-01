@@ -790,9 +790,7 @@
             showLeadsLoading();
             showAgentDebug();
             agentDebugTerminal.textContent = '';
-            // Show AI Calling Progress section
-            const aiSection = document.getElementById('aiCallingProgressSection');
-            if (aiSection) aiSection.style.display = '';
+            // No need to show/hide AI Calling Progress section here; handled by toggle logic
             updateAiCallingProgress(0, 'Starting AI calls...');
             let totalCalls = 0;
             let completedCalls = 0;
@@ -812,13 +810,13 @@
                         evtSource.close();
                         await fetchRankedLeads();
                         aiCallsLoading = false;
-                        setTimeout(() => { clearAgentDebug(); if (aiSection) aiSection.style.display = 'none'; }, 1800);
+                        setTimeout(() => { clearAgentDebug(); }, 1800);
                         resolve();
                     } else if (event.data.startsWith("❌")) {
                         updateAiCallingProgress(0, 'AI calling failed.');
                         evtSource.close();
                         aiCallsLoading = false;
-                        setTimeout(() => { clearAgentDebug(); if (aiSection) aiSection.style.display = 'none'; }, 1800);
+                        setTimeout(() => { clearAgentDebug(); }, 1800);
                         resolve();
                     }
                 };
@@ -827,7 +825,7 @@
                     updateAiCallingProgress(0, 'Connection lost.');
                     evtSource.close();
                     aiCallsLoading = false;
-                    setTimeout(() => { clearAgentDebug(); if (aiSection) aiSection.style.display = 'none'; }, 1800);
+                    setTimeout(() => { clearAgentDebug(); }, 1800);
                     resolve();
                 };
             });
@@ -1021,6 +1019,12 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             fetchDashboardData();
+            // Show or hide AI Calling Progress section based on toggle on load
+            const aiCallsToggle = document.getElementById('aiCallsToggle');
+            const aiSection = document.getElementById('aiCallingProgressSection');
+            if (aiCallsToggle && aiSection) {
+                aiSection.style.display = aiCallsToggle.checked ? '' : 'none';
+            }
         });
 
         // --- Sidebar and Settings Form Logic ---
@@ -1052,6 +1056,10 @@
         document.getElementById('aiCallsToggle').addEventListener('change', async (e) => {
             console.log('AI Calls status:', e.target.checked);
             localStorage.setItem('aiCallsStatus', e.target.checked);
+            const aiSection = document.getElementById('aiCallingProgressSection');
+            if (aiSection) {
+                aiSection.style.display = e.target.checked ? '' : 'none';
+            }
             if (e.target.checked) {
                 await runAgentAndRefreshLeads();
             }
