@@ -1,0 +1,58 @@
+[
+    {
+        "niche": "Full-service Digital Marketing and Web3 Development Agency",
+        "description": "NinjaPromo is a full-service digital marketing, video production, and Web3 development agency offering a wide range of services including web design, SEO, paid media, lead generation, and blockchain solutions.",
+        "email": null,
+        "phone": "929-492-4413",
+        "company_name": "NinjaPromo",
+        "url": "https://ninjapromo.io/top-web-design-companies-for-small-business"
+    },
+    {
+        "niche": "Full-service Software Development, IT Consulting, and Digital Marketing Agency",
+        "description": "This company provides end-to-end software development, IT consulting, QA & testing, cloud, data, AI/ML, and digital marketing solutions, serving startups, enterprises, and agencies globally.",
+        "email": null,
+        "phone": null,
+        "company_name": null,
+        "url": "https://www.valuecoders.com/blog/app-development/web-development-companies-catering-to-global-clients/"
+    },
+    {
+        "niche": "B2B directory and review platform for IT and digital service agencies",
+        "description": "SelectedFirms is a B2B platform that provides curated directories and reviews of top agencies across various IT and digital service categories, including web development, software development, AI, and digital marketing.",
+        "email": "info@selectedfirms.co",
+        "phone": null,
+        "url": "https://selectedfirms.co/companies/web-development/usa",
+        "company_name": "SelectedFirms"
+    },
+    {
+        "niche": "Full-cycle Software Product Development Company",
+        "description": "TechMagic is a full-cycle software product development company offering web, cloud, and security services across various industries.",
+        "email": "hello@techmagic.co",
+        "phone": null,
+        "url": "https://www.techmagic.co/blog/top-web-development-companies",
+        "company_name": "TechMagic"
+    },
+    {
+        "niche": "Digital Design Agency for Startups and SaaS",
+        "description": "Duck Design is a digital design agency offering comprehensive design services including website design, UI/UX, brand identity, motion graphics, and more, specifically tailored for startups, SaaS products, and other businesses.",
+        "email": null,
+        "phone": "267 799 1800",
+        "url": "https://duck.design/best-startup-web-design-agencies/",
+        "company_name": "Duck Design"
+    },
+    {
+        "niche": "Web and Mobile App Development Company",
+        "description": "Konstant Infosolutions is a premier software development company offering a wide range of web and mobile solutions, IT consulting, and related technology services globally.",
+        "email": "sales@konstantinfo.com",
+        "phone": "+1-310-933-5465",
+        "company_name": "Konstant Infosolutions",
+        "url": "https://www.itfirms.co/top-web-development-companies/"
+    },
+    {
+        "niche": "Directory and Review Platform for IT and Business Service Providers",
+        "description": "Topdevelopers.co is an online directory and review platform that helps businesses discover and evaluate leading companies specializing in software development, digital marketing, and various business services across global locations and industries.",
+        "email": null,
+        "phone": null,
+        "company_name": "Topdevelopers.co",
+        "url": "https://www.topdevelopers.co/directory/web-development-companies/country/usa"
+    }
+]

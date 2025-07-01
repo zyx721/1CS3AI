@@ -429,9 +429,14 @@ class _LoginScreenState extends State<LoginScreen>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            isSignUp ? 'Already have an account?' : "Don't have an account?",
-            style: GoogleFonts.inter(color: AppColors.textLight.withOpacity(0.7)),
+          // Wrap the text in Expanded to avoid overflow
+          Expanded(
+            child: Text(
+              isSignUp ? 'Already have an account?' : "Don't have an account?",
+              style: GoogleFonts.inter(color: AppColors.textLight.withOpacity(0.7)),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
           ),
           TextButton(
             onPressed: _toggleForm,

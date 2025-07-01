@@ -161,19 +161,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
             ),
           ),
           // Back button
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 20,
-            left: 20,
-            child: IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(
-                Icons.arrow_back_ios_new,
-                color: AppColors.textLight,
-                size: 20,
-              ),
-              splashRadius: 24,
-            ),
-          ),
         ],
       ),
     );
@@ -254,10 +241,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'Remember your password?',
-                      style: GoogleFonts.inter(
-                        color: AppColors.textLight.withOpacity(0.7),
+                    Expanded(
+                      child: Text(
+                        'Remember your password?',
+                        style: GoogleFonts.inter(
+                          color: AppColors.textLight.withOpacity(0.7),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                     ),
                     TextButton(
