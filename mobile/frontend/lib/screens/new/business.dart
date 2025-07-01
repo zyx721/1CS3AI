@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BusinessDetailScreen extends StatefulWidget {
   final Map<String, dynamic> business;
@@ -21,6 +24,8 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
   late Animation<Offset> _slideAnimation;
   
   bool _showContent = false;
+  bool _isFavorite = false;
+  String? _userId;
 
   @override
   void initState() {
@@ -46,6 +51,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
     ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeOutQuart));
 
     _startAnimations();
+    _initUserAndFavorite();
   }
 
   @override
@@ -62,6 +68,66 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
     await Future.delayed(const Duration(milliseconds: 300));
     if (mounted) {
       setState(() => _showContent = true);
+    }
+  }
+
+  Future<void> _initUserAndFavorite() async {
+    final user = FirebaseAuth.instance.currentUser;
+    setState(() {
+      _userId = user?.uid ?? "guest";
+    });
+    await _loadFavoriteStatus();
+  }
+
+  Future<void> _loadFavoriteStatus() async {
+    if (_userId == null) return;
+    final favDoc = await FirebaseFirestore.instance
+        .collection('favorites')
+        .doc(_userId)
+        .collection('items')
+        .doc(_favKey(widget.business))
+        .get();
+    setState(() {
+      _isFavorite = favDoc.exists;
+    });
+  }
+
+  Future<void> _toggleFavorite() async {
+    if (_userId == null) return;
+    final favRef = FirebaseFirestore.instance
+        .collection('favorites')
+        .doc(_userId)
+        .collection('items')
+        .doc(_favKey(widget.business));
+    if (_isFavorite) {
+      await favRef.delete();
+    } else {
+      await favRef.set(widget.business);
+    }
+    setState(() {
+      _isFavorite = !_isFavorite;
+    });
+  }
+
+  String _favKey(Map<String, dynamic> business) {
+    return (business["website"] ?? business["name"] ?? "").toString().replaceAll(RegExp(r'[^\w]'), '_');
+  }
+
+  // --- WEBSITE SHORTENING ---
+  String _shortWebsite(String url) {
+    if (url.isEmpty) return "";
+    try {
+      Uri uri = Uri.parse(url.startsWith('http') ? url : 'https://$url');
+      return uri.host.replaceFirst('www.', '');
+    } catch (_) {
+      return url.length > 22 ? url.substring(0, 20) + "..." : url;
+    }
+  }
+
+  Future<void> _launchWebsite(String url) async {
+    final uri = Uri.parse(url.startsWith('http') ? url : 'https://$url');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
   }
 
@@ -126,12 +192,11 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
         actions: [
           IconButton(
             icon: Icon(
-              Icons.bookmark_border,
+              _isFavorite ? Icons.bookmark : Icons.bookmark_border,
               color: Colors.white.withOpacity(0.9),
             ),
-            onPressed: () {
-              // TODO: Bookmark functionality
-            },
+            onPressed: _toggleFavorite,
+            tooltip: _isFavorite ? "Remove from Favorites" : "Add to Favorites",
           ),
         ],
       ),
@@ -371,23 +436,27 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                   const SizedBox(height: 16),
                   // Website
                   if ((widget.business["website"] ?? "").isNotEmpty)
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.language_outlined,
-                          color: Colors.white.withOpacity(0.5),
-                          size: 16,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          widget.business["website"],
-                          style: TextStyle(
-                            color: const Color(0xFF34D399),
-                            fontSize: 14,
-                            letterSpacing: 0.3,
+                    GestureDetector(
+                      onTap: () => _launchWebsite(widget.business["website"]),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.language_outlined,
+                            color: Colors.white.withOpacity(0.5),
+                            size: 16,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 8),
+                          Text(
+                            _shortWebsite(widget.business["website"]),
+                            style: TextStyle(
+                              color: const Color(0xFF34D399),
+                              fontSize: 14,
+                              letterSpacing: 0.3,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                 ],
               ),

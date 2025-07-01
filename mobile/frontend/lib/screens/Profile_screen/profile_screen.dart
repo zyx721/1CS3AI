@@ -6,10 +6,194 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // <-- Add this import
 import '../../services/drive.dart';
 import '../follow_list_screen.dart';
 import '../notification_screen/notification_screen.dart';
 import '../payment/payment_selection_dialog.dart';
+import '../new/compaign_list.dart'; // Import for DashboardPage and AppColors
+
+// Importing necessary components from compaign_list.dart for consistent styling
+// This assumes AppColors, _DashCard, _StatusPill, _SidebarOptionButton, _ProfessionalLineChart, _FavoriteBusinessCard
+// and DashboardPage are all defined within your compaign_list.dart file.
+
+// Transaction History Screen - Moved here for completeness, styled with AppColors
+class TransactionHistoryScreen extends StatelessWidget {
+  final String userId;
+
+  const TransactionHistoryScreen({Key? key, required this.userId}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.bgDark, // Compaign background
+      appBar: AppBar(
+        title: Text(
+          'Transaction History',
+          style: GoogleFonts.inter(
+            color: AppColors.textLight,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: AppColors.bgDark,
+        foregroundColor: AppColors.textLight,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.close, color: AppColors.textMuted),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('transactions')
+            .where('userId', isEqualTo: userId)
+            .orderBy('timestamp', descending: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.greenAccent), // Compaign accent color
+              ),
+            );
+          }
+
+          final transactions = snapshot.data!.docs;
+
+          if (transactions.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.history, size: 64, color: AppColors.textMuted.withOpacity(0.6)), // Muted icon
+                  const SizedBox(height: 16),
+                  Text(
+                    'No transactions yet.',
+                    style: GoogleFonts.inter(
+                      fontSize: 18,
+                      color: AppColors.textMuted, // Muted text
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: transactions.length,
+            itemBuilder: (context, index) {
+              final transaction = transactions[index].data() as Map<String, dynamic>;
+              final amount = transaction['amount']?.toDouble() ?? 0.0;
+              final type = transaction['type'] ?? '';
+              final timestamp = transaction['timestamp'] as Timestamp?;
+              final paymentMethod = transaction['paymentMethod'] ?? '';
+              final status = transaction['status'] ?? '';
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 0, // Flat design
+                color: AppColors.cardBg, // Compaign card background
+                child: Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: type == 'add_funds'
+                              ? AppColors.greenAccent.withOpacity(0.1) // Subtle accent background
+                              : AppColors.textMuted.withOpacity(0.1), // Muted background
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          type == 'add_funds'
+                              ? Icons.arrow_downward
+                              : Icons.arrow_upward,
+                          color: type == 'add_funds'
+                              ? AppColors.greenAccent // Accent color for income
+                              : AppColors.textMuted, // Muted color for outcome
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 18),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              type == 'add_funds'
+                                  ? 'Funds Added'
+                                  : 'Transfer',
+                              style: GoogleFonts.inter(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: AppColors.textLight, // Light text for main info
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            if (paymentMethod.isNotEmpty)
+                              Text(
+                                'via $paymentMethod',
+                                style: GoogleFonts.inter(
+                                  fontSize: 13,
+                                  color: AppColors.textMuted, // Muted text
+                                ),
+                              ),
+                            const SizedBox(height: 4),
+                            Text(
+                              timestamp != null
+                                  ? DateTime.fromMillisecondsSinceEpoch(
+                                          timestamp.millisecondsSinceEpoch)
+                                      .toLocal()
+                                      .toString()
+                                  : '',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: AppColors.textMuted.withOpacity(0.5), // Even more muted for timestamp
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            (type == 'add_funds' ? '+' : '-') +
+                                '${amount.toStringAsFixed(2)} DZD',
+                            style: GoogleFonts.inter(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: type == 'add_funds'
+                                  ? AppColors.greenAccent
+                                  : AppColors.textLight, // Accent for income, light for outcome
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          // Use _StatusPill for consistency
+                          StatusPill(
+                            status[0].toUpperCase() + status.substring(1),
+                            isSuccess: status == 'success',
+                            isTablet: MediaQuery.of(context).size.width > 600, // Pass isTablet for responsive pill size
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -24,20 +208,10 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   final GoogleDriveService _driveService = GoogleDriveService();
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   bool _isUploading = false;
-  bool _isEditingAbout = false;
-  final TextEditingController _aboutController = TextEditingController();
+  // Removed _isEditingAbout and _aboutController as they were not fully implemented in original snippet.
   final TextEditingController _amountController = TextEditingController();
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
-
-  // Enhanced color scheme
-  static const Color primaryGray = Color(0xFF424242);
-  static const Color accentGray = Color(0xFF757575);
-  static const Color lightGray = Color(0xFF9E9E9E);
-  static const Color surfaceGray = Color(0xFFF5F5F5);
-  static const Color cardGray = Color(0xFFFAFAFA);
-  static const Color successGreen = Color(0xFF4CAF50);
-  static const Color warningOrange = Color(0xFFFF9800);
 
   @override
   void initState() {
@@ -55,46 +229,49 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   @override
   void dispose() {
     _fadeController.dispose();
-    _aboutController.dispose();
     _amountController.dispose();
     super.dispose();
   }
 
-  Widget _buildStatItem(String title, String count, {VoidCallback? onTap}) {
+  // Adjusted to resemble _buildStatCard from DashboardPage
+  Widget _buildWalletBalanceCard(String title, String count, {VoidCallback? onTap, bool isTablet = false}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+        padding: EdgeInsets.all(isTablet ? 20 : 16),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          color: AppColors.cardBg, // Compaign card background
+          borderRadius: BorderRadius.circular(12),
+          // Subtle shadow to match dashboard cards
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              color: Colors.black.withOpacity(0.18),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
             ),
           ],
-          border: Border.all(color: Colors.grey[100]!),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              count,
-              style: GoogleFonts.inter(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: primaryGray,
-              ),
-            ),
-            const SizedBox(height: 4),
             Text(
               title,
               style: GoogleFonts.inter(
-                fontSize: 13,
-                color: lightGray,
-                fontWeight: FontWeight.w500,
+                fontSize: isTablet ? 14 : 12,
+                color: AppColors.textMuted, // Muted text
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              count,
+              style: GoogleFonts.inter(
+                fontSize: isTablet ? 32 : 28,
+                fontWeight: FontWeight.w600,
+                color: AppColors.greenAccent, // Highlight with accent color
+                height: 1.1,
               ),
             ),
           ],
@@ -103,59 +280,64 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
     );
   }
 
-  Widget _buildGradientButton({
+  // Re-designed button to match Compaign style
+  Widget _buildActionButton({
     required String text,
     required VoidCallback onPressed,
     required IconData icon,
-    Color? backgroundColor,
-    List<Color>? gradientColors,
-    double? fontSize, // <-- add this
+    bool isPrimary = true, // To distinguish between primary (filled) and secondary (outlined)
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: gradientColors != null 
-          ? LinearGradient(
-              colors: gradientColors,
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+    final bool isTablet = MediaQuery.of(context).size.width > 600;
+    return SizedBox(
+      width: double.infinity,
+      child: isPrimary
+          ? ElevatedButton.icon(
+              onPressed: onPressed,
+              icon: Icon(icon, size: isTablet ? 18 : 16, color: AppColors.bgDark), // <-- Use Icon instead of FaIcon for Material icons
+              label: Text(text),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.greenAccent,
+                foregroundColor: AppColors.bgDark, // Text color for primary button
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: isTablet ? 20 : 16, vertical: isTablet ? 14 : 12),
+                textStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: isTablet ? 16 : 14),
+              ).copyWith(
+                overlayColor: MaterialStateProperty.resolveWith<Color?>((states) {
+                  if (states.contains(MaterialState.hovered)) return AppColors.greenAccent.withOpacity(0.8); // Darker on hover
+                  return null;
+                }),
+                foregroundColor: MaterialStateProperty.resolveWith<Color?>((states) {
+                   if (states.contains(MaterialState.hovered)) return AppColors.bgDark;
+                   return AppColors.bgDark;
+                })
+              ),
             )
-          : backgroundColor == null 
-            ? LinearGradient(
-                colors: [accentGray, primaryGray],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
-            : null,
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: (backgroundColor ?? gradientColors?.first ?? accentGray).withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ElevatedButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon, size: 18),
-        label: Text(
-          text,
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.w600,
-            fontSize: fontSize ?? 14, // <-- use fontSize if provided
-          ),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          foregroundColor: Colors.white,
-          shadowColor: Colors.transparent,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      ),
+          : OutlinedButton.icon(
+              onPressed: onPressed,
+              icon: Icon(icon, size: isTablet ? 18 : 16, color: AppColors.textMuted), // <-- Use Icon instead of FaIcon
+              label: Text(text),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.textMuted, // Text color for secondary button
+                side: const BorderSide(color: AppColors.borderColor), // Border color
+                padding: EdgeInsets.symmetric(horizontal: isTablet ? 20 : 16, vertical: isTablet ? 14 : 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                textStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: isTablet ? 16 : 14),
+              ).copyWith(
+                  overlayColor: MaterialStateProperty.resolveWith<Color?>((states) {
+                    if (states.contains(MaterialState.hovered)) return AppColors.greenAccent.withOpacity(0.1);
+                    return null;
+                  }),
+                  foregroundColor: MaterialStateProperty.resolveWith<Color?>((states) {
+                     if (states.contains(MaterialState.hovered)) return AppColors.greenAccent;
+                     return AppColors.textMuted;
+                  })
+              ),
+            ),
     );
   }
 
@@ -178,7 +360,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error updating profile picture: $e'),
-              backgroundColor: Colors.redAccent,
+              backgroundColor: Colors.redAccent, // Keep red for error
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
@@ -231,75 +413,70 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       context: context,
       barrierDismissible: true,
       builder: (context) => Dialog(
+        backgroundColor: AppColors.cardBg, // Compaign dialog background
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Container(
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 children: [
-                  // Changed from green to gray
-                  Icon(Icons.add_circle, color: accentGray, size: 28),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Add Funds',
-                      style: GoogleFonts.inter(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: primaryGray,
-                      ),
-                    ),
-                  ),
+                  Icon(Icons.add_circle, color: AppColors.greenAccent, size: 28), // Accent color for icon
+                  const SizedBox(width: 12),
+      
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: Icon(Icons.close, color: Colors.grey),
+                    icon: Icon(Icons.close, color: AppColors.textMuted), // Muted close icon
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextField(
                 controller: _amountController,
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
+                style: GoogleFonts.inter(color: AppColors.textLight, fontSize: 16), // Light text input
                 decoration: InputDecoration(
                   labelText: 'Amount (DZD)',
-                  // Changed from green to gray
-                  prefixIcon: Icon(Icons.attach_money, color: accentGray),
+                  labelStyle: GoogleFonts.inter(color: AppColors.textMuted), // Muted label
+                  prefixIcon: Icon(Icons.attach_money, color: AppColors.textMuted), // Muted icon
+                  filled: true,
+                  fillColor: Colors.black.withOpacity(0.18), // Dark input background
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey[300]!),
+                    borderSide: const BorderSide(color: AppColors.borderColor), // Compaign border
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.borderColor), // Compaign border
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    // Changed from green to gray
-                    borderSide: BorderSide(color: accentGray, width: 2),
+                    borderSide: const BorderSide(color: AppColors.greenAccent, width: 2), // Accent focused border
                   ),
-                  filled: true,
-                  fillColor: Colors.grey[50],
                 ),
-                style: GoogleFonts.inter(fontSize: 16),
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               Row(
                 children: [
                   Expanded(
-                    child: TextButton(
+                    child: OutlinedButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: Text(
-                        'Cancel',
-                        style: GoogleFonts.inter(color: lightGray),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.textMuted, // Muted text for cancel
+                        side: const BorderSide(color: AppColors.borderColor),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        textStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 14),
                       ),
+                      child: const Text('Cancel'),
                     ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
-                    child: _buildGradientButton(
-                      // Add space before "Continue" if missing
+                    child: _buildActionButton( // Use the new action button for consistency
                       text: "Continue",
                       icon: Icons.payment,
-                      // Changed from green to gray
-                      gradientColors: [accentGray, primaryGray],
                       onPressed: () {
                         final amount = double.tryParse(_amountController.text);
                         if (amount != null && amount > 0) {
@@ -314,16 +491,14 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('Please enter a valid amount'),
-                              // Changed from orange to gray
-                              backgroundColor: accentGray,
+                              backgroundColor: Colors.orange, // Warning color
                               behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                             ),
                           );
                         }
                       },
-                      // Add this parameter to override the font size for "Continue"
-                      // (You need to update _buildGradientButton to accept this parameter)
-                      fontSize: 9,
+                      isPrimary: true,
                     ),
                   ),
                 ],
@@ -346,393 +521,218 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final bool isTablet = MediaQuery.of(context).size.width > 600;
+    final double padding = isTablet ? 32.0 : 20.0; // Consistent padding
+
     return Scaffold(
-      backgroundColor: surfaceGray,
-      body: CustomScrollView(
-        slivers: [
-          // Modern App Bar
-          SliverAppBar(
-            expandedHeight: 120,
-            floating: false,
-            pinned: true,
-            backgroundColor: Colors.white,
-            elevation: 0,
-            flexibleSpace: FlexibleSpaceBar(
-              titlePadding: const EdgeInsets.only(left: 0, bottom: 16, right: 0, top: 0),
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 20),
-                    child: Text(
-                      "Profile",
-                      style: GoogleFonts.inter(
-                        color: primaryGray,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.only(right: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: IconButton(
-                          icon: Icon(Icons.notifications_outlined, color: primaryGray, size: 22),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => NotificationScreen()),
-                            );
-                          },
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.only(right: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: IconButton(
-                          icon: Icon(Icons.logout, color: primaryGray, size: 22),
-                          onPressed: handleLogout,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              centerTitle: false,
-            ),
+      backgroundColor: AppColors.bgDark, // Compaign background color
+      appBar: AppBar(
+        backgroundColor: AppColors.bgDark, // Compaign app bar background
+        foregroundColor: AppColors.textLight, // Compaign text color for app bar
+        elevation: 0,
+        title: Text(
+          "Profile",
+          style: GoogleFonts.inter(
+            color: AppColors.textLight,
+            fontWeight: FontWeight.bold,
+            fontSize: 24, // Larger title to match Dashboard header
           ),
-          // Content
-          SliverToBoxAdapter(
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: StreamBuilder<DocumentSnapshot>(
-                stream: firestore.collection('users').doc(user?.uid).snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return Container(
-                      height: MediaQuery.of(context).size.height * 0.7,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(accentGray),
-                        ),
-                      ),
-                    );
-                  }
-
-                  final userData = snapshot.data!.data() as Map<String, dynamic>;
-                  final interests = (userData['interests'] as List<dynamic>?) ?? [];
-                  final aboutMe = userData['aboutMe'] as String? ?? "Tell the world about yourself...";
-
-                  final walletBalance = (userData['wallet_balance'] as num?)?.toDouble() ?? 0.0;
-
-                  return Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        // Enhanced Profile Header Card
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(24),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.06),
-                                blurRadius: 20,
-                                spreadRadius: 0,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(28),
-                            child: Column(
-                              children: [
-                                // Enhanced Avatar Section
-                                Stack(
-                                  children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withOpacity(0.1),
-                                            blurRadius: 20,
-                                            offset: const Offset(0, 8),
-                                          ),
-                                        ],
-                                      ),
-                                      child: CircleAvatar(
-                                        radius: 65,
-                                        backgroundColor: Colors.grey[200],
-                                        backgroundImage: user?.photoURL != null 
-                                          ? NetworkImage(user!.photoURL!) 
-                                          : null,
-                                        child: _isUploading 
-                                          ? CircularProgressIndicator(
-                                              valueColor: AlwaysStoppedAnimation<Color>(accentGray),
-                                            )
-                                          : user?.photoURL == null 
-                                            ? Icon(Icons.person, size: 50, color: lightGray)
-                                            : null,
-                                      ),
-                                    ),
-                                    Positioned(
-                                      bottom: 4,
-                                      right: 4,
-                                      child: GestureDetector(
-                                        onTap: _updateProfilePicture,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: primaryGray,
-                                            shape: BoxShape.circle,
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black.withOpacity(0.2),
-                                                blurRadius: 8,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
-                                          ),
-                                          padding: const EdgeInsets.all(8),
-                                          child: Icon(
-                                            Icons.camera_alt,
-                                            color: Colors.white,
-                                            size: 18,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 20),
-                                
-                                // Enhanced Name
-                                Text(
-                                  user?.displayName ?? 'User Name',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 26,
-                                    fontWeight: FontWeight.bold,
-                                    color: primaryGray,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 6),
-                                
-                                // Email
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[100],
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text(
-                                    user?.email ?? '',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 14,
-                                      color: lightGray,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 40), // Bottom padding
-                      ],
-                    ),);
-                },
-              ),
+        ),
+        actions: [ 
+          // Logout Button
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.borderColor),
+            ),
+            child: IconButton(
+              icon: Icon(Icons.logout, color: AppColors.textLight, size: 22),
+              onPressed: handleLogout,
             ),
           ),
         ],
       ),
-    );
-  }
-}
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: StreamBuilder<DocumentSnapshot>(
+          stream: firestore.collection('users').doc(user?.uid).snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.greenAccent),
+                ),
+              );
+            }
 
-// Transaction History Screen
-class TransactionHistoryScreen extends StatelessWidget {
-  final String userId;
+            final userData = snapshot.data!.data() as Map<String, dynamic>;
+            final walletBalance = (userData['wallet_balance'] as num?)?.toDouble() ?? 0.0;
 
-  const TransactionHistoryScreen({Key? key, required this.userId}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Transaction History'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        elevation: 0,
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('transactions')
-            .where('userId', isEqualTo: userId)
-            .orderBy('timestamp', descending: true)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
-          }
-
-          final transactions = snapshot.data!.docs;
-
-          if (transactions.isEmpty) {
-            return Center(
+            return SingleChildScrollView( // Changed from CustomScrollView for simplicity with new AppBar
+              padding: EdgeInsets.all(padding),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.history, size: 64, color: Colors.grey[400]),
-                  SizedBox(height: 16),
-                  Text(
-                    'No transactions yet',
-                    style: GoogleFonts.inter(
-                      fontSize: 18,
-                      color: Colors.grey[600],
+                  // Profile Header Card (Compaign style)
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.cardBg, // Compaign card background
+                      borderRadius: BorderRadius.circular(18), // Larger radius for a softer look
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.18), // Subtle shadow
+                          blurRadius: 18,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return ListView.builder(
-            padding: EdgeInsets.all(16),
-            itemCount: transactions.length,
-            itemBuilder: (context, index) {
-              final transaction = transactions[index].data() as Map<String, dynamic>;
-              final amount = transaction['amount']?.toDouble() ?? 0.0;
-              final type = transaction['type'] ?? '';
-              final timestamp = transaction['timestamp'] as Timestamp?;
-              final paymentMethod = transaction['paymentMethod'] ?? '';
-              final status = transaction['status'] ?? '';
-
-              return Card(
-                margin: EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 2,
-                child: Padding(
-                  padding: const EdgeInsets.all(18),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: type == 'add_funds'
-                              ? Colors.green[50]
-                              : Colors.blue[50],
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          type == 'add_funds'
-                              ? Icons.arrow_downward
-                              : Icons.arrow_upward,
-                          color: type == 'add_funds'
-                              ? Colors.green
-                              : Colors.blue,
-                          size: 22,
-                        ),
-                      ),
-                      SizedBox(width: 18),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              type == 'add_funds'
-                                  ? 'Funds Added'
-                                  : 'Transfer',
-                              style: GoogleFonts.inter(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              paymentMethod.isNotEmpty
-                                  ? 'via $paymentMethod'
-                                  : '',
-                              style: GoogleFonts.inter(
-                                fontSize: 13,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              timestamp != null
-                                  ? DateTime.fromMillisecondsSinceEpoch(
-                                          timestamp.millisecondsSinceEpoch)
-                                      .toLocal()
-                                      .toString()
-                                  : '',
-                              style: GoogleFonts.inter(
-                                fontSize: 12,
-                                color: Colors.grey[400],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                    child: Padding(
+                      padding: const EdgeInsets.all(28),
+                      child: Column(
                         children: [
-                          Text(
-                            (type == 'add_funds' ? '+' : '-') +
-                                '${amount.toStringAsFixed(2)} DZD',
-                            style: GoogleFonts.inter(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: type == 'add_funds'
-                                  ? Colors.green
-                                  : Colors.blue,
-                            ),
+                          // Avatar Section
+                          Stack(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 8),
+                                    ),
+                                  ],
+                                ),
+                                child: CircleAvatar(
+                                  radius: 65,
+                                  backgroundColor: Colors.black.withOpacity(0.10), // Darker placeholder
+                                  backgroundImage: user?.photoURL != null
+                                      ? NetworkImage(user!.photoURL!)
+                                      : null,
+                                  child: _isUploading
+                                      ? CircularProgressIndicator(
+                                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.greenAccent),
+                                        )
+                                      : user?.photoURL == null
+                                          ? Icon(Icons.person, size: 50, color: AppColors.textMuted) // Muted icon
+                                          : null,
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 4,
+                                right: 4,
+                                child: GestureDetector(
+                                  onTap: _updateProfilePicture,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: AppColors.greenAccent, // Accent color for camera button
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.2),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    padding: const EdgeInsets.all(8),
+                                    child: const Icon(
+                                      Icons.camera_alt,
+                                      color: AppColors.bgDark, // Dark icon for contrast
+                                      size: 18,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 20),
+
+                          // Name
+                          Text(
+                            user?.displayName ?? 'User Name',
+                            style: GoogleFonts.inter(
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textLight, // Light text
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 6),
+
+                          // Email
                           Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: status == 'success'
-                                  ? Colors.green[100]
-                                  : status == 'pending'
-                                      ? Colors.orange[100]
-                                      : Colors.red[100],
-                              borderRadius: BorderRadius.circular(8),
+                              color: Colors.black.withOpacity(0.12), // Subtle dark background
+                              borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              status[0].toUpperCase() +
-                                  status.substring(1),
+                              user?.email ?? '',
                               style: GoogleFonts.inter(
-                                fontSize: 12,
-                                color: status == 'success'
-                                    ? Colors.green
-                                    : status == 'pending'
-                                        ? Colors.orange
-                                        : Colors.red,
-                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: AppColors.textMuted, // Muted text
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              );
-            },
-          );
-        },
+                  const SizedBox(height: 20),
+                  // Settings Button (Compaign style)
+                  _buildActionButton(
+                    text: "Settings",
+                    icon: Icons.settings,
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => FractionallySizedBox(
+                          heightFactor: 0.95,
+                          child: DashboardPage.buildSettingsSidebar(context),
+                        ),
+                      );
+                    },
+                    isPrimary: false, // Outlined style
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+// Add this widget if _StatusPill is not public in compaign_list.dart
+class StatusPill extends StatelessWidget {
+  final String text;
+  final bool isSuccess;
+  final bool isTablet;
+  const StatusPill(this.text, {this.isSuccess = false, required this.isTablet});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: isTablet ? 12 : 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: isSuccess ? AppColors.greenAccent.withOpacity(0.1) : Colors.transparent,
+        borderRadius: BorderRadius.circular(50),
+      ),
+      child: Text(
+        text,
+        style: GoogleFonts.inter(
+          fontSize: isTablet ? 12 : 11,
+          fontWeight: FontWeight.w500,
+          color: isSuccess ? AppColors.greenAccent : AppColors.textMuted,
+        ),
       ),
     );
   }

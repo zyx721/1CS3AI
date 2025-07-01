@@ -1,50 +1,58 @@
 [
     {
-        "niche": "Manufacturer of Automated Poultry Farming Equipment",
-        "description": "Zhengzhou Livi Machinery Manufacturing CO.,LTD. designs, manufactures, and supplies fully automated poultry cage systems and related equipment for large-scale chicken farms.",
-        "email": "info@livichickencage.com",
-        "phone": "1731975088",
-        "company_name": "Zhengzhou Livi Machinery Manufacturing CO.,LTD.",
-        "url": "https://www.livichickencage.com/Fully-Automated-Layer-Poultry-Cage-System-for-30000-Birds-Farm-in-Algeria.html"
-    },
-    {
-        "niche": "Food and Beverage Industry Market Intelligence and News",
-        "description": "EssFeed provides essential news, market reports, and professional tools for the global food and beverage industry, including market indices, contact directories, and premium research.",
+        "niche": "Tech Job Board and Media Platform",
+        "description": "Built In is a platform that publishes articles, lists B2B companies, and provides job listings primarily for the tech industry.",
         "email": null,
         "phone": null,
-        "company_name": "EssFeed",
-        "url": "https://essfeed.com/top-10-poultry-importers-in-algeria-top-10-poultry-importers-in-algeria/"
+        "url": "https://builtin.com/articles/b2b-companies",
+        "company_name": "Built In"
     },
     {
-        "niche": "Agricultural B2B Media Platform",
-        "description": "The Poultry Site is an online platform providing news, technical articles, market insights, and resources for the global poultry and broader livestock industries.",
+        "niche": "Virtual Assistant Services for B2B",
+        "description": "Stealth Agents supports B2B companies with expert virtual assistants trained in lead generation, customer support, and back-office operations.",
         "email": null,
-        "phone": null,
-        "company_name": "The Poultry Site",
-        "url": "https://www.thepoultrysite.com/articles/maximizing-yield-key-to-higher-returns"
+        "phone": "(888) 693-1045",
+        "company_name": "Stealth Agents",
+        "url": "https://stealthagents.com/ultimate-list-of-b2b-industries__trashed/"
     },
     {
-        "niche": "Open Access Scientific Publisher",
-        "description": "IntechOpen is an Open Access publisher that makes scientific research freely available and easy to access for scientists worldwide, prioritizing academic needs over commercial interests.",
-        "email": "orders@intechopen.com",
-        "phone": null,
-        "company_name": "IntechOpen",
-        "url": "https://www.intechopen.com/chapters/1201529"
+        "niche": "Digital Media Production, Marketing & Training",
+        "description": "Ahmed Afridi offers a range of digital services including film making, equipment rental, video direction, digital marketing, and training workshops.",
+        "email": "info@ahmedafridi.com",
+        "phone": "+92 300 426 9924",
+        "url": "https://ahmedafridi.com/top-100-b2b-companies-list/",
+        "company_name": "Ahmed Afridi"
     },
     {
-        "niche": null,
-        "description": null,
+        "niche": "Directory of B2B Market Research Companies",
+        "description": "This platform serves as a directory and resource for businesses seeking B2B market research companies, detailing their services, specialities, and industry expertise.",
         "email": null,
-        "phone": null,
-        "url": "https://www.alibaba.com/showroom/algeria-poultry-farm.html",
-        "company_name": null
-    },
-    {
-        "niche": null,
-        "description": null,
-        "email": null,
-        "phone": null,
+        "phone": "(212) 849-2752",
         "company_name": null,
-        "url": "https://agra.org/wp-content/uploads/2017/09/Final-AASR-2017-Aug-28.pdf"
+        "url": "https://www.greenbook.org/market-research-firms/b2b-industry"
+    },
+    {
+        "niche": "B2B marketing agency specializing in web design, content marketing, and branding for industries including Technology, Fintech, Biotech, AI & ML, Software, Industrial, Engineering, Consulting, and Energy.",
+        "description": "Bop Design is a B2B marketing agency that provides creative and data-driven services, including web design, content marketing, and branding, to help businesses in various industries thrive.",
+        "email": null,
+        "phone": "888.670.7803",
+        "url": "https://www.bopdesign.com/bop-blog/2024/08/top-b2b-brands-list/",
+        "company_name": "Bop Design"
+    },
+    {
+        "niche": "B2B Company Ranking and Directory Service",
+        "description": "SuperbCompanies provides a platform for ranking and listing top business services companies, offering a curated collection of industry leaders.",
+        "email": null,
+        "phone": null,
+        "url": "https://superbcompanies.com/categories/business-services-companies/",
+        "company_name": "SuperbCompanies"
+    },
+    {
+        "niche": "Business Brokerage for B2B Services Companies",
+        "description": "Synergy Business Brokers is a business brokerage firm that facilitates the buying and selling of profitable B2B services companies across various industries.",
+        "email": null,
+        "phone": "(888)-750-5950",
+        "url": "https://synergybb.com/businesses-for-sale/b2b-services/",
+        "company_name": "Synergy Business Brokers"
     }
 ]
