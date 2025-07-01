@@ -416,11 +416,21 @@
                         description: document.getElementById('description').value || ""
                     };
 
-                    // 3. Save to LocalStorage and optional backend (as in original code)
+                    // 3. Save to LocalStorage
                     localStorage.setItem('agent_info', JSON.stringify(BUSINESS_INFO));
 
-                    // 4. Finally, redirect to the dashboard
-                    console.log("Setup complete. Redirecting to dashboard.");
+                    // 4. Save to backend (business_config.json)
+                    try {
+                        await fetch('/save_business_config', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(BUSINESS_INFO)
+                        });
+                    } catch (err) {
+                        console.error("Failed to save business config to backend:", err);
+                    }
+
+                    // 5. Redirect to dashboard
                     window.location.href = "dashboard.html";
                 };
 
