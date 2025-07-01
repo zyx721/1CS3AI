@@ -3,7 +3,8 @@ import 'dart:ui';
 import 'business.dart'; // Add this import if not already present
 
 class MatchesScreen extends StatefulWidget {
-  const MatchesScreen({super.key});
+  final List<Map<String, dynamic>> matches;
+  const MatchesScreen({super.key, required this.matches});
 
   @override
   State<MatchesScreen> createState() => _MatchesScreenState();
@@ -11,44 +12,7 @@ class MatchesScreen extends StatefulWidget {
 
 class _MatchesScreenState extends State<MatchesScreen>
     with TickerProviderStateMixin {
-  final List<Map<String, dynamic>> matches = [
-    {
-      "sector": "Technology",
-      "name": "Tech Solutions Inc.",
-      "website": "techsolutions.com",
-      "match": 95,
-      "logo": "assets/logo1.png"
-    },
-    {
-      "sector": "Finance",
-      "name": "Global Investments Ltd.",
-      "website": "globalinvestments.com",
-      "match": 92,
-      "logo": "assets/logo2.png"
-    },
-    {
-      "sector": "Healthcare",
-      "name": "Health Innovations Corp.",
-      "website": "healthinnovations.com",
-      "match": 88,
-      "logo": "assets/logo3.png"
-    },
-    {
-      "sector": "Retail",
-      "name": "Retail Dynamics LLC",
-      "website": "retaildynamics.com",
-      "match": 85,
-      "logo": "assets/logo4.png"
-    },
-    {
-      "sector": "Manufacturing",
-      "name": "Precision Manufacturing Co.",
-      "website": "precisionmfg.com",
-      "match": 82,
-      "logo": "assets/logo5.png"
-    },
-  ];
-
+  late List<Map<String, dynamic>> matches;
   final List<bool> _visible = [];
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -56,6 +20,7 @@ class _MatchesScreenState extends State<MatchesScreen>
   @override
   void initState() {
     super.initState();
+    matches = widget.matches;
     _visible.addAll(List.generate(matches.length, (_) => false));
     
     _fadeController = AnimationController(
@@ -143,7 +108,7 @@ class _MatchesScreenState extends State<MatchesScreen>
         ),
         centerTitle: true,
         title: Text(
-          "Business Matches",
+          "Business Matches (${matches.length})",
           style: TextStyle(
             color: Colors.white.withOpacity(0.95),
             fontWeight: FontWeight.w300,
@@ -197,9 +162,9 @@ class _MatchesScreenState extends State<MatchesScreen>
                         ),
                       ],
                     ),
-                  ),
-                );
-              },
+                  ),);
+                },
+              
             ),
           ),
           // Arrow bar at the bottom
@@ -246,7 +211,7 @@ class _MatchesScreenState extends State<MatchesScreen>
   }
 
   Widget _buildMatchCard(Map<String, dynamic> match, int index) {
-    final matchScore = match["match"] as int;
+    final matchScore = (match["match"] ?? 80) as int;
     final matchColor = _getMatchColor(matchScore);
     final scoreOutOf5 = (matchScore / 20).clamp(0, 5).toStringAsFixed(1);
 
@@ -302,25 +267,26 @@ class _MatchesScreenState extends State<MatchesScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: matchColor.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        match["sector"],
-                        style: TextStyle(
-                          color: matchColor,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.5,
+                    if (match["sector"] != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: matchColor.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          match["sector"],
+                          style: TextStyle(
+                            color: matchColor,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.5,
+                          ),
                         ),
                       ),
-                    ),
                     const SizedBox(height: 8),
                     Text(
-                      match["name"],
+                      match["name"] ?? "",
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.95),
                         fontSize: 16,
@@ -369,25 +335,36 @@ class _MatchesScreenState extends State<MatchesScreen>
           const SizedBox(height: 16),
           
           // Website Info
-          Row(
-            children: [
-              Icon(
-                Icons.language_outlined,
-                color: Colors.white.withOpacity(0.5),
-                size: 14,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                match["website"],
+          if ((match["website"] ?? "").isNotEmpty)
+            Row(
+              children: [
+                Icon(
+                  Icons.language_outlined,
+                  color: Colors.white.withOpacity(0.5),
+                  size: 14,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  match["website"],
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 13,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
+            ),
+          if ((match["description"] ?? "").isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                match["description"],
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withOpacity(0.6),
                   fontSize: 13,
-                  letterSpacing: 0.3,
                 ),
               ),
-            ],
-          ),
-          
+            ),
           const SizedBox(height: 16),
           
           // Action Button

@@ -110,7 +110,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
 
   @override
   Widget build(BuildContext context) {
-    final matchScore = widget.business["match"] as int;
+    final matchScore = (widget.business["match"] ?? 80) as int;
     final matchColor = _getMatchColor(matchScore);
     final scoreOutOf5 = (matchScore / 20).clamp(0, 5).toStringAsFixed(1);
 
@@ -161,25 +161,29 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Hero Section
                         _buildHeroSection(matchColor, scoreOutOf5),
-
                         const SizedBox(height: 24),
-
-                        // Quick Stats
-                        _buildQuickStats(),
-
-                        const SizedBox(height: 24),
-
-                        // About Section
                         _buildAboutSection(),
-
                         const SizedBox(height: 24),
-
-                        // Contact Information
                         _buildContactInfo(),
-
                         const SizedBox(height: 24),
+                        // Show extra info if available
+                        if ((widget.business["prospects"] ?? 0) > 0)
+                          _buildGlassContainer(
+                            child: Row(
+                              children: [
+                                Icon(Icons.people, color: Colors.white.withOpacity(0.8)),
+                                const SizedBox(width: 8),
+                                Text(
+                                  "Prospects: ${widget.business["prospects"]}",
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -233,7 +237,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(22),
                       child: Image.asset(
-                        widget.business["logo"],
+                        widget.business["logo"] ?? "",
                         width: 100,
                         height: 100,
                         fit: BoxFit.cover,
@@ -252,7 +256,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                   
                   // Company Name
                   Text(
-                    widget.business["name"],
+                    widget.business["name"] ?? "",
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.95),
                       fontSize: 24,
@@ -265,26 +269,27 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                   const SizedBox(height: 8),
                   
                   // Sector Badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: matchColor.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: matchColor.withOpacity(0.3),
-                        width: 1,
+                  if (widget.business["sector"] != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: matchColor.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: matchColor.withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        widget.business["sector"],
+                        style: TextStyle(
+                          color: matchColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
-                    child: Text(
-                      widget.business["sector"],
-                      style: TextStyle(
-                        color: matchColor,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
                   
                   const SizedBox(height: 20),
                   
@@ -329,47 +334,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
     );
   }
 
-  Widget _buildQuickStats() {
-    return TweenAnimationBuilder<double>(
-      duration: const Duration(milliseconds: 1400),
-      tween: Tween(begin: 0.0, end: _showContent ? 1.0 : 0.0),
-      curve: Curves.easeOutQuart,
-      builder: (context, value, child) {
-        return Transform.translate(
-          offset: Offset(0, 20 * (1 - value)),
-          child: Opacity(
-            opacity: value,
-            child: _buildGlassContainer(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _buildStatItem("Founded", "2018"),
-                  ),
-                  Container(
-                    width: 1,
-                    height: 40,
-                    color: Colors.white.withOpacity(0.1),
-                  ),
-                  Expanded(
-                    child: _buildStatItem("Employees", "150-500"),
-                  ),
-                  Container(
-                    width: 1,
-                    height: 40,
-                    color: Colors.white.withOpacity(0.1),
-                  ),
-                  Expanded(
-                    child: _buildStatItem("Revenue", "\$10M+"),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
+  
   Widget _buildAboutSection() {
     return TweenAnimationBuilder<double>(
       duration: const Duration(milliseconds: 1600),
@@ -395,7 +360,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    "Leading provider of innovative technology solutions for businesses worldwide. Specializing in cloud infrastructure, AI-powered analytics, and enterprise software development with a focus on scalability and security.",
+                    widget.business["description"] ?? "No description available.",
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.7),
                       fontSize: 14,
@@ -404,24 +369,26 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.language_outlined,
-                        color: Colors.white.withOpacity(0.5),
-                        size: 16,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        widget.business["website"],
-                        style: TextStyle(
-                          color: const Color(0xFF34D399),
-                          fontSize: 14,
-                          letterSpacing: 0.3,
+                  // Website
+                  if ((widget.business["website"] ?? "").isNotEmpty)
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.language_outlined,
+                          color: Colors.white.withOpacity(0.5),
+                          size: 16,
                         ),
-                      ),
-                    ],
-                  ),
+                        const SizedBox(width: 8),
+                        Text(
+                          widget.business["website"],
+                          style: TextStyle(
+                            color: const Color(0xFF34D399),
+                            fontSize: 14,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),
@@ -455,13 +422,18 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                     ),
                   ),
                   const SizedBox(height: 20),
-                  _buildContactItem(Icons.location_on_outlined, "San Francisco, CA"),
-                  const SizedBox(height: 12),
-                  _buildContactItem(Icons.phone_outlined, "+1 (555) 123-4567"),
-                  const SizedBox(height: 12),
-                  _buildContactItem(Icons.email_outlined, "contact@techsolutions.com"),
-                  const SizedBox(height: 12),
-                  _buildContactItem(Icons.business_outlined, "Enterprise & B2B"),
+                  // Location
+                  if ((widget.business["location"] ?? "").isNotEmpty)
+                    _buildContactItem(Icons.location_on_outlined, widget.business["location"]),
+                  // Phone
+                  if ((widget.business["phone"] ?? "").isNotEmpty)
+                    _buildContactItem(Icons.phone_outlined, widget.business["phone"]),
+                  // Email
+                  if ((widget.business["email"] ?? "").isNotEmpty)
+                    _buildContactItem(Icons.email_outlined, widget.business["email"]),
+                  // Sector
+                  if ((widget.business["sector"] ?? "").isNotEmpty)
+                    _buildContactItem(Icons.business_outlined, widget.business["sector"]),
                 ],
               ),
             ),
@@ -470,7 +442,6 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
       },
     );
   }
-
 
   Widget _buildStatItem(String label, String value) {
     return Column(

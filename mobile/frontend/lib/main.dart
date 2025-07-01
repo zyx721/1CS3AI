@@ -95,7 +95,7 @@ class MyApp extends StatelessWidget {
         '/fill-profile': (context) => const FillProfileScreen(),
         '/ai_scanning': (context) => const AIScanningScreen(), 
         '/lead': (context) => const AccountSetupScreen(),
-        '/matches': (context) => const MatchesScreen(),
+        '/matches': (context) => const MatchesScreen(matches: []), // <-- Provide empty list as default
       },
     );
   }
@@ -110,7 +110,7 @@ class MyApp extends StatelessWidget {
       case '/lead':
         return const AccountSetupScreen();
       case '/matches':
-        return const MatchesScreen();
+        return const MatchesScreen(matches: []);
       default:
         return const LoginScreen();
     }
