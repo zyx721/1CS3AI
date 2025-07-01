@@ -529,30 +529,30 @@
 
         /* --- NEW: Terminal Debug Styles --- */
         .terminal-debug {
-    background: #18181a;
-    color: #a6e22e;
-    font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
-    font-size: 13px;
-    border-radius: 10px;
-    padding: 18px 16px;
-    margin-bottom: 12px;
-    min-height: 120px;
-    max-height: 220px;
-    overflow-y: auto;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.13);
-    border: 1px solid var(--border-color);
-    line-height: 1.6;
-    display: none;
-    white-space: pre-wrap;
-}
-.terminal-debug.active {
-    display: block;
-    animation: fadeIn 0.2s;
-}
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
+            background: #18181a;
+            color: #a6e22e;
+            font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+            font-size: 13px;
+            border-radius: 10px;
+            padding: 18px 16px;
+            margin-bottom: 12px;
+            min-height: 120px;
+            max-height: 220px;
+            overflow-y: auto;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.13);
+            border: 1px solid var(--border-color);
+            line-height: 1.6;
+            display: none;
+            white-space: pre-wrap;
+        }
+        .terminal-debug.active {
+            display: block;
+            animation: fadeIn 0.2s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -563,12 +563,11 @@
             <a href="#" class="nav-link active" title="Dashboard">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
             </a>
-            <a href="#" class="nav-link" title="Leads">
+            <!-- --- MODIFIED: Leads icon links to a dedicated page --- -->
+            <a href="leads.html" class="nav-link" title="Leads">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
             </a>
-            <a href="#" class="nav-link" title="Analytics">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"></path><path d="M18 20V4"></path><path d="M6 20V16"></path></svg>
-            </a>
+            <!-- --- REMOVED: Analytics icon --- -->
         </div>
         <!-- --- NEW: Settings Button in Nav --- -->
         <button id="settingsBtn" class="nav-settings-btn" title="Agent Settings">
@@ -597,6 +596,19 @@
                         <div class="overview-card"><p class="label">New Leads Found</p><p class="value" id="newLeads">-</p></div>
                     </section>
                     <div class="dashboard-main-layout">
+                        <!-- AI Calling Progress Section (static UI only) -->
+                        <section id="aiCallingProgressSection" class="dash-card" style="margin-bottom: 20px;">
+                            <div class="dash-card-header" style="display: flex; align-items: center; gap: 10px;">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--green-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07A19.5 19.5 0 0 1 3.07 8.63 19.86 19.86 0 0 1 0 2.18 2 2 0 0 1 2.18 0h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.68 2.35a2 2 0 0 1-.45 2.11l-1.27 1.27a16 16 0 0 0 6.29 6.29l1.27-1.27a2 2 0 0 1 2.11-.45c.75.32 1.54.55 2.35.68A2 2 0 0 1 22 16.92z"/></svg>
+                                <h3 style="margin:0;">AI Calling Progress</h3>
+                            </div>
+                            <div id="aiCallingProgressBarWrapper" style="margin: 18px 0 8px 0;">
+                                <div style="background:rgba(255,255,255,0.06);border-radius:8px;height:18px;width:100%;overflow:hidden;">
+                                    <div id="aiCallingProgressBar" style="height:100%;width:60%;background:linear-gradient(90deg,var(--green-accent),#b6e2a1);transition:width 0.4s;"></div>
+                                </div>
+                                <div id="aiCallingProgressText" style="margin-top:8px;font-size:14px;color:var(--text-muted);font-weight:500;">AI is calling leads... (Demo UI only)</div>
+                            </div>
+                        </section>
                         <section class="dash-card">
                             <div class="dash-card-header"><h3>Performance Over Time (Last 30 Days)</h3></div>
                             <div class="chart-wrapper">
@@ -609,23 +621,27 @@
                             </div>
                         </section>
                         <section class="dash-card">
-                            <div class="dash-card-header"><h3>Lead Search Results</h3></div>
+                             <!-- --- MODIFIED: Header for Top 3 Leads preview --- -->
+                            <div class="dash-card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                <h3>Top 3 Leads</h3>
+                                <a href="leads.html" style="color: var(--green-accent); text-decoration: none; font-size: 14px; font-weight: 500;">View All →</a>
+                            </div>
                             <!-- --- NEW: Terminal Debug Output --- -->
-    <div id="agentDebugTerminal" class="terminal-debug"></div>
-    <div class="table-container">
-        <table class="results-table" id="leadsTable">
-            <thead>
-                <tr>
-                    <th>Business Name</th>
-                    <th>Contact</th>
-                    <th>Status</th>
-                    <!-- --- NEW: Call Icon Column --- -->
-                    <th style="width:40px;text-align:center;">Call</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
+                            <div id="agentDebugTerminal" class="terminal-debug"></div>
+                            <div class="table-container">
+                                <table class="results-table" id="leadsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Business Name</th>
+                                            <th>Contact</th>
+                                            <th>Status</th>
+                                            <!-- --- NEW: Call Icon Column --- -->
+                                            <th style="width:40px;text-align:center;">Call</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </section>
                     </div>
                 </main>
@@ -661,8 +677,6 @@
             <!-- --- End of Toggles --- -->
 
             <button type="button" class="sidebar-option-btn" id="editAgentInfoBtn">Edit Agent Information</button>
-            <button type="button" class="sidebar-option-btn" id="changePasswordBtn">Change Password</button>
-            <button type="button" class="sidebar-option-btn" id="notificationSettingsBtn">Notification Preferences</button>
             <button type="button" class="sidebar-option-btn" id="exportDataBtn">Export Data</button>
         </div>
         <form id="sidebarSettingsForm" autocomplete="off" style="display:none;">
@@ -732,19 +746,19 @@
         const agentDebugTerminal = document.getElementById('agentDebugTerminal');
 
         // --- NEW: Debug Terminal Functions ---
-function clearAgentDebug() {
-    agentDebugTerminal.textContent = '';
-    agentDebugTerminal.classList.remove('active');
-    agentDebugActive = false;
-}
-function showAgentDebug() {
-    agentDebugTerminal.classList.add('active');
-    agentDebugActive = true;
-}
-function appendAgentDebug(line) {
-    agentDebugTerminal.textContent += (agentDebugTerminal.textContent ? '\n' : '') + line;
-    agentDebugTerminal.scrollTop = agentDebugTerminal.scrollHeight;
-}
+        function clearAgentDebug() {
+            agentDebugTerminal.textContent = '';
+            agentDebugTerminal.classList.remove('active');
+            agentDebugActive = false;
+        }
+        function showAgentDebug() {
+            agentDebugTerminal.classList.add('active');
+            agentDebugActive = true;
+        }
+        function appendAgentDebug(line) {
+            agentDebugTerminal.textContent += (agentDebugTerminal.textContent ? '\n' : '') + line;
+            agentDebugTerminal.scrollTop = agentDebugTerminal.scrollHeight;
+        }
 
         // --- NEW: Show loading in leads table ---
         function showLeadsLoading() {
@@ -776,28 +790,55 @@ function appendAgentDebug(line) {
             showLeadsLoading();
             showAgentDebug();
             agentDebugTerminal.textContent = '';
-            // Use SSE for real-time debug
-            let finished = false;
+            // Show AI Calling Progress section
+            const aiSection = document.getElementById('aiCallingProgressSection');
+            if (aiSection) aiSection.style.display = '';
+            updateAiCallingProgress(0, 'Starting AI calls...');
+            let totalCalls = 0;
+            let completedCalls = 0;
             return new Promise((resolve) => {
                 const evtSource = new EventSource("http://localhost:8000/run-agent-stream");
                 evtSource.onmessage = async function(event) {
                     appendAgentDebug(event.data);
-                    if (event.data.startsWith("✅ Agent finished") || event.data.startsWith("❌")) {
+                    // Try to parse progress from event.data (e.g., "Progress: 2/10")
+                    const progressMatch = event.data.match(/Progress:\s*(\d+)\s*\/\s*(\d+)/i);
+                    if (progressMatch) {
+                        completedCalls = parseInt(progressMatch[1]);
+                        totalCalls = parseInt(progressMatch[2]);
+                        updateAiCallingProgress((completedCalls/totalCalls)*100, `Calling lead ${completedCalls} of ${totalCalls}...`);
+                    }
+                    if (event.data.startsWith("✅ Agent finished")) {
+                        updateAiCallingProgress(100, 'AI calling complete!');
                         evtSource.close();
                         await fetchRankedLeads();
                         aiCallsLoading = false;
-                        setTimeout(() => { clearAgentDebug(); }, 1200);
+                        setTimeout(() => { clearAgentDebug(); if (aiSection) aiSection.style.display = 'none'; }, 1800);
+                        resolve();
+                    } else if (event.data.startsWith("❌")) {
+                        updateAiCallingProgress(0, 'AI calling failed.');
+                        evtSource.close();
+                        aiCallsLoading = false;
+                        setTimeout(() => { clearAgentDebug(); if (aiSection) aiSection.style.display = 'none'; }, 1800);
                         resolve();
                     }
                 };
                 evtSource.onerror = function() {
                     appendAgentDebug('❌ Agent error: connection lost.');
+                    updateAiCallingProgress(0, 'Connection lost.');
                     evtSource.close();
                     aiCallsLoading = false;
-                    setTimeout(() => { clearAgentDebug(); }, 1200);
+                    setTimeout(() => { clearAgentDebug(); if (aiSection) aiSection.style.display = 'none'; }, 1800);
                     resolve();
                 };
             });
+        }
+
+        // Helper to update AI Calling Progress bar and text
+        function updateAiCallingProgress(percent, text) {
+            const bar = document.getElementById('aiCallingProgressBar');
+            const txt = document.getElementById('aiCallingProgressText');
+            if (bar) bar.style.width = `${percent || 0}%`;
+            if (txt) txt.textContent = text || '';
         }
 
         // --- Fetch /ranked-leads and update table ---
@@ -820,7 +861,7 @@ function appendAgentDebug(line) {
             }
         }
 
-        // --- updateLeadsTable to use rankedLeads ---
+        // --- MODIFIED: updateLeadsTable to show only top 3 leads ---
         function updateLeadsTable() {
             const tbody = document.querySelector("#leadsTable tbody");
             const tableContainer = document.querySelector(".table-container");
@@ -838,7 +879,7 @@ function appendAgentDebug(line) {
                 tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">No data available</td></tr>';
                 return;
             }
-            rankedLeads.forEach(row => {
+            rankedLeads.slice(0, 3).forEach(row => {
                 const business = row.company_name || row.url || "";
                 const contact = row.email || row.phone || "";
                 let status = row.niche || row.description || row.url || "";
@@ -964,23 +1005,22 @@ function appendAgentDebug(line) {
         }
 
         // --- NEW: Fetch toggle states from server when opening settings sidebar ---
-async function fetchAndApplyToggleStates() {
-    try {
-        const resp = await fetch("http://localhost:8000/dashboard-data");
-        if (!resp.ok) throw new Error(`Server responded with status: ${resp.status}`);
-        const data = await resp.json();
-        // Assume the backend returns these fields (adjust if needed)
-        document.getElementById('searchEngineToggle').checked = !!data.search_engine_on;
-        document.getElementById('aiCallsToggle').checked = !!data.ai_calls_on;
-    } catch (e) {
-        // fallback: do not change toggles, or optionally show error
-        console.error("Failed to fetch toggle states:", e);
-    }
-}
+        async function fetchAndApplyToggleStates() {
+            try {
+                const resp = await fetch("http://localhost:8000/dashboard-data");
+                if (!resp.ok) throw new Error(`Server responded with status: ${resp.status}`);
+                const data = await resp.json();
+                // Assume the backend returns these fields (adjust if needed)
+                document.getElementById('searchEngineToggle').checked = !!data.search_engine_on;
+                document.getElementById('aiCallsToggle').checked = !!data.ai_calls_on;
+            } catch (e) {
+                // fallback: do not change toggles, or optionally show error
+                console.error("Failed to fetch toggle states:", e);
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             fetchDashboardData();
-            // REMOVE: loadAllSettings(); // Now handled when opening sidebar
         });
 
         // --- Sidebar and Settings Form Logic ---
@@ -1113,6 +1153,7 @@ async function fetchAndApplyToggleStates() {
             }
         });
 
+
         document.getElementById('editAgentInfoBtn').addEventListener('click', function() {
             const info = JSON.parse(localStorage.getItem('agentInfo') || '{}');
             document.getElementById('sidebarBusinessName').value = info.business_name || '';
@@ -1120,12 +1161,66 @@ async function fetchAndApplyToggleStates() {
             selectedCountries = Array.isArray(info.location) ? info.location : [];
             document.getElementById('sidebarServices').value = info.services || '';
             document.getElementById('sidebarDescription').value = info.description || '';
-            
             setupCountryInput(); 
             renderSelectedCountries();
-            
             settingsOptions.style.display = 'none';
             sidebarSettingsForm.style.display = 'block';
+        });
+
+        // --- Export Leads Button Logic (CSV or JSON) ---
+        document.getElementById('exportDataBtn').addEventListener('click', function() {
+            // Prompt for format selection
+            const format = prompt('Export leads as: Type "csv" for CSV or "json" for JSON', 'csv');
+            if (!format) return;
+            const fmt = format.trim().toLowerCase();
+            if (fmt === 'json') {
+                // Export leads as JSON
+                const jsonStr = JSON.stringify(rankedLeads, null, 2);
+                const blob = new Blob([jsonStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'sellgem_leads_export.json';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            } else if (fmt === 'csv') {
+                // Export leads as CSV
+                let csv = '';
+                if (rankedLeads && rankedLeads.length > 0) {
+                    // Get all unique keys from leads
+                    const keys = Array.from(new Set(rankedLeads.flatMap(obj => Object.keys(obj))));
+                    csv += keys.join(',') + '\n';
+                    rankedLeads.forEach(row => {
+                        csv += keys.map(k => {
+                            let val = row[k] == null ? '' : String(row[k]);
+                            // Escape quotes and commas
+                            if (val.includes('"') || val.includes(',') || val.includes('\n')) {
+                                val = '"' + val.replace(/"/g, '""') + '"';
+                            }
+                            return val;
+                        }).join(',') + '\n';
+                    });
+                } else {
+                    csv = 'No leads to export.';
+                }
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'sellgem_leads_export.csv';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            } else {
+                alert('Invalid format. Please type "csv" or "json".');
+            }
         });
 
         document.getElementById('saveSidebarSettings').addEventListener('click', function() {
@@ -1148,6 +1243,59 @@ async function fetchAndApplyToggleStates() {
             sidebarSettingsForm.style.display = 'none';
             settingsOptions.style.display = 'block';
         });
+
+        // --- SPA Navigation Logic: showPage function and nav event listeners ---
+        // Only add SPA nav logic if .nav-link[data-page] exists (prevents errors)
+        if (document.querySelector('.nav-link[data-page]')) {
+            function showPage(pageId) {
+                // Hide all .page elements
+                document.querySelectorAll('.page').forEach(page => {
+                    page.style.display = 'none';
+                });
+                // Show the requested page
+                const pageToShow = document.querySelector(`.page[data-page="${pageId}"]`);
+                if (pageToShow) {
+                    pageToShow.style.display = '';
+                }
+                // Update nav-link active state
+                document.querySelectorAll('.nav-link[data-page]').forEach(link => {
+                    if (link.getAttribute('data-page') === pageId) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+                // Optionally update header/subtitle
+                const headerTitle = document.querySelector('.dashboard-header h1');
+                const headerSubtitle = document.querySelector('.dashboard-header p');
+                if (headerTitle && headerSubtitle) {
+                    if (pageId === 'dashboard') {
+                        headerTitle.textContent = "Agent Dashboard";
+                        headerSubtitle.textContent = "Welcome back! Here's a summary of your activities.";
+                    } else if (pageId === 'settings') {
+                        headerTitle.textContent = "Settings";
+                        headerSubtitle.textContent = "Manage your agent and preferences.";
+                    } // Add more as needed
+                }
+            }
+
+            // Attach SPA nav event listeners to nav links with data-page
+            document.querySelectorAll('.nav-link[data-page]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const pageId = this.getAttribute('data-page');
+                    showPage(pageId);
+                });
+            });
+
+            // Optionally, show the default page on load
+            document.addEventListener('DOMContentLoaded', () => {
+                const defaultPage = document.querySelector('.nav-link[data-page].active')?.getAttribute('data-page');
+                if (defaultPage) {
+                    showPage(defaultPage);
+                }
+            });
+        }
     </script>
 </body>
 </html>
