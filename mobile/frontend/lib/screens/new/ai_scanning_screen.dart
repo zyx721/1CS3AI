@@ -83,7 +83,7 @@ class _AIScanningScreenState extends State<AIScanningScreen>
     try {
       // Call backend to run agent and get leads
       final runAgentResp = await http.post(
-        Uri.parse('http://192.168.100.5:8000/run-agent'),
+        Uri.parse('http://192.168.203.163:8000/run-agent'),
         headers: {'Content-Type': 'application/json'},
       );
       if (runAgentResp.statusCode != 200) {
@@ -93,7 +93,7 @@ class _AIScanningScreenState extends State<AIScanningScreen>
       await Future.delayed(const Duration(seconds: 1));
       // Fetch ranked leads
       final leadsResp = await http.get(
-        Uri.parse('http://192.168.100.5:8000/ranked-leads'),
+        Uri.parse('http://192.168.203.163:8000/ranked-leads'),
       );
       if (leadsResp.statusCode != 200) {
         throw Exception('Failed to fetch leads: ${leadsResp.body}');

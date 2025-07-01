@@ -6,18 +6,15 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // <-- Add this import
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 import '../../services/drive.dart';
-import '../follow_list_screen.dart';
-import '../notification_screen/notification_screen.dart';
 import '../payment/payment_selection_dialog.dart';
-import '../new/compaign_list.dart'; // Import for DashboardPage and AppColors
+import '../new/compaign_list.dart';
 
-// Importing necessary components from compaign_list.dart for consistent styling
-// This assumes AppColors, _DashCard, _StatusPill, _SidebarOptionButton, _ProfessionalLineChart, _FavoriteBusinessCard
-// and DashboardPage are all defined within your compaign_list.dart file.
-
-// Transaction History Screen - Moved here for completeness, styled with AppColors
+// --- Transaction History Screen ---
 class TransactionHistoryScreen extends StatelessWidget {
   final String userId;
 
@@ -26,7 +23,7 @@ class TransactionHistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgDark, // Compaign background
+      backgroundColor: AppColors.bgDark,
       appBar: AppBar(
         title: Text(
           'Transaction History',
@@ -55,7 +52,7 @@ class TransactionHistoryScreen extends StatelessWidget {
           if (!snapshot.hasData) {
             return Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.greenAccent), // Compaign accent color
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.greenAccent),
               ),
             );
           }
@@ -67,13 +64,13 @@ class TransactionHistoryScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.history, size: 64, color: AppColors.textMuted.withOpacity(0.6)), // Muted icon
+                  Icon(Icons.history, size: 64, color: AppColors.textMuted.withOpacity(0.6)),
                   const SizedBox(height: 16),
                   Text(
                     'No transactions yet.',
                     style: GoogleFonts.inter(
                       fontSize: 18,
-                      color: AppColors.textMuted, // Muted text
+                      color: AppColors.textMuted,
                     ),
                   ),
                 ],
@@ -95,8 +92,8 @@ class TransactionHistoryScreen extends StatelessWidget {
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 0, // Flat design
-                color: AppColors.cardBg, // Compaign card background
+                elevation: 0,
+                color: AppColors.cardBg,
                 child: Padding(
                   padding: const EdgeInsets.all(18),
                   child: Row(
@@ -105,8 +102,8 @@ class TransactionHistoryScreen extends StatelessWidget {
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: type == 'add_funds'
-                              ? AppColors.greenAccent.withOpacity(0.1) // Subtle accent background
-                              : AppColors.textMuted.withOpacity(0.1), // Muted background
+                              ? AppColors.greenAccent.withOpacity(0.1)
+                              : AppColors.textMuted.withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -114,8 +111,8 @@ class TransactionHistoryScreen extends StatelessWidget {
                               ? Icons.arrow_downward
                               : Icons.arrow_upward,
                           color: type == 'add_funds'
-                              ? AppColors.greenAccent // Accent color for income
-                              : AppColors.textMuted, // Muted color for outcome
+                              ? AppColors.greenAccent
+                              : AppColors.textMuted,
                           size: 22,
                         ),
                       ),
@@ -131,7 +128,7 @@ class TransactionHistoryScreen extends StatelessWidget {
                               style: GoogleFonts.inter(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
-                                color: AppColors.textLight, // Light text for main info
+                                color: AppColors.textLight,
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -140,7 +137,7 @@ class TransactionHistoryScreen extends StatelessWidget {
                                 'via $paymentMethod',
                                 style: GoogleFonts.inter(
                                   fontSize: 13,
-                                  color: AppColors.textMuted, // Muted text
+                                  color: AppColors.textMuted,
                                 ),
                               ),
                             const SizedBox(height: 4),
@@ -153,7 +150,7 @@ class TransactionHistoryScreen extends StatelessWidget {
                                   : '',
                               style: GoogleFonts.inter(
                                 fontSize: 12,
-                                color: AppColors.textMuted.withOpacity(0.5), // Even more muted for timestamp
+                                color: AppColors.textMuted.withOpacity(0.5),
                               ),
                             ),
                           ],
@@ -170,15 +167,14 @@ class TransactionHistoryScreen extends StatelessWidget {
                               fontSize: 16,
                               color: type == 'add_funds'
                                   ? AppColors.greenAccent
-                                  : AppColors.textLight, // Accent for income, light for outcome
+                                  : AppColors.textLight,
                             ),
                           ),
                           const SizedBox(height: 4),
-                          // Use _StatusPill for consistency
                           StatusPill(
                             status[0].toUpperCase() + status.substring(1),
                             isSuccess: status == 'success',
-                            isTablet: MediaQuery.of(context).size.width > 600, // Pass isTablet for responsive pill size
+                            isTablet: MediaQuery.of(context).size.width > 600,
                           ),
                         ],
                       ),
@@ -194,7 +190,34 @@ class TransactionHistoryScreen extends StatelessWidget {
   }
 }
 
+// --- Status Pill Widget ---
+class StatusPill extends StatelessWidget {
+  final String text;
+  final bool isSuccess;
+  final bool isTablet;
+  const StatusPill(this.text, {this.isSuccess = false, required this.isTablet});
 
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: isTablet ? 12 : 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: isSuccess ? AppColors.greenAccent.withOpacity(0.1) : Colors.transparent,
+        borderRadius: BorderRadius.circular(50),
+      ),
+      child: Text(
+        text,
+        style: GoogleFonts.inter(
+          fontSize: isTablet ? 12 : 11,
+          fontWeight: FontWeight.w500,
+          color: isSuccess ? AppColors.greenAccent : AppColors.textMuted,
+        ),
+      ),
+    );
+  }
+}
+
+// --- Profile Screen ---
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
@@ -203,16 +226,27 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateMixin {
+  // --- Controllers & State ---
   final user = FirebaseAuth.instance.currentUser;
   final firestore = FirebaseFirestore.instance;
   final GoogleDriveService _driveService = GoogleDriveService();
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   bool _isUploading = false;
-  // Removed _isEditingAbout and _aboutController as they were not fully implemented in original snippet.
   final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
+  
+  // Additional controllers for agent dialog
+  final TextEditingController _businessNameController = TextEditingController();
+  final TextEditingController _domainController = TextEditingController();
+  final TextEditingController _servicesController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool _isEditingAgentInfo = false;
+  bool _isAgentInfoLoading = false;
 
+  // --- Lifecycle ---
   @override
   void initState() {
     super.initState();
@@ -230,19 +264,23 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   void dispose() {
     _fadeController.dispose();
     _amountController.dispose();
+    _businessNameController.dispose();
+    _domainController.dispose();
+    _servicesController.dispose();
+    _descriptionController.dispose();
+    _locationController.dispose();
     super.dispose();
   }
 
-  // Adjusted to resemble _buildStatCard from DashboardPage
+  // --- UI Builders ---
   Widget _buildWalletBalanceCard(String title, String count, {VoidCallback? onTap, bool isTablet = false}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.all(isTablet ? 20 : 16),
         decoration: BoxDecoration(
-          color: AppColors.cardBg, // Compaign card background
+          color: AppColors.cardBg,
           borderRadius: BorderRadius.circular(12),
-          // Subtle shadow to match dashboard cards
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.18),
@@ -259,7 +297,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
               title,
               style: GoogleFonts.inter(
                 fontSize: isTablet ? 14 : 12,
-                color: AppColors.textMuted, // Muted text
+                color: AppColors.textMuted,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -270,7 +308,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
               style: GoogleFonts.inter(
                 fontSize: isTablet ? 32 : 28,
                 fontWeight: FontWeight.w600,
-                color: AppColors.greenAccent, // Highlight with accent color
+                color: AppColors.greenAccent,
                 height: 1.1,
               ),
             ),
@@ -280,12 +318,11 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
     );
   }
 
-  // Re-designed button to match Compaign style
   Widget _buildActionButton({
     required String text,
     required VoidCallback onPressed,
     required IconData icon,
-    bool isPrimary = true, // To distinguish between primary (filled) and secondary (outlined)
+    bool isPrimary = true,
   }) {
     final bool isTablet = MediaQuery.of(context).size.width > 600;
     return SizedBox(
@@ -293,11 +330,11 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       child: isPrimary
           ? ElevatedButton.icon(
               onPressed: onPressed,
-              icon: Icon(icon, size: isTablet ? 18 : 16, color: AppColors.bgDark), // <-- Use Icon instead of FaIcon for Material icons
+              icon: Icon(icon, size: isTablet ? 18 : 16, color: AppColors.bgDark),
               label: Text(text),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.greenAccent,
-                foregroundColor: AppColors.bgDark, // Text color for primary button
+                foregroundColor: AppColors.bgDark,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -306,7 +343,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 textStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: isTablet ? 16 : 14),
               ).copyWith(
                 overlayColor: MaterialStateProperty.resolveWith<Color?>((states) {
-                  if (states.contains(MaterialState.hovered)) return AppColors.greenAccent.withOpacity(0.8); // Darker on hover
+                  if (states.contains(MaterialState.hovered)) return AppColors.greenAccent.withOpacity(0.8);
                   return null;
                 }),
                 foregroundColor: MaterialStateProperty.resolveWith<Color?>((states) {
@@ -317,11 +354,11 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             )
           : OutlinedButton.icon(
               onPressed: onPressed,
-              icon: Icon(icon, size: isTablet ? 18 : 16, color: AppColors.textMuted), // <-- Use Icon instead of FaIcon
+              icon: Icon(icon, size: isTablet ? 18 : 16, color: AppColors.textMuted),
               label: Text(text),
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.textMuted, // Text color for secondary button
-                side: const BorderSide(color: AppColors.borderColor), // Border color
+                foregroundColor: AppColors.textMuted,
+                side: const BorderSide(color: AppColors.borderColor),
                 padding: EdgeInsets.symmetric(horizontal: isTablet ? 20 : 16, vertical: isTablet ? 14 : 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -341,6 +378,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
     );
   }
 
+  // --- Profile Actions ---
   Future<void> _updateProfilePicture() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
@@ -360,7 +398,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error updating profile picture: $e'),
-              backgroundColor: Colors.redAccent, // Keep red for error
+              backgroundColor: Colors.redAccent,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
@@ -413,7 +451,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       context: context,
       barrierDismissible: true,
       builder: (context) => Dialog(
-        backgroundColor: AppColors.cardBg, // Compaign dialog background
+        backgroundColor: AppColors.cardBg,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Container(
           padding: const EdgeInsets.all(24),
@@ -422,12 +460,21 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             children: [
               Row(
                 children: [
-                  Icon(Icons.add_circle, color: AppColors.greenAccent, size: 28), // Accent color for icon
+                  Icon(Icons.add_circle, color: AppColors.greenAccent, size: 28),
                   const SizedBox(width: 12),
-      
+                  Expanded(
+                    child: Text(
+                      'Add Funds',
+                      style: GoogleFonts.inter(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textLight,
+                      ),
+                    ),
+                  ),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: Icon(Icons.close, color: AppColors.textMuted), // Muted close icon
+                    icon: Icon(Icons.close, color: AppColors.textMuted),
                   ),
                 ],
               ),
@@ -435,24 +482,24 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
               TextField(
                 controller: _amountController,
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
-                style: GoogleFonts.inter(color: AppColors.textLight, fontSize: 16), // Light text input
+                style: GoogleFonts.inter(color: AppColors.textLight, fontSize: 16),
                 decoration: InputDecoration(
                   labelText: 'Amount (DZD)',
-                  labelStyle: GoogleFonts.inter(color: AppColors.textMuted), // Muted label
-                  prefixIcon: Icon(Icons.attach_money, color: AppColors.textMuted), // Muted icon
+                  labelStyle: GoogleFonts.inter(color: AppColors.textMuted),
+                  prefixIcon: Icon(Icons.attach_money, color: AppColors.textMuted),
                   filled: true,
-                  fillColor: Colors.black.withOpacity(0.18), // Dark input background
+                  fillColor: Colors.black.withOpacity(0.18),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.borderColor), // Compaign border
+                    borderSide: const BorderSide(color: AppColors.borderColor),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.borderColor), // Compaign border
+                    borderSide: const BorderSide(color: AppColors.borderColor),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.greenAccent, width: 2), // Accent focused border
+                    borderSide: const BorderSide(color: AppColors.greenAccent, width: 2),
                   ),
                 ),
               ),
@@ -463,7 +510,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                     child: OutlinedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.textMuted, // Muted text for cancel
+                        foregroundColor: AppColors.textMuted,
                         side: const BorderSide(color: AppColors.borderColor),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -474,9 +521,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: _buildActionButton( // Use the new action button for consistency
-                      text: "Continue",
-                      icon: Icons.payment,
+                    child: ElevatedButton.icon(
                       onPressed: () {
                         final amount = double.tryParse(_amountController.text);
                         if (amount != null && amount > 0) {
@@ -491,14 +536,22 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('Please enter a valid amount'),
-                              backgroundColor: Colors.orange, // Warning color
+                              backgroundColor: Colors.orange,
                               behavior: SnackBarBehavior.floating,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                             ),
                           );
                         }
                       },
-                      isPrimary: true,
+                      icon: Icon(Icons.payment, color: AppColors.bgDark),
+                      label: Text("Continue"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.greenAccent,
+                        foregroundColor: AppColors.bgDark,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        textStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 14),
+                      ),
                     ),
                   ),
                 ],
@@ -519,27 +572,284 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
     );
   }
 
+  // --- Fetch agent info from backend ---
+  Future<void> _fetchAgentInfo() async {
+    setState(() => _isAgentInfoLoading = true);
+    try {
+      final res = await http.get(Uri.parse('http://192.168.203.163:8000/agent-info'));
+      if (res.statusCode == 200) {
+        final data = json.decode(res.body);
+        _businessNameController.text = data['business_name'] ?? '';
+        _domainController.text = data['domain'] ?? '';
+        _locationController.text = data['location'] ?? '';
+        _servicesController.text = data['services'] ?? '';
+        _descriptionController.text = data['description'] ?? '';
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch agent info: $e'), backgroundColor: Colors.red),
+      );
+    } finally {
+      setState(() => _isAgentInfoLoading = false);
+    }
+  }
+
+  // --- Update agent info on backend ---
+  Future<bool> _updateAgentInfo() async {
+    setState(() => _isAgentInfoLoading = true);
+    try {
+      final res = await http.post(
+        Uri.parse('http://192.168.203.163:8000/agent-info'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'business_name': _businessNameController.text,
+          'domain': _domainController.text,
+          'location': _locationController.text,
+          'services': _servicesController.text,
+          'description': _descriptionController.text,
+        }),
+      );
+      if (res.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Agent info updated!'), backgroundColor: Colors.green),
+        );
+        return true;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update agent info'), backgroundColor: Colors.red),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+      );
+    } finally {
+      setState(() => _isAgentInfoLoading = false);
+    }
+    return false;
+  }
+
+  // --- Show Edit Agent Dialog with fetch ---
+  void _showEditAgentDialog() async {
+    await _fetchAgentInfo();
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return Material(
+              color: Colors.transparent,
+              child: _AgentEditDialog(
+                businessNameController: _businessNameController,
+                domainController: _domainController,
+                locationController: _locationController,
+                servicesController: _servicesController,
+                descriptionController: _descriptionController,
+                isLoading: _isAgentInfoLoading,
+                onSave: () async {
+                  if (_businessNameController.text.trim().isEmpty ||
+                      _domainController.text.trim().isEmpty ||
+                      _locationController.text.trim().isEmpty ||
+                      _servicesController.text.trim().isEmpty ||
+                      _descriptionController.text.trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('All fields are required'), backgroundColor: Colors.orange),
+                    );
+                    return;
+                  }
+                  setStateDialog(() => _isAgentInfoLoading = true);
+                  final success = await _updateAgentInfo();
+                  setStateDialog(() => _isAgentInfoLoading = false);
+                  if (success && mounted) Navigator.of(ctx).pop();
+                },
+                onCancel: () {
+                  Navigator.of(ctx).pop();
+                },
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _saveAndCloseSidebar() {
+    if (_formKey.currentState?.validate() ?? false) {
+      // Save logic here
+      Navigator.of(context).pop();
+    }
+  }
+
+  void _hideEditAgentForm() {
+    setState(() {
+      _isEditingAgentInfo = false;
+    });
+  }
+
+  Widget _buildTextFormField({
+    required TextEditingController controller,
+    required String label,
+    String? hint,
+    int maxLines = 1,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: GoogleFonts.inter(fontSize: 14, color: AppColors.textMuted)),
+        const SizedBox(height: 6),
+        TextFormField(
+          controller: controller,
+          maxLines: maxLines,
+          style: GoogleFonts.inter(color: AppColors.textLight),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.black.withOpacity(0.18),
+            hintText: hint,
+            hintStyle: GoogleFonts.inter(color: AppColors.textMuted.withOpacity(0.5)),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppColors.borderColor),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppColors.borderColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppColors.greenAccent),
+            ),
+          ),
+          validator: (val) => (val == null || val.isEmpty) ? 'Required' : null,
+        ),
+        const SizedBox(height: 14),
+      ],
+    );
+  }
+
+  Widget _buildSettingsOptions() {
+    return Column(
+      key: const ValueKey('options'),
+      children: [
+        _SidebarOptionButton(
+          icon: FontAwesomeIcons.solidUser,
+          label: "Edit Agent Information",
+          onPressed: _showEditAgentDialog,
+        ),
+        _SidebarOptionButton(
+          icon: FontAwesomeIcons.key,
+          label: "Change Password",
+          onPressed: () {},
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSettingsForm() {
+    return Form(
+      key: _formKey,
+      child: SingleChildScrollView(
+        key: const ValueKey('form'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildTextFormField(controller: _businessNameController, label: "Business Name"),
+            _buildTextFormField(controller: _domainController, label: "Industry / Niche"),
+            _buildTextFormField(controller: _locationController, label: "Target Location(s)", hint: "e.g. United States, France"),
+            _buildTextFormField(controller: _servicesController, label: "Products / Services", maxLines: 2),
+            _buildTextFormField(controller: _descriptionController, label: "Company Description", maxLines: 3),
+            const SizedBox(height: 20),
+            Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _saveAndCloseSidebar,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.greenAccent,
+                      foregroundColor: AppColors.bgDark,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      textStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 16),
+                    ),
+                    child: const Text("Save"),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: _hideEditAgentForm,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.textMuted,
+                      side: const BorderSide(color: AppColors.borderColor),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      textStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 16),
+                    ),
+                    child: const Text("Cancel"),
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingsSidebar() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final sidebarWidth = screenWidth < 400 ? screenWidth * 0.9 : 400.0;
+    
+    return Drawer(
+      width: sidebarWidth,
+      backgroundColor: AppColors.cardBg,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 50, 20, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Settings",
+              style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.textLight),
+            ),
+            const SizedBox(height: 24),
+            Expanded(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                child: _isEditingAgentInfo ? _buildSettingsForm() : _buildSettingsOptions(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --- Build ---
   @override
   Widget build(BuildContext context) {
     final bool isTablet = MediaQuery.of(context).size.width > 600;
-    final double padding = isTablet ? 32.0 : 20.0; // Consistent padding
+    final double padding = isTablet ? 32.0 : 20.0;
 
     return Scaffold(
-      backgroundColor: AppColors.bgDark, // Compaign background color
+      backgroundColor: AppColors.bgDark,
       appBar: AppBar(
-        backgroundColor: AppColors.bgDark, // Compaign app bar background
-        foregroundColor: AppColors.textLight, // Compaign text color for app bar
+        backgroundColor: AppColors.bgDark,
+        foregroundColor: AppColors.textLight,
         elevation: 0,
         title: Text(
           "Profile",
           style: GoogleFonts.inter(
             color: AppColors.textLight,
             fontWeight: FontWeight.bold,
-            fontSize: 24, // Larger title to match Dashboard header
+            fontSize: 24,
           ),
         ),
         actions: [ 
-          // Logout Button
           Container(
             margin: const EdgeInsets.only(right: 16),
             decoration: BoxDecoration(
@@ -570,18 +880,18 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             final userData = snapshot.data!.data() as Map<String, dynamic>;
             final walletBalance = (userData['wallet_balance'] as num?)?.toDouble() ?? 0.0;
 
-            return SingleChildScrollView( // Changed from CustomScrollView for simplicity with new AppBar
+            return SingleChildScrollView(
               padding: EdgeInsets.all(padding),
               child: Column(
                 children: [
-                  // Profile Header Card (Compaign style)
+                  // --- Profile Header Card ---
                   Container(
                     decoration: BoxDecoration(
-                      color: AppColors.cardBg, // Compaign card background
-                      borderRadius: BorderRadius.circular(18), // Larger radius for a softer look
+                      color: AppColors.cardBg,
+                      borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.18), // Subtle shadow
+                          color: Colors.black.withOpacity(0.18),
                           blurRadius: 18,
                           offset: const Offset(0, 8),
                         ),
@@ -606,133 +916,385 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                                   ],
                                 ),
                                 child: CircleAvatar(
-                                  radius: 65,
-                                  backgroundColor: Colors.black.withOpacity(0.10), // Darker placeholder
-                                  backgroundImage: user?.photoURL != null
-                                      ? NetworkImage(user!.photoURL!)
+                                  radius: isTablet ? 54 : 44,
+                                  backgroundColor: AppColors.bgDark,
+                                  backgroundImage: userData['photoURL'] != null && userData['photoURL'].toString().isNotEmpty
+                                      ? NetworkImage(userData['photoURL'])
                                       : null,
-                                  child: _isUploading
-                                      ? CircularProgressIndicator(
-                                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.greenAccent),
-                                        )
-                                      : user?.photoURL == null
-                                          ? Icon(Icons.person, size: 50, color: AppColors.textMuted) // Muted icon
-                                          : null,
+                                  child: userData['photoURL'] == null || userData['photoURL'].toString().isEmpty
+                                      ? Icon(Icons.person, size: isTablet ? 54 : 44, color: AppColors.textMuted)
+                                      : null,
                                 ),
                               ),
                               Positioned(
-                                bottom: 4,
-                                right: 4,
+                                bottom: 0,
+                                right: 0,
                                 child: GestureDetector(
-                                  onTap: _updateProfilePicture,
+                                  onTap: _isUploading ? null : _updateProfilePicture,
                                   child: Container(
+                                    padding: const EdgeInsets.all(6),
                                     decoration: BoxDecoration(
-                                      color: AppColors.greenAccent, // Accent color for camera button
+                                      color: AppColors.greenAccent,
                                       shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.2),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ],
+                                      border: Border.all(color: AppColors.bgDark, width: 2),
                                     ),
-                                    padding: const EdgeInsets.all(8),
-                                    child: const Icon(
-                                      Icons.camera_alt,
-                                      color: AppColors.bgDark, // Dark icon for contrast
-                                      size: 18,
-                                    ),
+                                    child: _isUploading
+                                        ? SizedBox(
+                                            width: 18,
+                                            height: 18,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2.2,
+                                              valueColor: AlwaysStoppedAnimation<Color>(AppColors.bgDark),
+                                            ),
+                                          )
+                                        : Icon(Icons.camera_alt, color: AppColors.bgDark, size: 18),
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 20),
-
-                          // Name
+                          const SizedBox(height: 18),
                           Text(
-                            user?.displayName ?? 'User Name',
+                            userData['displayName'] ?? user?.displayName ?? 'No Name',
                             style: GoogleFonts.inter(
-                              fontSize: 26,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.textLight, // Light text
+                              fontSize: isTablet ? 22 : 18,
+                              color: AppColors.textLight,
                             ),
-                            textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 6),
-
-                          // Email
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.12), // Subtle dark background
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              user?.email ?? '',
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                color: AppColors.textMuted, // Muted text
-                                fontWeight: FontWeight.w500,
-                              ),
+                          Text(
+                            userData['email'] ?? user?.email ?? '',
+                            style: GoogleFonts.inter(
+                              fontSize: isTablet ? 15 : 13,
+                              color: AppColors.textMuted,
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  // Settings Button (Compaign style)
-                  _buildActionButton(
-                    text: "Settings",
-                    icon: Icons.settings,
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (context) => FractionallySizedBox(
-                          heightFactor: 0.95,
-                          child: DashboardPage.buildSettingsSidebar(context),
+                  const SizedBox(height: 28),
+                  // --- Wallet Balance & Actions ---
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildWalletBalanceCard(
+                          "Wallet Balance",
+                          "${walletBalance.toStringAsFixed(2)} DZD",
+                          onTap: _showTransactionHistory,
+                          isTablet: isTablet,
                         ),
-                      );
-                    },
-                    isPrimary: false, // Outlined style
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildWalletBalanceCard(
+                          "Add Funds",
+                          "+",
+                          onTap: _showAddFundsDialog,
+                          isTablet: isTablet,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 28),
+                  // --- Actions ---
+     
+                  // --- Settings Sidebar Button ---
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: OutlinedButton.icon(
+                      icon: Icon(Icons.settings, color: AppColors.textMuted),
+                      label: Text("Settings"),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.textMuted,
+                        side: const BorderSide(color: AppColors.borderColor),
+                        padding: EdgeInsets.symmetric(horizontal: isTablet ? 20 : 16, vertical: isTablet ? 14 : 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        textStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: isTablet ? 16 : 14),
+                      ),
+                      onPressed: () {
+                        Scaffold.of(context).openEndDrawer();
+                      },
+                    ),
+                  ),
                 ],
               ),
             );
           },
         ),
       ),
+      endDrawer: _buildSettingsSidebar(),
     );
   }
 }
 
-// Add this widget if _StatusPill is not public in compaign_list.dart
-class StatusPill extends StatelessWidget {
-  final String text;
-  final bool isSuccess;
-  final bool isTablet;
-  const StatusPill(this.text, {this.isSuccess = false, required this.isTablet});
+// --- Sidebar Option Button Widget ---
+class _SidebarOptionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onPressed;
+
+  const _SidebarOptionButton({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: isTablet ? 12 : 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: isSuccess ? AppColors.greenAccent.withOpacity(0.1) : Colors.transparent,
-        borderRadius: BorderRadius.circular(50),
-      ),
-      child: Text(
-        text,
-        style: GoogleFonts.inter(
-          fontSize: isTablet ? 12 : 11,
-          fontWeight: FontWeight.w500,
-          color: isSuccess ? AppColors.greenAccent : AppColors.textMuted,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: OutlinedButton.icon(
+        icon: Icon(icon, color: AppColors.textMuted, size: 18),
+        label: Text(label),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.textMuted,
+          side: const BorderSide(color: AppColors.borderColor),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          textStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 15),
         ),
+        onPressed: onPressed,
+      ),
+    );
+  }
+}
+
+// --- Agent Edit Dialog Widget ---
+class _AgentEditDialog extends StatelessWidget {
+  final TextEditingController businessNameController;
+  final TextEditingController domainController;
+  final TextEditingController locationController;
+  final TextEditingController servicesController;
+  final TextEditingController descriptionController;
+  final VoidCallback onSave;
+  final VoidCallback onCancel;
+  final bool isLoading;
+
+  const _AgentEditDialog({
+    required this.businessNameController,
+    required this.domainController,
+    required this.locationController,
+    required this.servicesController,
+    required this.descriptionController,
+    required this.onSave,
+    required this.onCancel,
+    this.isLoading = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AbsorbPointer(
+      absorbing: isLoading,
+      child: Stack(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.cardBg,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.edit, color: AppColors.greenAccent, size: 28),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Edit Agent Information',
+                          style: GoogleFonts.inter(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textLight,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: onCancel,
+                        icon: Icon(Icons.close, color: AppColors.textMuted),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: businessNameController,
+                    style: GoogleFonts.inter(color: AppColors.textLight, fontSize: 16),
+                    decoration: InputDecoration(
+                      labelText: 'Business Name',
+                      labelStyle: GoogleFonts.inter(color: AppColors.textMuted),
+                      filled: true,
+                      fillColor: Colors.black.withOpacity(0.18),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.borderColor),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.borderColor),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.greenAccent, width: 2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: domainController,
+                    style: GoogleFonts.inter(color: AppColors.textLight, fontSize: 16),
+                    decoration: InputDecoration(
+                      labelText: 'Industry / Niche',
+                      labelStyle: GoogleFonts.inter(color: AppColors.textMuted),
+                      filled: true,
+                      fillColor: Colors.black.withOpacity(0.18),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.borderColor),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.borderColor),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.greenAccent, width: 2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: locationController,
+                    style: GoogleFonts.inter(color: AppColors.textLight, fontSize: 16),
+                    decoration: InputDecoration(
+                      labelText: 'Target Location(s)',
+                      labelStyle: GoogleFonts.inter(color: AppColors.textMuted),
+                      hintText: "e.g. United States, France",
+                      hintStyle: GoogleFonts.inter(color: AppColors.textMuted.withOpacity(0.5)),
+                      filled: true,
+                      fillColor: Colors.black.withOpacity(0.18),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.borderColor),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.borderColor),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.greenAccent, width: 2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: servicesController,
+                    maxLines: 2,
+                    style: GoogleFonts.inter(color: AppColors.textLight, fontSize: 16),
+                    decoration: InputDecoration(
+                      labelText: 'Products / Services',
+                      labelStyle: GoogleFonts.inter(color: AppColors.textMuted),
+                      filled: true,
+                      fillColor: Colors.black.withOpacity(0.18),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.borderColor),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.borderColor),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.greenAccent, width: 2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: descriptionController,
+                    maxLines: 3,
+                    style: GoogleFonts.inter(color: AppColors.textLight, fontSize: 16),
+                    decoration: InputDecoration(
+                      labelText: 'Company Description',
+                      labelStyle: GoogleFonts.inter(color: AppColors.textMuted),
+                      filled: true,
+                      fillColor: Colors.black.withOpacity(0.18),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.borderColor),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.borderColor),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.greenAccent, width: 2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: isLoading ? null : onCancel,
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.textMuted,
+                            side: const BorderSide(color: AppColors.borderColor),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            textStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 14),
+                          ),
+                          child: const Text('Cancel'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: isLoading ? null : onSave,
+                          icon: Icon(Icons.save, color: AppColors.bgDark),
+                          label: isLoading
+                              ? SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.bgDark),
+                                  ),
+                                )
+                              : Text("Save"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.greenAccent,
+                            foregroundColor: AppColors.bgDark,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            textStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 14),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (isLoading)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.08),
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -24,10 +24,9 @@ class _NavBarScreenState extends State<NavBarScreen>
 
   final List<Widget> _pages = [
     // const EnhancedMapScreen(),
-    const DashboardPage(), // 0: Dashboard
-    AIScanningScreen(),    // 1: Scan
-    VoiceChatPage(),       // 2: Chat
-    const ProfileScreen(), // 3: Profile
+    const DashboardPage(), 
+    AIScanningScreen(),  
+    const ProfileScreen(), 
   ];
 
   @override
@@ -226,8 +225,7 @@ class _NavBarScreenState extends State<NavBarScreen>
                 children: [    
                   _buildNavItem(Icons.list_rounded, 0, 'dashboard'),
                   _buildNavItem(Icons.search_rounded, 1, 'Scan'),
-                  _buildNavItem(Icons.chat_bubble_outline_rounded, 2, 'Chat'),
-                  _buildNavItem(Icons.person_rounded, 3, 'Profile'),
+                  _buildNavItem(Icons.person_rounded, 2, 'Profile'),
                 ],
               ),
             ),

@@ -436,6 +436,6 @@ async def get_ranked_leads():
 # --- Main Execution Block ---
 if __name__ == "__main__":
     print("--- Starting Uvicorn Server ---")
-    print("Access the API at http://192.168.100.5:8000")
-    print("API documentation available at http://192.168.100.5:8000/docs")
-    uvicorn.run(app, host="192.168.100.5", port=8000)
+    print("Access the API at http://192.168.203.163:8000")
+    print("API documentation available at http://192.168.203.163:8000/docs")
+    uvicorn.run(app, host="192.168.203.163", port=8000)
