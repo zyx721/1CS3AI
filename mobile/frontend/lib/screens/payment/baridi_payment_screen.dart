@@ -249,10 +249,11 @@ class _BaridiPaymentScreenState extends State<BaridiPaymentScreen>
           'Baridi Mobile Payment', 
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)
         ),
-        backgroundColor: Color(0xFF336799),
+        backgroundColor: const Color(0xFF181C23), // dark appbar
         elevation: 0,
         centerTitle: true,
       ),
+      backgroundColor: const Color(0xFF101215), // dark background
       body: SlideTransition(
         position: _slideAnimation,
         child: SingleChildScrollView(
@@ -268,7 +269,7 @@ class _BaridiPaymentScreenState extends State<BaridiPaymentScreen>
                     children: [
                       Image.asset(
                         'assets/images/baridi_card.png',
-                        height: 300, // Increased from 48 to 90
+                        height: 300,
                         fit: BoxFit.contain,
                       ),
                     ],
@@ -282,7 +283,7 @@ class _BaridiPaymentScreenState extends State<BaridiPaymentScreen>
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF336799),
+                    color: Color(0xFFF3CB35),
                   ),
                 ),
                 Container(
@@ -296,9 +297,10 @@ class _BaridiPaymentScreenState extends State<BaridiPaymentScreen>
                 
                 // Payment Details Card
                 Card(
-                  elevation: 4,
+                  elevation: 8,
+                  color: const Color(0xFF23262B).withOpacity(0.85), // dark glass effect
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Padding(
                     padding: EdgeInsets.all(16),
@@ -307,14 +309,14 @@ class _BaridiPaymentScreenState extends State<BaridiPaymentScreen>
                         // Order Details Table
                         Container(
                           decoration: BoxDecoration(
-                            border: Border.all(color: Color(0xFF336799)),
+                            border: Border.all(color: Color(0xFFF3CB35)),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Table(
                             children: [
                               TableRow(
                                 decoration: BoxDecoration(
-                                  color: Color(0xFF336799),
+                                  color: Color(0xFF23262B),
                                   borderRadius: BorderRadius.only(
                                     topLeft: Radius.circular(7),
                                     topRight: Radius.circular(7),
@@ -327,7 +329,7 @@ class _BaridiPaymentScreenState extends State<BaridiPaymentScreen>
                                       child: Text(
                                         'ORDER NUMBER',
                                         style: TextStyle(
-                                          color: Colors.white,
+                                          color: Color(0xFFF3CB35),
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -339,7 +341,7 @@ class _BaridiPaymentScreenState extends State<BaridiPaymentScreen>
                                       child: Text(
                                         'TOTAL AMOUNT',
                                         style: TextStyle(
-                                          color: Colors.white,
+                                          color: Color(0xFFF3CB35),
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -354,7 +356,10 @@ class _BaridiPaymentScreenState extends State<BaridiPaymentScreen>
                                       padding: EdgeInsets.all(12),
                                       child: Text(
                                         widget.orderNumber,
-                                        style: TextStyle(fontWeight: FontWeight.w500),
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.white,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -365,7 +370,7 @@ class _BaridiPaymentScreenState extends State<BaridiPaymentScreen>
                                         '${widget.amount.toStringAsFixed(2)} DZD',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          color: Color(0xFF336799),
+                                          color: Color(0xFFF3CB35),
                                           fontSize: 16,
                                         ),
                                       ),
@@ -445,7 +450,7 @@ class _BaridiPaymentScreenState extends State<BaridiPaymentScreen>
                   child: ElevatedButton(
                     onPressed: _isProcessing ? null : _processPayment,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF336799),
+                      backgroundColor: Color(0xFFF3CB35),
                       minimumSize: Size(double.infinity, 56),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -462,7 +467,7 @@ class _BaridiPaymentScreenState extends State<BaridiPaymentScreen>
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
+                                    Colors.black,
                                   ),
                                 ),
                               ),
@@ -470,7 +475,7 @@ class _BaridiPaymentScreenState extends State<BaridiPaymentScreen>
                               Text(
                                 'Processing...',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: Colors.black,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -480,7 +485,7 @@ class _BaridiPaymentScreenState extends State<BaridiPaymentScreen>
                         : Text(
                             'Confirm Payment',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Colors.black,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
@@ -494,19 +499,19 @@ class _BaridiPaymentScreenState extends State<BaridiPaymentScreen>
                 Container(
                   padding: EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.green.shade50,
+                    color: Colors.white.withOpacity(0.04),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.green.shade200),
+                    border: Border.all(color: Color(0xFFF3CB35)),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.security, color: Colors.green, size: 20),
+                      Icon(Icons.security, color: Color(0xFFF3CB35), size: 20),
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'Your payment information is secure and encrypted',
                           style: TextStyle(
-                            color: Colors.green.shade700,
+                            color: Color(0xFFF3CB35),
                             fontSize: 12,
                           ),
                         ),
@@ -533,23 +538,25 @@ class _BaridiPaymentScreenState extends State<BaridiPaymentScreen>
       controller: controller,
       keyboardType: keyboardType,
       obscureText: obscureText,
+      style: TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: Color(0xFF336799)) : null,
+        labelStyle: TextStyle(color: Colors.white70),
+        prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: Color(0xFFF3CB35)) : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: BorderSide(color: Color(0xFFF3CB35)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Color(0xFF336799), width: 2),
+          borderSide: BorderSide(color: Color(0xFFF3CB35), width: 2),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: BorderSide(color: Colors.white24),
         ),
         filled: true,
-        fillColor: Colors.grey.shade50,
+        fillColor: Colors.white.withOpacity(0.04),
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {

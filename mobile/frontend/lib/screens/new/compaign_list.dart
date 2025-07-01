@@ -63,7 +63,7 @@ class _DashboardPageState extends State<DashboardPage> {
   String? _leadsError;
 
   // --- API BASE URL ---
-  static const String apiBase = "http://192.168.100.5:8000";
+  static const String apiBase = "http://10.48.173.163:8000";
 
   @override
   void dispose() {
@@ -160,8 +160,33 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  // Fetch agent info from backend and populate controllers
+  Future<void> _fetchAgentInfoFromBackend() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+      final res = await http.get(Uri.parse("$apiBase/agent-info?uid=${user.uid}"));
+      if (res.statusCode == 200) {
+        final info = jsonDecode(res.body);
+        _businessNameController.text = info['business_name'] ?? '';
+        _domainController.text = info['domain'] ?? '';
+        final location = info['location'];
+        if (location is List) {
+          _locationController.text = location.join(', ');
+        } else {
+          _locationController.text = location?.toString() ?? '';
+        }
+        _servicesController.text = info['services'] ?? '';
+        _descriptionController.text = info['description'] ?? '';
+      }
+    } catch (e) {
+      // Optionally show error or fallback to local storage
+    }
+  }
+
+  // Modified: When editing agent info, fetch from backend first
   void _showEditAgentForm() async {
-    await _loadAgentInfo();
+    await _fetchAgentInfoFromBackend();
     setState(() {
       _isEditingAgentInfo = true;
     });
@@ -179,6 +204,7 @@ class _DashboardPageState extends State<DashboardPage> {
     Navigator.of(context).pop(); // Close drawer
   }
 
+ 
   Future<void> _fetchDashboardData() async {
     setState(() {
       _loadingDashboard = true;
@@ -240,7 +266,6 @@ class _DashboardPageState extends State<DashboardPage> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: AppColors.bgDark,
-      endDrawer: _buildSettingsSidebar(),
       body: Stack(
         children: [
           // --- Top Radial Glow Effect ---
@@ -597,6 +622,7 @@ class _DashboardPageState extends State<DashboardPage> {
   
   // Move the sidebar builder logic to a static method for external access
   static Widget buildSettingsSidebarStatic(BuildContext context) {
+    final state = context.findAncestorStateOfType<_DashboardPageState>();
     final screenWidth = MediaQuery.of(context).size.width;
     final sidebarWidth = screenWidth < 400 ? screenWidth * 0.9 : 400.0;
     
@@ -620,7 +646,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   _SidebarOptionButton(
                     icon: FontAwesomeIcons.solidUser,
                     label: "Edit Agent Information",
-                    onPressed: () {},
+                    onPressed: state?._showEditAgentForm ?? () {},
                   ),
                   _SidebarOptionButton(
                     icon: FontAwesomeIcons.key,
@@ -636,115 +662,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildSettingsSidebar() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final sidebarWidth = screenWidth < 400 ? screenWidth * 0.9 : 400.0;
-    
-    return Drawer(
-      width: sidebarWidth,
-      backgroundColor: AppColors.cardBg,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 50, 20, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Settings",
-              style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.textLight),
-            ),
-            const SizedBox(height: 24),
-            Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 250),
-                child: _isEditingAgentInfo ? _buildSettingsForm() : _buildSettingsOptions(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
   
-  Widget _buildSettingsOptions() {
-    return Column(
-      key: const ValueKey('options'),
-      children: [
-        _SidebarOptionButton(
-          icon: FontAwesomeIcons.solidUser,
-          label: "Edit Agent Information",
-          onPressed: _showEditAgentForm,
-        ),
-        _SidebarOptionButton(
-          icon: FontAwesomeIcons.key,
-          label: "Change Password",
-          onPressed: () {},
-        ),
-        _SidebarOptionButton(
-          icon: FontAwesomeIcons.solidBell,
-          label: "Notification Preferences",
-          onPressed: () {},
-        ),
-        _SidebarOptionButton(
-          icon: FontAwesomeIcons.fileExport,
-          label: "Export Data",
-          onPressed: () {},
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSettingsForm() {
-    return Form(
-      key: _formKey,
-      child: SingleChildScrollView(
-        key: const ValueKey('form'),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTextFormField(controller: _businessNameController, label: "Business Name"),
-            _buildTextFormField(controller: _domainController, label: "Industry / Niche"),
-            _buildTextFormField(controller: _locationController, label: "Target Location(s)", hint: "e.g. United States, France"),
-            _buildTextFormField(controller: _servicesController, label: "Products / Services", maxLines: 2),
-            _buildTextFormField(controller: _descriptionController, label: "Company Description", maxLines: 3),
-            const SizedBox(height: 20),
-            Column(
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _saveAndCloseSidebar,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.greenAccent,
-                      foregroundColor: AppColors.bgDark,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      textStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 16),
-                    ),
-                    child: const Text("Save"),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed: _hideEditAgentForm,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.textMuted,
-                      side: const BorderSide(color: AppColors.borderColor),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      textStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 16),
-                    ),
-                    child: const Text("Cancel"),
-                  ),
-                ),
-              ],
-            )
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildTextFormField({
     required TextEditingController controller,
@@ -843,8 +761,7 @@ class _StatusPill extends StatelessWidget {
           fontWeight: FontWeight.w500,
           color: isSuccess ? AppColors.greenAccent : AppColors.textMuted,
         ),
-      ),
-    );
+      ),);
   }
 }
 
@@ -1232,3 +1149,4 @@ class _FavoriteBusinessCard extends StatelessWidget {
     );
   }
 }
+

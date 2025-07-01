@@ -107,15 +107,21 @@ class _AccountSetupScreenState extends State<AccountSetupScreen>
       return;
     }
 
-    if (_currentPage < AppConstants.totalFormSteps) {
+    if (_currentPage < AppConstants.totalFormSteps - 1) {
       _pageController.nextPage(
         duration: AppConstants.animationDuration,
         curve: Curves.easeInOut,
       );
-    }
-
-    if (_currentPage == AppConstants.totalFormSteps - 1) {
+    } else if (_currentPage == AppConstants.totalFormSteps - 1) {
       _collectAndSubmitData();
+      setState(() {
+        _currentPage++; // Move to completion step after submission
+      });
+      _pageController.animateToPage(
+        _currentPage,
+        duration: AppConstants.animationDuration,
+        curve: Curves.easeInOut,
+      );
     }
   }
 
@@ -145,7 +151,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen>
     try {
       // Use the correct endpoint and fix the URL
       final response = await http.post(
-        Uri.parse('http://192.168.100.5:8000/agent-info'),
+        Uri.parse('http://10.48.173.163:8000/agent-info'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(businessInfo),
       );
@@ -161,15 +167,10 @@ class _AccountSetupScreenState extends State<AccountSetupScreen>
         setState(() {
           _submitSuccess = true;
         });
-        // Navigate to navbar after setup
-        if (mounted) {
-          Navigator.pushReplacementNamed(context, '/navbar');
-        }
-        // Optionally, go to the next page (completion step)
-        // _pageController.nextPage(
-        //   duration: AppConstants.animationDuration,
-        //   curve: Curves.easeInOut,
-        // );
+        // Optionally, navigate to navbar after setup
+        // if (mounted) {
+        //   Navigator.pushReplacementNamed(context, '/navbar');
+        // }
       } else {
         setState(() {
           _submitError = 'Failed to submit: ${response.body}';
@@ -574,7 +575,9 @@ class _AccountSetupScreenState extends State<AccountSetupScreen>
           const SizedBox(height: 30),
           EnhancedElevatedButton(
             onPressed: _submitSuccess
-                ? () => print("Navigate to Dashboard")
+                ? () {
+                    Navigator.pushReplacementNamed(context, '/navbar');
+                  }
                 : () {
                     // Retry submission
                     _collectAndSubmitData();

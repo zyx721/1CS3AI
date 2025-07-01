@@ -1,58 +1,58 @@
 [
     {
-        "niche": "Tech Job Board and Media Platform",
-        "description": "Built In is a platform that publishes articles, lists B2B companies, and provides job listings primarily for the tech industry.",
+        "niche": "Digital Marketing and E-commerce Solutions Agency",
+        "description": "Paradox Studios TT specializes in transforming online stores into thriving e-commerce enterprises across the Caribbean by providing digital marketing, website design, and related business growth services.",
+        "email": "sales@paradoxstudiostt.com",
+        "phone": "(868) 222-0844",
+        "company_name": "Paradox Studios TT",
+        "url": "https://paradoxstudiostt.com/ecommerce-website-services-in-antigua-barbuda/"
+    },
+    {
+        "niche": "Full-service Digital Marketing Agency in Antigua & Barbuda",
+        "description": "Anchor Monkey is a full-service digital marketing agency in Antigua & Barbuda that helps businesses develop and improve their online presence through services like web design, SEO, branding, and website maintenance.",
         "email": null,
         "phone": null,
-        "url": "https://builtin.com/articles/b2b-companies",
-        "company_name": "Built In"
+        "url": "https://anchormonkey.com/digital-marketing/antigua-and-barbuda/",
+        "company_name": "Anchor Monkey"
     },
     {
-        "niche": "Virtual Assistant Services for B2B",
-        "description": "Stealth Agents supports B2B companies with expert virtual assistants trained in lead generation, customer support, and back-office operations.",
-        "email": null,
-        "phone": "(888) 693-1045",
-        "company_name": "Stealth Agents",
-        "url": "https://stealthagents.com/ultimate-list-of-b2b-industries__trashed/"
-    },
-    {
-        "niche": "Digital Media Production, Marketing & Training",
-        "description": "Ahmed Afridi offers a range of digital services including film making, equipment rental, video direction, digital marketing, and training workshops.",
-        "email": "info@ahmedafridi.com",
-        "phone": "+92 300 426 9924",
-        "url": "https://ahmedafridi.com/top-100-b2b-companies-list/",
-        "company_name": "Ahmed Afridi"
-    },
-    {
-        "niche": "Directory of B2B Market Research Companies",
-        "description": "This platform serves as a directory and resource for businesses seeking B2B market research companies, detailing their services, specialities, and industry expertise.",
-        "email": null,
-        "phone": "(212) 849-2752",
-        "company_name": null,
-        "url": "https://www.greenbook.org/market-research-firms/b2b-industry"
-    },
-    {
-        "niche": "B2B marketing agency specializing in web design, content marketing, and branding for industries including Technology, Fintech, Biotech, AI & ML, Software, Industrial, Engineering, Consulting, and Energy.",
-        "description": "Bop Design is a B2B marketing agency that provides creative and data-driven services, including web design, content marketing, and branding, to help businesses in various industries thrive.",
-        "email": null,
-        "phone": "888.670.7803",
-        "url": "https://www.bopdesign.com/bop-blog/2024/08/top-b2b-brands-list/",
-        "company_name": "Bop Design"
-    },
-    {
-        "niche": "B2B Company Ranking and Directory Service",
-        "description": "SuperbCompanies provides a platform for ranking and listing top business services companies, offering a curated collection of industry leaders.",
+        "niche": "Dropshipping Solutions and E-commerce Marketing",
+        "description": "Ecommerce Infinity offers services and products to help individuals start and grow dropshipping businesses, including ready-made stores and various digital marketing solutions.",
         "email": null,
         "phone": null,
-        "url": "https://superbcompanies.com/categories/business-services-companies/",
-        "company_name": "SuperbCompanies"
+        "url": "https://ecommerceinfinity.com/discover-top-10-dropshipping-suppliers-antigua-and-barbuda/",
+        "company_name": "Ecommerce Infinity"
     },
     {
-        "niche": "Business Brokerage for B2B Services Companies",
-        "description": "Synergy Business Brokers is a business brokerage firm that facilitates the buying and selling of profitable B2B services companies across various industries.",
+        "niche": "Digital Marketing and E-commerce Web Development Agency",
+        "description": "WIT Digital is a digital marketing and web development agency specializing in e-commerce solutions.",
+        "email": "info@witdigitalworld.com",
+        "phone": "+91 76982 54555",
+        "company_name": "WIT Digital",
+        "url": "https://witdigitalworld.com/antigua-and-barbuda/ecommerce-website-development.php"
+    },
+    {
+        "niche": "AI-driven Investment Migration and Global Mobility Solutions",
+        "description": "Tisoro provides AI-driven investment migration and global mobility solutions, including citizenship, residency, and Golden Visa programs, for high-net-worth individuals and governments.",
         "email": null,
-        "phone": "(888)-750-5950",
-        "url": "https://synergybb.com/businesses-for-sale/b2b-services/",
-        "company_name": "Synergy Business Brokers"
+        "phone": null,
+        "url": "https://www.tisoroglobal.com/tisoro-companies/tisoro-companies-In-regions/antigua-barbuda/e-commerce-platforms/",
+        "company_name": "Tisoro"
+    },
+    {
+        "niche": "Offshore Company Formation and Business Solutions",
+        "description": "OVZA helps entrepreneurs establish offshore businesses in various jurisdictions, offering services like company registration, banking support, and expert guidance for tax efficiency and privacy.",
+        "email": "info@ovza.com",
+        "phone": null,
+        "company_name": "OVZA",
+        "url": "https://ovza.com/best-antigua-offshore-business-ideas/"
+    },
+    {
+        "niche": null,
+        "description": null,
+        "email": null,
+        "phone": null,
+        "url": "https://conciergeantiguabarbuda.com/wp-content/uploads/2020/10/AntiguaBarbudaTheCitizen6.pdf",
+        "company_name": null
     }
 ]

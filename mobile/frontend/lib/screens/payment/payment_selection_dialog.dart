@@ -73,14 +73,16 @@ class _PaymentSelectionDialogState extends State<PaymentSelectionDialog>
                 padding: EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.white,
-                      Colors.grey.shade50,
-                    ],
-                  ),
+                  // Match Profile: dark glass effect using profile's cardBg and green accent
+                  color: const Color(0xFF1D1D1F).withOpacity(0.96),
+                  border: Border.all(color: Color(0xFF79B266).withOpacity(0.13), width: 1.2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.18),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -90,7 +92,7 @@ class _PaymentSelectionDialogState extends State<PaymentSelectionDialog>
                       children: [
                         Icon(
                           Icons.payment,
-                          color: Color(0xFF336799),
+                          color: Color(0xFF79B266),
                           size: 28,
                         ),
                         SizedBox(width: 12),
@@ -102,13 +104,13 @@ class _PaymentSelectionDialogState extends State<PaymentSelectionDialog>
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF336799),
+                              color: Colors.white,
                             ),
                           ),
                         ),
                         IconButton(
                           onPressed: () => Navigator.of(context).pop(),
-                          icon: Icon(Icons.close, color: Colors.grey),
+                          icon: Icon(Icons.close, color: Colors.white54),
                         ),
                       ],
                     ),
@@ -120,10 +122,10 @@ class _PaymentSelectionDialogState extends State<PaymentSelectionDialog>
                       width: double.infinity,
                       padding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
                       decoration: BoxDecoration(
-                        color: Color(0xFF336799).withOpacity(0.1),
+                        color: Color(0xFF79B266).withOpacity(0.09),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Color(0xFF336799).withOpacity(0.3),
+                          color: Color(0xFF79B266).withOpacity(0.18),
                         ),
                       ),
                       child: Text(
@@ -132,7 +134,7 @@ class _PaymentSelectionDialogState extends State<PaymentSelectionDialog>
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF336799),
+                          color: Color(0xFF79B266),
                         ),
                       ),
                     ),
@@ -143,7 +145,7 @@ class _PaymentSelectionDialogState extends State<PaymentSelectionDialog>
                       'Select your preferred payment method:',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.grey[700],
+                        color: Colors.white70,
                       ),
                     ),
                     
@@ -153,8 +155,8 @@ class _PaymentSelectionDialogState extends State<PaymentSelectionDialog>
                     _buildPaymentOption(
                       title: 'Baridi Mobile',
                       subtitle: 'Pay with Baridi Mobile',
-                      iconWidget: Icon(Icons.phone_android, color: Color(0xFF336799), size: 24),
-                      color: Color(0xFF336799),
+                      iconWidget: Icon(Icons.phone_android, color: Color(0xFF79B266), size: 24),
+                      color: Color(0xFF79B266),
                       onTap: () => _handleBaridiPayment(),
                     ),
                     
@@ -163,8 +165,8 @@ class _PaymentSelectionDialogState extends State<PaymentSelectionDialog>
                     _buildPaymentOption(
                       title: 'PayPal',
                       subtitle: 'Pay with PayPal account',
-                      iconWidget: Icon(Icons.account_balance_wallet, color: Colors.blue[700], size: 24),
-                      color: Colors.blue[700]!,
+                      iconWidget: Icon(Icons.account_balance_wallet, color: Colors.blue[300], size: 24),
+                      color: Colors.blue[300]!,
                       onTap: () => _handlePayPalPayment(),
                     ),
                     
@@ -178,8 +180,7 @@ class _PaymentSelectionDialogState extends State<PaymentSelectionDialog>
                         height: 24,
                         width: 24,
                       ),
-                      // Changed from green to gray
-                      color: Colors.grey[600]!,
+                      color: Colors.grey[400]!,
                       onTap: () => _handleGooglePayment(),
                     ),
                   ],
@@ -219,16 +220,16 @@ class _PaymentSelectionDialogState extends State<PaymentSelectionDialog>
           child: Container(
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(color: color.withOpacity(0.22)),
               borderRadius: BorderRadius.circular(12),
-              color: Colors.white,
+              color: Colors.white.withOpacity(0.03),
             ),
             child: Row(
               children: [
                 Container(
                   padding: EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withOpacity(0.13),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: iconWidget,
@@ -243,14 +244,14 @@ class _PaymentSelectionDialogState extends State<PaymentSelectionDialog>
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black87,
+                          color: Colors.white,
                         ),
                       ),
                       Text(
                         subtitle,
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey[600],
+                          color: Colors.white70,
                         ),
                       ),
                     ],
@@ -259,7 +260,7 @@ class _PaymentSelectionDialogState extends State<PaymentSelectionDialog>
                 Icon(
                   Icons.arrow_forward_ios,
                   size: 16,
-                  color: Colors.grey[400],
+                  color: Colors.white38,
                 ),
               ],
             ),
