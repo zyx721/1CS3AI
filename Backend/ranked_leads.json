@@ -1,3 +1,82 @@
-[{
-    "company":"ziad"
-}]
+[
+    {
+        "niche": "Digital Marketing and Web Design Agency",
+        "description": "Vital is a digital agency specializing in website design and development, digital marketing, and brand strategy, serving B2B, education, and eCommerce industries.",
+        "email": null,
+        "phone": null,
+        "company_name": "Vital",
+        "url": "https://vitaldesign.com/social-media-ecommerce/"
+    },
+    {
+        "niche": "Digital Marketing Agency",
+        "description": "Thrive Internet Marketing Agency provides a comprehensive suite of digital marketing services, including SEO, PPC, social media, and web design, to help businesses achieve real results and scale.",
+        "email": null,
+        "phone": "866-908-4748",
+        "url": "https://thriveagency.com/news/the-ultimate-social-media-marketing-strategy-for-ecommerce/",
+        "company_name": "Thrive Internet Marketing Agency"
+    },
+    {
+        "niche": "Social Media Management Software",
+        "description": "Sprout Social provides a comprehensive social media management platform designed to help businesses streamline and scale their social media efforts, including engagement, publishing, analytics, listening, and customer care.",
+        "email": null,
+        "phone": "866-878-3231",
+        "company_name": "Sprout Social",
+        "url": "https://sproutsocial.com/insights/social-media-ecommerce/"
+    },
+    {
+        "niche": "B2B Digital Marketing Solutions Provider",
+        "description": "This company provides digital marketing solutions and tools, including social media marketing, PPC management, and SEO resources, to businesses, agencies, and multi-location businesses to help them find, convert, and grow their customer base.",
+        "email": null,
+        "phone": "855.967.3787",
+        "url": "https://www.wordstream.com/social-media-marketing",
+        "company_name": null
+    },
+    {
+        "niche": "U.S. Government Agency for International Trade and Investment",
+        "description": "The International Trade Administration (ITA) is an official U.S. government organization dedicated to promoting and facilitating international trade for American businesses and attracting foreign direct investment to the United States.",
+        "email": null,
+        "phone": null,
+        "url": "https://www.trade.gov/ecommerce-frontline-social-media-forecast",
+        "company_name": "International Trade Administration (ITA)"
+    },
+    {
+        "niche": "E-commerce Platform Provider",
+        "description": "BigCommerce provides a modern and flexible e-commerce platform that enables businesses to build, manage, and grow their online stores for B2B and B2C sales.",
+        "email": null,
+        "phone": "1-888-248-9325",
+        "url": "https://www.bigcommerce.com/articles/omnichannel-retail/social-commerce/",
+        "company_name": "BigCommerce"
+    },
+    {
+        "niche": "Social Media Management Platform",
+        "description": "Social Champ is an intuitive social media management platform offering powerful automation features and integrations to help businesses create content, analyze performance, and engage with their audience across various social channels.",
+        "email": null,
+        "phone": null,
+        "url": "https://www.socialchamp.com/blog/social-media-marketing-for-ecommerce/",
+        "company_name": "Social Champ"
+    },
+    {
+        "niche": "Question and Answer Platform",
+        "description": "Quora is an online platform that allows users to ask questions, answer questions, and discover information on a wide range of topics.",
+        "email": null,
+        "phone": null,
+        "url": "https://www.quora.com/What-role-does-social-media-play-in-e-commerce-marketing-1",
+        "company_name": "Quora"
+    },
+    {
+        "niche": "Global professional services and consulting firm",
+        "description": "Accenture is a global professional services company that provides strategy, consulting, digital, technology, and operations services, as demonstrated by their industry research and reports.",
+        "email": "quentin.nolibois@accenture.com",
+        "phone": "415 741 8356",
+        "company_name": "Accenture",
+        "url": "https://newsroom.accenture.com/news/2022/shopping-on-social-media-platforms-expected-to-reach-1-2-trillion-globally-by-2025-new-accenture-study-finds"
+    },
+    {
+        "niche": "Full-Service Digital Agency for Nonprofits, Associations, Brands, and Government",
+        "description": "New Target is a full-service digital agency offering marketing strategies, website design and development, branding, and creative services to drive conversions and grow organizations, specializing in e-commerce, nonprofits, associations, brands, and government clients.",
+        "email": null,
+        "phone": null,
+        "company_name": "New Target",
+        "url": "https://www.newtarget.com/web-insights-blog/social-media-marketing-strategies-2/"
+    }
+]

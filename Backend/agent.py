@@ -74,9 +74,20 @@ def load_business_config(path: str = BUSINESS_CONFIG_PATH):
     except (json.JSONDecodeError, IOError) as e:
         logging.error(f"❌ Error loading business config: {e}. Using default values.")
 
+def normalize_business_info():
+    """Ensure BUSINESS_INFO fields are in the correct format for saving."""
+    # Convert location list to comma-separated string if needed
+    if isinstance(BUSINESS_INFO.get("location"), list):
+        BUSINESS_INFO["location"] = ", ".join(BUSINESS_INFO["location"])
+    # Optionally, trim whitespace from all string fields
+    for k, v in BUSINESS_INFO.items():
+        if isinstance(v, str):
+            BUSINESS_INFO[k] = v.strip()
+
 def save_business_config(path: str = BUSINESS_CONFIG_PATH):
     """Saves the in-memory BUSINESS_INFO to a JSON file."""
     try:
+        normalize_business_info()
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(BUSINESS_INFO, f, indent=4)
         logging.info(f"✅ Business config saved to {path}.")
@@ -101,10 +112,16 @@ def search_leads(description: str) -> str:
 def save_ranked_leads(ranked_leads: list[dict]):
     """Saves the provided list of ranked leads to a 'ranked_leads.json' file."""
     logging.info(f"Executing 'save_ranked_leads' tool...")
+    # Only keep leads with all required fields (not just relevance_score/company_name)
+    required_fields = {"company_name", "niche", "description", "email", "phone", "url"}
+    filtered_leads = [
+        lead for lead in ranked_leads
+        if required_fields.issubset(lead.keys())
+    ]
     try:
         with open(RANKED_LEADS_PATH, "w", encoding="utf-8") as f:
-            json.dump(ranked_leads, f, indent=4)
-        success_message = f"Successfully saved {len(ranked_leads)} ranked leads to {RANKED_LEADS_PATH}"
+            json.dump(filtered_leads, f, indent=4)
+        success_message = f"Successfully saved {len(filtered_leads)} ranked leads to {RANKED_LEADS_PATH}"
         logging.info(f"✅ {success_message}")
         return success_message
     except Exception as e:
@@ -220,6 +237,7 @@ async def upload_config(file: UploadFile = File(..., description="A JSON file wi
         content = await file.read()
         data = json.loads(content)
         BUSINESS_INFO.update(data)
+        normalize_business_info()
         save_business_config()
         return {"message": "Configuration uploaded successfully.", "new_config": BUSINESS_INFO}
     except json.JSONDecodeError:
@@ -419,6 +437,7 @@ async def update_agent_info(update_data: BusinessInfoUpdate):
         raise HTTPException(status_code=400, detail="No update data provided.")
     
     BUSINESS_INFO.update(update_dict)
+    normalize_business_info()
     save_business_config()
     return {"message": "Agent info updated successfully.", "updated_info": BUSINESS_INFO}
 

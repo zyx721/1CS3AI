@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | Chilbot</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <!-- Add Firebase App and Auth SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         :root {
@@ -671,7 +674,7 @@
             <div class="toggle-switch-container">
                 <label for="aiCallsToggle" class="toggle-label">AI Calls</label>
                 <label class="toggle-switch">
-                    <input type="checkbox" id="aiCallsToggle" checked>
+                    <input type="checkbox" id="aiCallsToggle">
                     <span class="toggle-slider"><span class="toggle-thumb"></span></span>
                 </label>
             </div>
@@ -679,6 +682,8 @@
 
             <button type="button" class="sidebar-option-btn" id="editAgentInfoBtn">Edit Agent Information</button>
             <button type="button" class="sidebar-option-btn" id="exportDataBtn">Export Data</button>
+            <!-- NEW: Logout Button -->
+            <button type="button" class="sidebar-option-btn" id="logoutBtn" style="color:#e57373;">Logout</button>
         </div>
         <form id="sidebarSettingsForm" autocomplete="off" style="display:none;">
             <label for="sidebarBusinessName">Business Name</label>
@@ -1024,6 +1029,7 @@
             const aiCallsToggle = document.getElementById('aiCallsToggle');
             const aiSection = document.getElementById('aiCallingProgressSection');
             if (aiCallsToggle && aiSection) {
+                // Hide progress section unless AI Calls is ON
                 aiSection.style.display = aiCallsToggle.checked ? '' : 'none';
             }
         });
@@ -1037,6 +1043,7 @@
         document.getElementById('settingsBtn').addEventListener('click', async () => {
             sidebar.classList.add('open');
             await fetchAndApplyToggleStates();
+            syncAiCallsToggleAndSection();
         });
         document.getElementById('cancelSidebarSettings').addEventListener('click', () => {
             sidebar.classList.remove('open');
@@ -1053,7 +1060,7 @@
             }
         });
 
-        // --- MODIFIED: AI Calls toggle triggers agent if ON ---
+        // --- MODIFIED: AI Calls toggle ONLY shows/hides progress section, does NOT run agent ---
         document.getElementById('aiCallsToggle').addEventListener('change', async (e) => {
             console.log('AI Calls status:', e.target.checked);
             localStorage.setItem('aiCallsStatus', e.target.checked);
@@ -1061,9 +1068,7 @@
             if (aiSection) {
                 aiSection.style.display = e.target.checked ? '' : 'none';
             }
-            if (e.target.checked) {
-                await runAgentAndRefreshLeads();
-            }
+            // Do NOT call runAgentAndRefreshLeads() here!
         });
 
         // --- Multi-Select Country Component Logic ---
@@ -1305,6 +1310,30 @@
                 }
             });
         }
+
+        // --- NEW: Firebase config and logout logic ---
+        // Replace with your Firebase config if needed
+        const firebaseConfig = {
+        apiKey: "AIzaSyBu8k7nwXPBq2ryXansUiBCsSCBWT3QLVk",
+        authDomain: "ncs2025-d7a20.firebaseapp.com",
+        projectId: "ncs2025-d7a20",
+        storageBucket: "ncs2025-d7a20.firebasestorage.app",
+        messagingSenderId: "9180440703",
+        appId: "1:9180440703:web:5b2c4e634ac00ad7c3374a",
+        measurementId: "G-GTBQJZL00D"};
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', async function() {
+            try {
+                await firebase.auth().signOut();
+                window.location.href = "landing.html";
+            } catch (e) {
+                alert("Logout failed: " + (e.message || e));
+            }
+        });
     </script>
 </body>
 </html>
