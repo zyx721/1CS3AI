@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chilbot - Your AI Writing Assistant</title>
+    <title>Gemsell - Your AI Sales Agent</title>
     <style>
         /* FONT IMPORT */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -129,7 +129,7 @@
         .logo-wrapper {
             display: flex;
             align-items: center;
-            gap: 12px; /* This creates the space between the logo and text */
+            gap: 12px;
         }
 
         .logo {
@@ -168,18 +168,15 @@
             overflow: hidden;
         }
         
-        /* --- START: CSS for 3D Diamond Background --- */
         #diamond-background-canvas {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            /* Placed behind hero content (z-index:2) but in front of the glow (z-index:0) */
             z-index: 1; 
             cursor: pointer;
         }
-        /* --- END: CSS for 3D Diamond Background --- */
         
         .hero-section::before {
             content: '';
@@ -194,7 +191,7 @@
             animation: drift-glow 40s infinite alternate ease-in-out;
             transition: transform 0.2s ease-out;
             transform: translate(var(--x, 0), var(--y, 0));
-            z-index: 0; /* Lowered z-index to be behind diamonds */
+            z-index: 0;
         }
 
         @keyframes drift-glow {
@@ -204,7 +201,7 @@
 
         .hero-content {
             position: relative;
-            z-index: 2; /* Highest z-index to stay on top */
+            z-index: 2;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -229,9 +226,6 @@
             background: rgba(255, 255, 255, 0.05);
         }
         
-        /*
-        * === GLOBAL ANIMATION STYLES ===
-        */
         .hero-title .char {
             display: inline-block;
             opacity: 0;
@@ -272,6 +266,120 @@
         .animate-on-scroll.is-visible > * {
             transition-delay: var(--stagger-delay);
         }
+        
+        /* --- START: NEW MODERN DASHBOARD SECTION --- */
+        .dashboard-section {
+            padding: 120px 0;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            position: relative;
+            overflow: hidden;
+        }
+        .dashboard-section::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1200px;
+            height: 1200px;
+            background: radial-gradient(circle, rgba(46, 64, 43, 0.3) 0%, rgba(19, 20, 20, 0) 60%);
+            transform: translate(-50%, -50%);
+            z-index: 0;
+        }
+        .dashboard-section .container {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+        .dashboard-title-wrapper {
+            margin-bottom: 80px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .dashboard-title-wrapper p {
+            font-size: 16px;
+            color: #aaa;
+            margin-bottom: 8px;
+        }
+        .dashboard-title-wrapper h2 {
+            font-size: 56px;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 2fr 3fr 2fr;
+            align-items: center;
+            gap: 20px;
+        }
+        .dashboard-laptop {
+            grid-column: 2 / 3;
+        }
+        .dashboard-laptop img {
+            max-width: 100%;
+            height: auto;
+            filter: drop-shadow(0 25px 50px rgba(0,0,0,0.3));
+        }
+        .dashboard-features-left, .dashboard-features-right {
+            display: grid;
+            gap: 24px;
+        }
+        .feature-card {
+            background-color: #1C1C1C;
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid #282828;
+            text-align: left;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            background-color: #222;
+        }
+        .feature-card .icon {
+            width: 28px;
+            height: 28px;
+            stroke-width: 1.5;
+            color: var(--green-accent);
+            margin-bottom: 16px;
+        }
+        .feature-card h4 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-light);
+        }
+        .feature-card p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #aaa;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+                gap: 60px;
+            }
+            .dashboard-laptop {
+                grid-row: 1 / 2;
+                max-width: 80%;
+                margin: 0 auto;
+            }
+            .dashboard-features-left, .dashboard-features-right {
+                grid-template-columns: 1fr 1fr;
+                grid-row: 2 / 3;
+            }
+        }
+         @media (max-width: 768px) {
+            .dashboard-features-left, .dashboard-features-right {
+                grid-template-columns: 1fr;
+            }
+             .dashboard-laptop {
+                max-width: 100%;
+            }
+        }
+        /* --- END: NEW MODERN DASHBOARD SECTION --- */
 
         /* --- PRODUCTS SECTION --- */
         .products-section { padding: 120px 0; text-align: center; background-color: var(--bg-light); }
@@ -283,8 +391,8 @@
         .product-card:hover::before { opacity: 1; transform: scale(1); }
         .product-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .product-card .icon { width: 36px; height: 36px; transition: fill 0.4s ease; }
-        .product-card .icon path { fill: var(--text-dark); }
-        .product-card:hover .icon path { fill: var(--text-light); }
+        .product-card .icon path, .product-card .icon circle, .product-card .icon line, .product-card .icon rect { stroke: var(--text-dark); fill: none; } /* Modified for outline icons */
+        .product-card:hover .icon path, .product-card:hover .icon circle, .product-card:hover .icon line, .product-card:hover .icon rect { stroke: var(--text-light); }
         .product-card-header .number { font-size: 12px; color: #888; transition: color 0.4s ease; }
         .product-card:hover .number { color: rgba(245, 244, 240, 0.5); }
         .product-card h3 { font-size: 20px; margin-bottom: 8px; }
@@ -313,21 +421,28 @@
         .price-card .price span { font-size: 14px; font-weight: 400; color: #9E9E9E; }
         .price-card .btn { width: 100%; text-align: center; padding: 16px; border-radius: 12px; font-weight: 500; font-size: 16px; margin-bottom: 24px; display: flex; justify-content: center; align-items: center; gap: 10px; transition: transform 0.2s ease, background-color 0.2s ease; }
         .price-card .btn:hover { transform: scale(1.03); }
-        .price-card .btn::before { content: '●'; font-size: 8px; color: #61F44E; line-height: 1; }
-        .price-card.free .btn { background: #1F1F1F; color: var(--text-light); border: 1px solid #333; }
-        .price-card.free .btn:hover { background: #2a2a2a; }
+        .price-card .btn-dark { background: #1F1F1F; color: var(--text-light); border: 1px solid #333; }
+        .price-card .btn-dark:hover { background: #2a2a2a; }
         .price-card.premium .btn { background: #B3D0AB; color: #1A2E17; font-weight: 600; }
         .price-card.premium .btn:hover { background: #c3e0bd; }
-        .card-description { color: #BDBDBD; font-size: 14px; line-height: 1.5; height: 63px; }
+        .card-description { color: #BDBDBD; font-size: 14px; line-height: 1.5; min-height: 63px; }
         .divider { border-top: 1px solid rgba(255, 255, 255, 0.1); margin: 32px 0; }
         .features-title { font-weight: 500; margin-bottom: 20px; color: #E0E0E0; }
-        .price-card ul { list-style: none; padding: 0; margin: 0; }
+        .price-card ul { list-style: none; padding: 0; margin: 0; flex-grow: 1;}
         .price-card ul li { margin-bottom: 15px; padding-left: 28px; position: relative; font-size: 14px; color: #D0D0D0; }
         .price-card ul li:last-child { margin-bottom: 0; }
         .price-card ul li::before { content: '✓'; color: #B4CC5B; position: absolute; left: 0; font-weight: bold; font-size: 16px; }
         .price-card.premium { border: none; overflow: visible; transform: scale(1.02); background-color: var(--color-left); background-image: radial-gradient(circle at 100% 100%, var(--color-bottom-right), transparent 40%), radial-gradient(circle at 100% 0%, var(--color-top-right), transparent 40%), linear-gradient(115deg, var(--color-left) 25%, var(--color-middle) 70%); }
         .premium-diamond { position: absolute; top: -65px; right: -4px; width: 180px; height: auto; z-index: 10; pointer-events: none; filter: drop-shadow(4px 4px 20px rgba(0, 0, 0, 0.4)); }
         .price-card.premium::after { content: ''; position: absolute; bottom: -150px; right: -150px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(162, 185, 156, 0.15) 0%, rgba(162, 185, 156, 0) 60%); z-index: 1; pointer-events: none; }
+        
+        @media (max-width: 900px) {
+            .pricing-grid {
+                grid-template-columns: 1fr;
+                max-width: 480px;
+                margin: 0 auto;
+            }
+        }
         
         /* --- TESTIMONIALS & OTHER SECTIONS --- */
         .testimonials-section, .final-cta-section, .main-footer { background-color: var(--bg-light); }
@@ -355,30 +470,25 @@
         .footer-bottom-links { display: flex; align-items: center; gap: 20px; color: #555; }
         .footer-bottom-links a { color: #555; text-decoration: none; }
         .footer-bottom-links a:hover { color: var(--text-dark); }
+        
+        @media (max-width: 900px) {
+            .testimonials-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+            .footer-bottom { flex-direction: column; gap: 20px; }
+        }
+        @media (max-width: 480px) {
+            .footer-grid { grid-template-columns: 1fr; }
+            .hero-title { font-size: 56px; }
+            .products-title h2, .iphone-scroll-title, .pricing-title h2, .testimonials-section h2, .dashboard-title-wrapper h2 { font-size: 42px; }
+            .final-cta-content h2 { font-size: 48px; }
+        }
 
-        /* HERO LOGO TOP LEFT */
-        .hero-logo-top-left {
-            position: absolute;
-            top: 32px;
-            left: 32px;
-            width: 64px;
-            height: 64px;
-            object-fit: contain;
-            z-index: 3;
-            filter: drop-shadow(0 2px 12px #3B5428);
-        }
-        @media (max-width: 600px) {
-            .hero-logo-top-left {
-                top: 16px;
-                left: 16px;
-                width: 44px;
-                height: 44px;
-            }
-        }
 
         .header-logo-img {
-            width: 42px; /* MODIFIED: Made logo bigger */
-            height: 42px; /* MODIFIED: Made logo bigger */
+            width: 42px;
+            height: 42px;
             object-fit: contain;
             vertical-align: middle;
             display: inline-block;
@@ -395,73 +505,104 @@
 <body>
     <header class="main-header">
         <div class="container navbar">
-            <!-- MODIFICATION: Wrapped logo and text in a container to group them -->
             <div class="logo-wrapper">
-                <img src="images/logo.png" alt="SellGem Logo" class="header-logo-img">
+                <img src="images/logo.png" alt="Gemsell Logo" class="header-logo-img">
                 <a href="#" class="logo">Gemsell</a>
             </div>
             <nav class="nav-links">
-                <a href="#">Products</a>
-                <a href="#">Pricing</a>
+                <a href="#products">Products</a>
+                <a href="#pricing">Pricing</a>
                 <a href="#">About</a>
                 <a href="#">Blog</a>
             </nav>
             <div id="header-auth-container" class="header-auth-buttons">
-                <a href="sign_in.html" class="btn btn-outline">Sign up for free</a>
+                <a href="sign_in.html" class="btn btn-outline">Get Started</a>
             </div>
         </div>
     </header>
 
     <main>
         <section class="hero-section">
-            <!-- START: 3D Canvas element -->
             <canvas id="diamond-background-canvas"></canvas>
-            <!-- END: 3D Canvas element -->
-
-
+            
             <div class="hero-content">
-                <h1 class="hero-title">Have a Service? <br> AI<span class="highlight-green"> Finds </span>& <span class="highlight-green"> Close</span> <br></span> Your Deals</h1>
+                <h1 class="hero-title">Have a Service? <br> AI<span class="highlight-green"> Finds </span>& <span class="highlight-green"> Closes</span> <br></span> Your Deals</h1>
                 <div class="hero-social-proof">
-                    ⭐ 4.3/5 Rating / 3.5M+ Installs
+                    ⭐ Trusted by over 500+ Sales Teams Globally
                 </div>
-                <a id="hero-cta" href="sign_in.html" class="btn btn-green hero-cta">Sign up. It's free!</a>
+                <a id="hero-cta" href="sign_in.html" class="btn btn-green hero-cta">Get Your First Deals</a>
             </div>
         </section>
 
-        <section class="products-section">
+        <!-- START: NEW MODERN DASHBOARD SECTION (MOVED) -->
+        
+        <!-- END: NEW MODERN DASHBOARD SECTION -->
+
+        <section id="products" class="products-section">
             <div class="container">
                 <div class="products-title animate-on-scroll">
                     <p>Our products</p>
-                    <h2>2 tools — one platform</h2>
+                    <h2>2 tools — one powerful platform</h2>
                 </div>
                 <div class="products-grid animate-on-scroll" style="grid-template-columns: 1fr 1fr; justify-content: center; max-width: 700px; margin: 60px auto 0;">
-                    <!-- Lead Finder Tool -->
                     <div class="product-card" style="min-height:220px;">
                         <div class="product-card-header">
-                            <!-- Simple search icon -->
-                            <svg class="icon" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><line x1="16.65" y1="16.65" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                             <span class="number">[ 01 ]</span>
                         </div>
                         <h3>Lead Finder</h3>
-                        <p>AI-powered search for high-potential customers who need your product most.</p>
+                        <p>AI-powered search for high-potential customers who need your service most.</p>
                     </div>
-                    <!-- AI Advanced Voice Tool -->
                     <div class="product-card" style="min-height:220px;">
                         <div class="product-card-header">
-                            <!-- Simple voice/waveform icon -->
-                            <svg class="icon" viewBox="0 0 24 24" fill="none"><rect x="9" y="3" width="6" height="18" rx="3" stroke="currentColor" stroke-width="2"/><path d="M19 10v4M5 10v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line></svg>
                             <span class="number">[ 02 ]</span>
                         </div>
-                        <h3>AI Advanced Voice</h3>
+                        <h3>AI Sales Agent</h3>
                         <p>Natural, real-time streaming AI agent that interacts and negotiates with businesses—closing deals for you.</p>
                     </div>
                 </div>
             </div>
         </section>
-
-        <!-- MODIFICATION: This is the new, integrated section -->
+<section id="dashboard" class="dashboard-section animate-on-scroll">
+            <div class="container">
+                <div class="dashboard-title-wrapper">
+                    <p>Your Central Command</p>
+                    <h2>Track every deal, <span class="highlight-green">in real-time</span></h2>
+                </div>
+                <div class="dashboard-layout">
+                    <div class="dashboard-features-left">
+                        <div class="feature-card">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <h4>Live-Track Sales</h4>
+                            <p>Monitor your AI's performance and active conversations from one intuitive interface.</p>
+                        </div>
+                        <div class="feature-card">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                            <h4>Deep Analytics</h4>
+                            <p>Gain insights from call outcomes and performance data to refine your sales strategy.</p>
+                        </div>
+                    </div>
+                    <div class="dashboard-laptop">
+                        <img src="laptop.png" alt="Gemsell Dashboard on a Laptop">
+                    </div>
+                    <div class="dashboard-features-right">
+                        <div class="feature-card">
+                             <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <h4>Manage Deals</h4>
+                            <p>Review conversation transcripts, manage appointments, and track closed deals seamlessly.</p>
+                        </div>
+                         <div class="feature-card">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <h4>Full Control</h4>
+                            <p>Configure your AI's personality, sales scripts, and even take over a call live if needed.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
         <section class="iphone-scroll-section">
-            <h2 class="iphone-scroll-title animate-on-scroll">See AI Flow in Action</h2>
+            <h2 class="iphone-scroll-title animate-on-scroll">See Your AI Agent in Action</h2>
             <div class="image-sequence-container">
                 <div class="canvas-container">
                     <canvas id="scroll-canvas"></canvas>
@@ -469,44 +610,44 @@
             </div>
         </section>
         
-        <section class="pricing-section">
+        <section id="pricing" class="pricing-section">
             <div class="container">
                  <div class="pricing-title animate-on-scroll">
-                    <p>Checker</p>
-                    <h2>Empower your writing <br>with <span class="highlight-green">Premium</span></h2>
+                    <p>Pricing Plans</p>
+                    <h2>Empower your sales team<br>with <span class="highlight-green">AI Automation</span></h2>
                 </div>
                 <div class="pricing-grid animate-on-scroll">
-                    <div class="price-card free">
-                        <h3>Free</h3>
-                        <p class="price-subtitle">No credit card required</p>
-                        <div class="price">$0<span>USD / per month</span></div>
-                        <a id="pricing-cta" href="sign_in.html" class="btn btn-dark">Sign up for free</a>
-                        <p class="card-description">Fix errors, strengthen your work, and get help brainstorming</p>
+                    <div class="price-card">
+                        <h3>Pro</h3>
+                        <p class="price-subtitle">For growing businesses</p>
+                        <div class="price">$20<span>USD / per month</span></div>
+                        <a href="sign_in.html" class="btn btn-dark">Choose Pro Plan</a>
+                        <p class="card-description">Automate your outreach and qualify leads at scale.</p>
                         <div class="divider"></div>
-                        <p class="features-title">Features you'll love:</p>
+                        <p class="features-title">Key features:</p>
                         <ul>
-                            <li>Paraphrase up to 125 words</li>
-                            <li>Paraphrase in 2 modes</li>
-                            <li>Correct basic grammar errors</li>
-                            <li>Generate text with 50 AI prompts/day</li>
-                            <li>Generate basic summaries</li>
+                            <li>100 AI sales calls / month</li>
+                            <li>500 lead lookups / month</li>
+                            <li>Standard AI Voice</li>
+                            <li>Basic CRM Integration</li>
+                            <li>Email & Community Support</li>
                         </ul>
                     </div>
                     <div class="price-card premium">
                         <img src="dimond.png" alt="Premium Diamond" class="premium-diamond">
-                        <h3>Premium</h3>
-                        <p class="price-subtitle">3-day money-back guarantee</p>
-                        <div class="price">$5.18<span>USD / per month, billed annually</span></div>
-                        <a href="#" class="btn btn-green">Upgrade to premium</a>
-                        <p class="card-description">Feel confident your writing is clear, impactful, and flawless</p>
+                        <h3>Scale</h3>
+                        <p class="price-subtitle">For high-volume sales teams</p>
+                        <div class="price">$50<span>USD / per month</span></div>
+                        <a href="#" class="btn btn-green">Upgrade to Scale</a>
+                        <p class="card-description">Unleash the full power of AI to dominate your market.</p>
                         <div class="divider"></div>
-                        <p class="features-title">Everything included in Free, plus:</p>
+                        <p class="features-title">Everything in Pro, plus:</p>
                         <ul>
-                            <li>Paraphrase unlimited text</li>
-                            <li>Paraphrase in unlimited modes</li>
-                            <li>Access advanced grammar suggestions</li>
-                            <li>Generate text with unlimited AI prompts</li>
-                            <li>Create custom summaries</li>
+                            <li>300 AI sales calls / month</li>
+                            <li>Unlimited lead lookups</li>
+                            <li>Advanced, human-like AI voices</li>
+                            <li>Advanced CRM Integration</li>
+                            <li>Priority Support & Onboarding</li>
                         </ul>
                     </div>
                 </div>
@@ -515,35 +656,35 @@
         
         <section class="testimonials-section">
              <div class="container">
-                <h2 class="animate-on-scroll">Why B2B teams <span class="highlight-green">love</span> SellGem</h2>
+                <h2 class="animate-on-scroll">Why B2B teams <span class="highlight-green">love</span> Gemsell</h2>
                 <div class="testimonials-grid animate-on-scroll">
                     <div class="testimonial-card">
-                        <p>"As someone who makes money online by writing, I wouldn't say I like fluff, so I will say that briefly: SellGem is one of my favorite tools, and I use it daily. It will save you time and money."</p>
+                        <p>"Gemsell has been a game-changer. Our team now spends less time on cold calls and more time closing pre-qualified deals. It's like having a tireless sales assistant working 24/7."</p>
                         <div class="testimonial-author">
-                            <img src="https://i.pravatar.cc/80?u=jerry" alt="author">
+                            <img src="https://i.pravatar.cc/80?u=john" alt="author">
                             <div class="author-info">
-                                <strong>Jerry Keszka</strong>
-                                <span>Content creator</span>
+                                <strong>John D.</strong>
+                                <span>Sales Manager</span>
                             </div>
                         </div>
                     </div>
                      <div class="testimonial-card">
-                        <p>"My favorite SellGem tools are the Paraphraser and the AI Detector. These aren't static tools; they're constantly evolving and helping me improve my technical, commercial and creative writing."</p>
+                        <p>"The AI's ability to navigate conversations and book meetings is just incredible. We saw a 3x increase in qualified appointments within the first month. The lead finder is spot on."</p>
                         <div class="testimonial-author">
-                            <img src="https://i.pravatar.cc/80?u=nico" alt="author">
+                            <img src="https://i.pravatar.cc/80?u=sarah" alt="author">
                             <div class="author-info">
-                                <strong>Nico Z.</strong>
-                                <span>Published author</span>
+                                <strong>Sarah L.</strong>
+                                <span>Startup Founder</span>
                             </div>
                         </div>
                     </div>
                      <div class="testimonial-card">
-                        <p>"I have been using SellGem for a few weeks now and I am really impressed with the results. The AI helps me to write more clearly and concisely, which has significantly improved my productivity."</p>
+                        <p>"I was skeptical about an AI handling sales calls, but Gemsell is shockingly effective. It understands nuance and pushes the conversation forward. Our productivity is through the roof."</p>
                         <div class="testimonial-author">
-                            <img src="https://i.pravatar.cc/80?u=linda" alt="author">
+                            <img src="https://i.pravatar.cc/80?u=mike" alt="author">
                             <div class="author-info">
-                                <strong>Linda Thompson</strong>
-                                <span>Content creator</span>
+                                <strong>Mike R.</strong>
+                                <span>Business Development</span>
                             </div>
                         </div>
                     </div>
@@ -554,8 +695,8 @@
         <section class="final-cta-section">
              <div class="final-cta-content animate-on-scroll">
                 <p>Get started</p>
-                <h2>Start automating B2B sales <br> with SellGem</h2>
-                <a id="final-cta" href="#" class="btn btn-green">Sign up. It's free!</a>
+                <h2>Start automating B2B sales <br> with Gemsell</h2>
+                <a id="final-cta" href="#" class="btn btn-green">Start for free</a>
             </div>
         </section>
     </main>
@@ -564,28 +705,30 @@
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-col">
-                    <h4>Writing Tools</h4>
+                    <h4>Product</h4>
                     <ul>
-                        <li><a href="#">Paraphrasing Tool</a></li>
-                        <li><a href="#">Summarizer</a></li>
-                        <li><a href="#">Word Counter</a></li>
-                        <li><a href="#">Translator</a></li>
+                        <li><a href="#">Lead Finder</a></li>
+                        <li><a href="#">AI Sales Agent</a></li>
+                        <li><a href="#">Integrations</a></li>
+                        <li><a href="#">Pricing</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
-                    <h4>Language Correction</h4>
+                    <h4>Use Cases</h4>
                     <ul>
-                        <li><a href="#">Grammar Checker</a></li>
-                        <li><a href="#">Proofreader</a></li>
-                        <li><a href="#">Essay Checker</a></li>
+                        <li><a href="#">B2B Lead Generation</a></li>
+                        <li><a href="#">Appointment Setting</a></li>
+                        <li><a href="#">Market Research</a></li>
+                        <li><a href="#">Sales Automation</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
-                    <h4>Citing and Originality</h4>
+                    <h4>Resources</h4>
                     <ul>
-                        <li><a href="#">Citation Generator</a></li>
-                        <li><a href="#">Plagiarism Checker</a></li>
-                        <li><a href="#">AI Detector</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Case Studies</a></li>
+                        <li><a href="#">API Documentation</a></li>
+                        <li><a href="#">Help Center</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
@@ -599,23 +742,21 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <a href="#" class="logo">SellGem</a>
+                <a href="#" class="logo">Gemsell</a>
                 <div class="footer-bottom-links">
                     <span>En</span>
                     <a href="#">Privacy Policy</a>
                     <a href="#">Terms</a>
-                    <span>support@gemsell.io</span>
+                    <span>support@gemsell.ai</span>
                 </div>
-                <span>Copyright © 2024, SellGem Inc.</span>
+                <span>Copyright © 2024, Gemsell Inc.</span>
             </div>
         </div>
     </footer>
     
-    <!-- GSAP Libraries (needed for animations) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     
-    <!-- START: Three.js Import Map -->
     <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
     <script type="importmap">
     {
@@ -626,45 +767,35 @@
         }
     }
     </script>
-    <!-- END: Three.js Import Map -->
 
-
-    <!-- Firebase Authentication Script Block -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 
-        // IMPORTANT: Replace with your actual Firebase config
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID",
-            measurementId: "YOUR_MEASUREMENT_ID"
-        };
+        apiKey: "AIzaSyBu8k7nwXPBq2ryXansUiBCsSCBWT3QLVk",
+        authDomain: "ncs2025-d7a20.firebaseapp.com",
+        projectId: "ncs2025-d7a20",
+        storageBucket: "ncs2025-d7a20.firebasestorage.app",
+        messagingSenderId: "9180440703",
+        appId: "1:9180440703:web:5b2c4e634ac00ad7c3374a",
+        measurementId: "G-GTBQJZL00D"};
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // Get references to all Call-to-Action elements
         const headerAuthContainer = document.getElementById('header-auth-container');
         const heroCTA = document.getElementById('hero-cta');
-        const pricingCTA = document.getElementById('pricing-cta');
         const finalCTA = document.getElementById('final-cta');
 
         const updateUiForLoggedInUser = (user) => {
-            console.log('User is logged in:', user.email);
-
             if (headerAuthContainer) {
                 headerAuthContainer.innerHTML = `
-                    <a href="chat.html" class="btn btn-green">Open App</a>
+                    <a href="dashboard.html" class="btn btn-green">Open App</a>
                     <button id="sign-out-btn" class="btn btn-signout">Sign Out</button>
                 `;
                 document.getElementById('sign-out-btn').addEventListener('click', () => {
                     signOut(auth).then(() => {
-                        console.log('User signed out successfully.');
                         window.location.reload(); 
                     }).catch((error) => {
                         console.error('Sign out error:', error);
@@ -674,37 +805,25 @@
 
             if (heroCTA) {
                 heroCTA.textContent = "Go to the App";
-                heroCTA.href = "chat.html";
-            }
-            
-            if (pricingCTA) {
-                pricingCTA.textContent = "Open App";
-                pricingCTA.href = "chat.html";
-                pricingCTA.classList.remove('btn-dark');
-                pricingCTA.classList.add('btn-green');
+                heroCTA.href = "dashboard.html";
             }
             
             if (finalCTA) {
                 finalCTA.textContent = "Let's Go!";
-                finalCTA.href = "chat.html";
+                finalCTA.href = "dashboard.html";
             }
         };
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 updateUiForLoggedInUser(user);
-            } else {
-                console.log('No user is signed in. Showing default page.');
             }
         });
     </script>
 
-
-    <!-- Combined Page Animations Script Block -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         
-        /* --- SCRIPT 1: PARALLAX EFFECT FOR HERO BACKGROUND --- */
         const heroSection = document.querySelector('.hero-section');
         if (heroSection) {
             window.addEventListener('mousemove', function(e) {
@@ -718,7 +837,6 @@
             });
         }
         
-        /* --- SCRIPT 2: HERO TEXT "FLIP UP" ANIMATION --- */
         const title = document.querySelector('.hero-title');
         if (title) {
             let charIndex = 0;
@@ -745,7 +863,6 @@
             wrapCharacters(title);
         }
 
-        /* --- SCRIPT 3: SCROLL-TRIGGERED FADE-IN ANIMATIONS --- */
         const animatedElements = document.querySelectorAll('.animate-on-scroll');
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -766,12 +883,11 @@
             observer.observe(el);
         });
 
-        /* --- SCRIPT 4: IPHONE IMAGE SEQUENCE SCROLL --- */
         const canvas = document.getElementById("scroll-canvas");
-        if (canvas) { // Check if canvas exists to avoid errors
+        if (canvas) {
             const context = canvas.getContext("2d");
 
-            const frameCount = 180; // Total number of frames
+            const frameCount = 180;
             const imageFolderPath = "iphone-zoom-straight-out/";
             const getcurrentFramePath = (index) => `${imageFolderPath}frame_${index.toString().padStart(6, '0')}.png`;
 
@@ -792,7 +908,6 @@
                         renderIphone();
                     }
                     if (loadedImagesCount === frameCount) {
-                        console.log("All iPhone frames preloaded.");
                         initializeIphoneScrollAnimation();
                     }
                 };
@@ -824,7 +939,6 @@
     });
     </script>
     
-    <!-- START: 3D DIAMOND BACKGROUND SCRIPT -->
     <script type="module">
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -832,7 +946,6 @@
 
         const canvas = document.getElementById('diamond-background-canvas');
         if (canvas) {
-            // --- Basic Scene Setup ---
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.z = 10;
@@ -847,18 +960,16 @@
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
             renderer.outputEncoding = THREE.sRGBEncoding;
 
-            // --- Lighting ---
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             scene.add(ambientLight);
             const pointLight = new THREE.PointLight(0xffffff, 0.7);
             pointLight.position.set(5, 5, 5);
             scene.add(pointLight);
 
-            // --- Asset Loading ---
             const rgbeLoader = new RGBELoader();
             const gltfLoader = new GLTFLoader();
             let diamondMesh = null;
-            const diamonds = []; // Array to hold our diamond objects
+            const diamonds = [];
 
             rgbeLoader.load('https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_03_1k.hdr', (texture) => {
                 texture.mapping = THREE.EquirectangularReflectionMapping;
@@ -878,7 +989,7 @@
 
             function loadDiamondModel() {
                 gltfLoader.load(
-                    'diamond (2).glb', // Make sure this file is accessible
+                    'diamond (2).glb',
                     (gltf) => {
                         gltf.scene.traverse((child) => {
                             if (child.isMesh) {
@@ -888,8 +999,8 @@
                         });
                         
                         if (diamondMesh) {
-                            createInteractiveDiamond(); // Create the interactive diamond
-                            animate(); // Start animation loop only after model is loaded
+                            createInteractiveDiamond();
+                            animate();
                         }
                     },
                     undefined,
@@ -899,20 +1010,18 @@
 
             function createInteractiveDiamond() {
                 const diamond1 = diamondMesh.clone();
-                diamond1.name = "diamond1"; // Give it a name for reference
+                diamond1.name = "diamond1";
                 diamond1.position.set(0, 5.5, -2);
                 const scale1 = 1.0;
                 diamond1.scale.set(scale1, scale1, scale1);
                 diamond1.rotation.set(0.5, 0.5, 0);
                 
-                // Add userData to store physics properties
                 diamond1.userData.velocity = new THREE.Vector3(0, 0, 0);
 
                 diamonds.push(diamond1);
                 scene.add(diamond1);
             }
 
-            // --- Interactivity and Physics Logic ---
             const raycaster = new THREE.Raycaster();
             const mouse = new THREE.Vector2();
             let lastMousePosition = { x: 0, y: 0 };
@@ -920,14 +1029,12 @@
             let hoveredDiamond = null;
             
             const rotationSensitivity = 0.0008;
-            const friction = 0.96; // Damping factor. closer to 1 is less friction.
+            const friction = 0.96;
 
-            // This listener tracks mouse movement and applies spin when hovering
             window.addEventListener('mousemove', (event) => {
                 const currentMouseX = event.clientX;
                 const currentMouseY = event.clientY;
                 
-                // Update normalized mouse coordinates for raycasting
                 mouse.x = (currentMouseX / window.innerWidth) * 2 - 1;
                 mouse.y = -(currentMouseY / window.innerHeight) * 2 + 1;
 
@@ -935,23 +1042,17 @@
                     const deltaX = currentMouseX - lastMousePosition.x;
                     const deltaY = currentMouseY - lastMousePosition.y;
 
-                    // Apply mouse movement to the diamond's rotation velocity
-                    // Mouse X movement affects Y-axis rotation (spinning left/right)
-                    // Mouse Y movement affects X-axis rotation (spinning up/down)
                     hoveredDiamond.userData.velocity.y += deltaX * rotationSensitivity;
                     hoveredDiamond.userData.velocity.x += deltaY * rotationSensitivity;
                 }
                 
-                // Update the last position for the next frame's calculation
                 lastMousePosition.x = currentMouseX;
                 lastMousePosition.y = currentMouseY;
             });
             
-            // --- Animation Loop ---
             function animate() {
                 requestAnimationFrame(animate);
 
-                // 1. Check for hover state using the raycaster
                 raycaster.setFromCamera(mouse, camera);
                 const intersects = raycaster.intersectObjects(diamonds);
 
@@ -963,22 +1064,16 @@
                     hoveredDiamond = null;
                 }
                 
-                // 2. Animate all diamonds based on their velocity
                 diamonds.forEach(diamond => {
-                    // Apply rotation from velocity
                     diamond.rotation.y += diamond.userData.velocity.y;
                     diamond.rotation.x += diamond.userData.velocity.x;
                     diamond.rotation.z += diamond.userData.velocity.z;
-
-                    // Apply friction to naturally slow the spin
                     diamond.userData.velocity.multiplyScalar(friction);
                 });
 
-                // 3. Render the updated scene
                 renderer.render(scene, camera);
             }
 
-            // --- Handle Window Resizing ---
             window.addEventListener('resize', () => {
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
@@ -987,6 +1082,5 @@
             });
         }
     </script>
-    <!-- END: 3D DIAMOND BACKGROUND SCRIPT -->
 </body>
 </html>
