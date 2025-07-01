@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leads | Chilbot</title>
+    <!-- Re-using the same CSS and libraries for consistency -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        :root {
+            --bg-dark: #131414;
+            --card-bg: #1D1D1F;
+            --text-light: #F5F4F0;
+            --text-muted: #8a8a8e;
+            --green-accent: #79B266;
+            --border-color: rgba(245, 244, 240, 0.1);
+            --nav-width: 80px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            color: var(--text-light); 
+            -webkit-font-smoothing: antialiased;
+            background: 
+                radial-gradient(circle at 20% 30%, #145b31 0%, transparent 40%),
+                radial-gradient(circle at 80% 20%, #354337 0%, transparent 50%),
+                conic-gradient(from 90deg at 50% 50%, #0a2e19, #0f3d26, #000000, #234832),
+                linear-gradient(135deg, #0a2e19 0%, rgba(255,255,255,0.05) 30%, #000000 100%);
+            background-blend-mode: overlay, overlay, screen, normal;
+            background-color: #0a2e19;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+
+        /* --- Main Side Navigation (Copied from index.html) --- */
+        .main-nav { position: fixed; top: 0; left: 0; width: var(--nav-width); height: 100vh; background-color: var(--card-bg); border-right: 1px solid var(--border-color); z-index: 200; display: flex; flex-direction: column; align-items: center; padding: 24px 0; gap: 20px; }
+        .main-nav .logo { width: 40px; height: 40px; border-radius: 8px; margin-bottom: 20px; }
+        .nav-links { display: flex; flex-direction: column; gap: 16px; }
+        .nav-link { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 10px; color: var(--text-muted); transition: background-color 0.2s, color 0.2s; }
+        .nav-link svg { width: 24px; height: 24px; }
+        .nav-link:hover { color: var(--text-light); background-color: rgba(255, 255, 255, 0.05); }
+        .nav-link.active { color: var(--bg-dark); background-color: var(--green-accent); }
+        .nav-settings-btn { margin-top: auto; margin-bottom: 10px; width: 48px; height: 48px; border-radius: 10px; background: none; border: none; color: var(--text-muted); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s, color 0.2s; }
+        .nav-settings-btn:hover { background: rgba(255,255,255,0.05); color: var(--text-light); }
+
+        .page-container { margin-left: var(--nav-width); }
+        .dashboard-body-wrapper { padding: 40px; max-width: 1400px; margin: 0 auto; min-height: 100vh; position: relative; }
+        .dashboard-content { position: relative; z-index: 1; }
+        .dashboard-header { margin-bottom: 32px; }
+        .dashboard-header h1 { font-size: 28px; font-weight: 600; color: var(--text-light); }
+        .dashboard-header p { font-size: 16px; color: var(--text-muted); margin-top: 4px; }
+        
+        .dash-card { background-color: var(--card-bg); padding: 24px; border-radius: 16px; border: none; }
+        .dash-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+        
+        /* --- NEW: Leads Page Controls --- */
+        .leads-controls-header { display: flex; gap: 16px; align-items: center; flex-grow: 1; }
+        #leadSearchInput {
+            background: rgba(0,0,0,0.18);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: var(--text-light);
+            font-size: 15px;
+            font-family: inherit;
+            min-width: 300px;
+        }
+        #runAgentBtn {
+            background: var(--green-accent);
+            color: var(--bg-dark);
+            border: 1px solid var(--green-accent);
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 15px;
+            font-family: inherit;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        #runAgentBtn:hover { background: #6ca05a; }
+
+        .table-container { width: 100%; overflow-x: auto; }
+        .results-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .results-table th, .results-table td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .results-table tbody tr:last-child td { border-bottom: none; }
+        .results-table thead th { color: var(--text-muted); font-weight: 500; text-transform: uppercase; font-size: 12px; }
+        .results-table tbody tr:hover { background-color: rgba(255, 255, 255, 0.02); }
+        .status-pill { display: inline-block; padding: 4px 12px; border-radius: 50px; font-weight: 500; font-size: 12px; }
+
+        /* --- NEW: Pagination --- */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 24px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        .pagination-controls button {
+            background: var(--card-bg);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-family: inherit;
+            font-weight: 500;
+            cursor: pointer;
+            margin-left: 8px;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .pagination-controls button:hover:not(:disabled) {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.2);
+        }
+        .pagination-controls button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        /* --- Settings Sidebar (Copied from index.html) --- */
+        .settings-sidebar { position: fixed; top: 0; left: -400px; right: auto; width: 360px; height: 100vh; background: var(--card-bg); box-shadow: -4px 0 24px rgba(0,0,0,0.18); z-index: 100; transition: left 0.35s cubic-bezier(0.4,0,0.2,1); padding: 32px 28px 24px 28px; display: flex; flex-direction: column; }
+        .settings-sidebar.open { left: var(--nav-width); right: auto; }
+        /* Add the rest of the sidebar styles from index.html here to ensure it looks correct */
+        
+        @media (max-width: 768px) {
+            .main-nav { display: none; }
+            .page-container { margin-left: 0; }
+            .dashboard-body-wrapper { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="main-nav">
+        <img src="images/logo.png" alt="Logo" class="logo" style="object-fit:cover;" />
+        <div class="nav-links">
+            <!-- MODIFIED: Set active class based on page -->
+            <a href="Dashboard.html" class="nav-link" title="Dashboard">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            </a>
+            <a href="Dashboard.html" class="nav-link active" title="Leads">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            </a>
+        </div>
+        <button id="settingsBtn" class="nav-settings-btn" title="Agent Settings">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 9 3.09V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+        </button>
+    </nav>
+    
+    <div class="page-container">
+        <div class="dashboard-body-wrapper">
+            <div class="dashboard-content">
+                <header class="dashboard-header">
+                    <h1>Lead Management</h1>
+                    <p>Search, filter, and manage your generated leads.</p>
+                </header>
+                <main>
+                    <section class="dash-card">
+                        <div class="dash-card-header leads-controls-header">
+                            <input type="search" id="leadSearchInput" placeholder="Search by name, contact, niche...">
+                            <button id="runAgentBtn">Run New Search</button>
+                        </div>
+                        <div class="table-container">
+                            <table class="results-table" id="leadsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Business Name</th>
+                                        <th>Contact</th>
+                                        <th>Status</th>
+                                        <th style="width:40px;text-align:center;">Call</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Lead data will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination-container">
+                            <span id="pageInfo"></span>
+                            <div class="pagination-controls">
+                                <button id="prevPageBtn" disabled>Previous</button>
+                                <button id="nextPageBtn" disabled>Next</button>
+                            </div>
+                        </div>
+                    </section>
+                </main>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Sidebar HTML (copy from index.html if you want it here) -->
+    <div class="settings-sidebar" id="settingsSidebar">
+        <!-- ... Paste the full sidebar HTML from index.html ... -->
+    </div>
+    
+    <script type="module">
+        let allLeads = [];
+        let currentFilter = '';
+        let currentPage = 1;
+        const rowsPerPage = 10;
+
+        // --- Fetch all ranked leads ---
+        async function fetchRankedLeads() {
+            try {
+                const resp = await fetch("http://localhost:8000/ranked-leads");
+                if (!resp.ok) throw new Error(`Server responded with status: ${resp.status}`);
+                const data = await resp.json();
+                allLeads = data.filter(row => {
+                    const keys = ['niche', 'description', 'email', 'phone', 'url', 'company_name'];
+                    return keys.reduce((acc, k) => acc + (row[k] != null && row[k] !== "" ? 1 : 0), 0) >= 2;
+                });
+                renderTable();
+            } catch (e) {
+                console.error("Failed to load ranked leads:", e);
+                allLeads = [];
+                renderTable();
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.querySelector("#leadsTable tbody");
+            tbody.innerHTML = "";
+
+            // 1. Apply search filter
+            const filteredLeads = allLeads.filter(lead => {
+                const searchTerm = currentFilter.toLowerCase();
+                return (lead.company_name || '').toLowerCase().includes(searchTerm) ||
+                       (lead.email || '').toLowerCase().includes(searchTerm) ||
+                       (lead.phone || '').toLowerCase().includes(searchTerm) ||
+                       (lead.niche || '').toLowerCase().includes(searchTerm);
+            });
+
+            if (filteredLeads.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">No leads found.</td></tr>`;
+                updatePaginationControls(0);
+                return;
+            }
+
+            // 2. Apply pagination
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const paginatedLeads = filteredLeads.slice(startIndex, endIndex);
+
+            paginatedLeads.forEach(row => {
+                const business = row.company_name || row.url || "";
+                const contact = row.email || row.phone || "";
+                let status = row.niche || row.description || row.url || "";
+                if (status && status.length > 60) status = status.slice(0, 57) + "...";
+                let businessCell = business;
+                if (row.url) {
+                    businessCell = `<a href="${row.url}" target="_blank" style="color:var(--green-accent);text-decoration:underline;">${business}</a>`;
+                }
+
+                const callBtn = `
+                    <button class="call-lead-btn" title="Call Lead" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--green-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07A19.5 19.5 0 0 1 3.07 8.63 19.86 19.86 0 0 1 0 2.18 2 2 0 0 1 2.18 0h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.68 2.35a2 2 0 0 1-.45 2.11l-1.27 1.27a16 16 0 0 0 6.29 6.29l1.27-1.27a2 2 0 0 1 2.11-.45c.75.32 1.54.55 2.35.68A2 2 0 0 1 22 16.92z"/></svg>
+                    </button>`;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${businessCell}</td>
+                        <td>${contact}</td>
+                        <td><span class="status-pill">${status}</span></td>
+                        <td style="text-align:center;">${callBtn}</td>
+                    </tr>`;
+            });
+
+            updatePaginationControls(filteredLeads.length);
+        }
+
+        function updatePaginationControls(totalFilteredRows) {
+            const pageInfo = document.getElementById('pageInfo');
+            const prevBtn = document.getElementById('prevPageBtn');
+            const nextBtn = document.getElementById('nextPageBtn');
+
+            const totalPages = Math.ceil(totalFilteredRows / rowsPerPage);
+
+            if (totalFilteredRows === 0) {
+                pageInfo.textContent = 'Showing 0 results';
+            } else {
+                const startRow = (currentPage - 1) * rowsPerPage + 1;
+                const endRow = Math.min(startRow + rowsPerPage - 1, totalFilteredRows);
+                pageInfo.textContent = `Showing ${startRow}–${endRow} of ${totalFilteredRows}`;
+            }
+
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchRankedLeads();
+
+            const searchInput = document.getElementById('leadSearchInput');
+            const prevBtn = document.getElementById('prevPageBtn');
+            const nextBtn = document.getElementById('nextPageBtn');
+
+            searchInput.addEventListener('input', (e) => {
+                currentFilter = e.target.value;
+                currentPage = 1; // Reset to first page on new search
+                renderTable();
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable();
+                }
+            });
+
+            nextBtn.addEventListener('click', () => {
+                currentPage++;
+                renderTable();
+            });
+
+            // You can add logic for settings sidebar and run agent button if needed
+            document.getElementById('runAgentBtn').addEventListener('click', () => {
+                alert('Running agent to find new leads...');
+                // You can reuse the SSE logic from index.html here
+            });
+            
+            // Re-add settings sidebar logic from index.html if you copied the HTML
+            // document.getElementById('settingsBtn').addEventListener('click', ...);
+        });
+
+    </script>
+</body>
+</html>
