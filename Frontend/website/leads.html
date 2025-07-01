@@ -9,50 +9,82 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         :root {
-            --bg-dark: #131414;
-            --card-bg: #1D1D1F;
+            --bg-light: #EBE6DC;
+            --bg-dark: #151515;
+            --bg-hero: #181C1B;
+            --card-bg: #1C1C1C;
+            --text-dark: #131414;
             --text-light: #F5F4F0;
-            --text-muted: #8a8a8e;
+            --text-muted: #9E9E9E;
             --green-accent: #79B266;
-            --border-color: rgba(245, 244, 240, 0.1);
-            --nav-width: 80px;
+            --green-accent-hover: #6ca05a;
+            --green-dark: #2E402B;
+            --border-color: #282828;
+            --border-light: rgba(245, 244, 240, 0.3);
+            --nav-width: 84px;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body { 
-            font-family: 'Inter', sans-serif; 
-            color: var(--text-light); 
+            font-family: 'Inter', sans-serif;
+            color: var(--text-light);
             -webkit-font-smoothing: antialiased;
-            background: 
-                radial-gradient(circle at 20% 30%, #145b31 0%, transparent 40%),
-                radial-gradient(circle at 80% 20%, #354337 0%, transparent 50%),
-                conic-gradient(from 90deg at 50% 50%, #0a2e19, #0f3d26, #000000, #234832),
-                linear-gradient(135deg, #0a2e19 0%, rgba(255,255,255,0.05) 30%, #000000 100%);
-            background-blend-mode: overlay, overlay, screen, normal;
-            background-color: #0a2e19;
+            min-height: 100vh;
+            background:
+                radial-gradient(ellipse 90% 60% at 60% 0%, #2e402b 0%, transparent 70%),
+                radial-gradient(ellipse 80% 60% at 30% 100%, #79b26633 0%, transparent 80%),
+                linear-gradient(120deg, #151515 0%, #181C1B 60%, #0a2e19 100%),
+                linear-gradient(180deg, #151515 0%, #181C1B 100%);
+            background-color: var(--bg-dark);
             background-attachment: fixed;
             background-repeat: no-repeat;
         }
 
         /* --- Main Side Navigation (Copied from index.html) --- */
-        .main-nav { position: fixed; top: 0; left: 0; width: var(--nav-width); height: 100vh; background-color: var(--card-bg); border-right: 1px solid var(--border-color); z-index: 200; display: flex; flex-direction: column; align-items: center; padding: 24px 0; gap: 20px; }
+        .main-nav {
+            position: fixed; top: 0; left: 0; width: var(--nav-width); height: 100vh;
+            background: rgba(28,28,28,0.82);
+            backdrop-filter: blur(14px) saturate(1.2);
+            border-right: 1.5px solid var(--border-color);
+            box-shadow: 0 6px 32px 0 rgba(0,0,0,0.18);
+            z-index: 200; display: flex; flex-direction: column; align-items: center; padding: 24px 0; gap: 20px;
+        }
         .main-nav .logo { width: 40px; height: 40px; border-radius: 8px; margin-bottom: 20px; }
         .nav-links { display: flex; flex-direction: column; gap: 16px; }
         .nav-link { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 10px; color: var(--text-muted); transition: background-color 0.2s, color 0.2s; }
         .nav-link svg { width: 24px; height: 24px; }
         .nav-link:hover { color: var(--text-light); background-color: rgba(255, 255, 255, 0.05); }
         .nav-link.active { color: var(--bg-dark); background-color: var(--green-accent); }
-        .nav-settings-btn { margin-top: auto; margin-bottom: 10px; width: 48px; height: 48px; border-radius: 10px; background: none; border: none; color: var(--text-muted); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s, color 0.2s; }
-        .nav-settings-btn:hover { background: rgba(255,255,255,0.05); color: var(--text-light); }
+        .nav-settings-btn {
+            margin-top: auto; margin-bottom: 10px; width: 48px; height: 48px; border-radius: 10px;
+            background: rgba(28,28,28,0.7); border: 1.5px solid var(--border-color);
+            color: var(--text-muted); display: flex; align-items: center; justify-content: center; cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+            transition: background 0.2s, color 0.2s, border 0.2s;
+        }
+        .nav-settings-btn:hover {
+            background: var(--green-accent);
+            color: var(--bg-dark);
+            border-color: var(--green-accent);
+        }
 
         .page-container { margin-left: var(--nav-width); }
-        .dashboard-body-wrapper { padding: 40px; max-width: 1400px; margin: 0 auto; min-height: 100vh; position: relative; }
+        .dashboard-body-wrapper {
+            padding: 40px; max-width: 1400px; margin: 0 auto; min-height: 100vh; position: relative;
+        }
         .dashboard-content { position: relative; z-index: 1; }
         .dashboard-header { margin-bottom: 32px; }
         .dashboard-header h1 { font-size: 28px; font-weight: 600; color: var(--text-light); }
         .dashboard-header p { font-size: 16px; color: var(--text-muted); margin-top: 4px; }
         
-        .dash-card { background-color: var(--card-bg); padding: 24px; border-radius: 16px; border: none; }
+        .dash-card {
+            background: rgba(28,28,28,0.82);
+            border: 1.5px solid var(--border-color);
+            padding: 24px;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.18);
+            backdrop-filter: blur(10px) saturate(1.2);
+        }
         .dash-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
         
         /* --- NEW: Leads Page Controls --- */
@@ -81,7 +113,13 @@
         }
         #runAgentBtn:hover { background: #6ca05a; }
 
-        .table-container { width: 100%; overflow-x: auto; }
+        .table-container {
+            width: 100%; overflow-x: auto;
+            background: rgba(28,28,28,0.72);
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+            backdrop-filter: blur(6px) saturate(1.1);
+        }
         .results-table { width: 100%; border-collapse: collapse; font-size: 14px; }
         .results-table th, .results-table td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
         .results-table tbody tr:last-child td { border-bottom: none; }
@@ -120,8 +158,17 @@
             cursor: not-allowed;
         }
         
-        /* --- Settings Sidebar (Copied from index.html) --- */
-        .settings-sidebar { position: fixed; top: 0; left: -400px; right: auto; width: 360px; height: 100vh; background: var(--card-bg); box-shadow: -4px 0 24px rgba(0,0,0,0.18); z-index: 100; transition: left 0.35s cubic-bezier(0.4,0,0.2,1); padding: 32px 28px 24px 28px; display: flex; flex-direction: column; }
+        /* --- Settings Sidebar (Glassy, premium style) --- */
+        .settings-sidebar {
+            position: fixed; top: 0; left: -400px; right: auto; width: 360px; height: 100vh;
+            background: rgba(28,28,28,0.92);
+            border-left: 1.5px solid var(--border-color);
+            box-shadow: -4px 0 32px rgba(0,0,0,0.22);
+            z-index: 100; transition: left 0.35s cubic-bezier(0.4,0,0.2,1);
+            padding: 32px 28px 24px 28px; display: flex; flex-direction: column;
+            border-top-right-radius: 18px; border-bottom-right-radius: 18px;
+            backdrop-filter: blur(16px) saturate(1.2);
+        }
         .settings-sidebar.open { left: var(--nav-width); right: auto; }
         /* Add the rest of the sidebar styles from index.html here to ensure it looks correct */
         
