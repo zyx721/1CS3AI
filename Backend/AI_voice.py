@@ -1,26 +1,23 @@
+
+
 import asyncio
 import os
 import pyaudio
-from dotenv import load_dotenv
 from google import genai
-from google.genai.types import Blob
+from dotenv import load_dotenv
 
-load_dotenv()
-API_KEY = os.getenv("GOOGLE_API_KEY")
-if not API_KEY:
-    raise ValueError("GOOGLE_API_KEY not found in .env file")
 
-MODEL = "gemini-2.5-flash-preview-native-audio-dialog"
+client = genai.Client(api_key="AIzaSyBz_1yYajRX8ZNVHoUynStuY3FzN922dtk")
+
+
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
-IN_RATE = 16000
-OUT_RATE = 24000
-CHUNK = int(IN_RATE * 0.1)
-SEND_DURATION_SEC = 5
-RESPONSE_SILENCE_TIMEOUT = 3.0  
-INITIAL_PROMPT_DELAY = 1.0     
+SEND_SAMPLE_RATE = 16000
+RECEIVE_SAMPLE_RATE = 24000
+CHUNK_SIZE = 1024
+MODEL = "models/gemini-2.0-flash-live-001"
 
-SYSTEM_INSTRUCTION = (
+SYSTEM_PROMPT = (
     "You are a professional sales representative. Follow these instructions exactly:\n\n"
     "1. Begin the conversation ONLY with: \"Hello, am I speaking with someone from Smith and Company?\" Do not add any other text to your first response.\n"
     "2. Listen to their responses and ask relevant follow‑up questions about their current IT setup or challenges.\n"
@@ -29,111 +26,84 @@ SYSTEM_INSTRUCTION = (
     "5. Focus on understanding their business needs and IT challenges."
 )
 
-async def main():
-    config = {
-        "response_modalities": ["AUDIO"],
-        "system_instruction": SYSTEM_INSTRUCTION,
-        "speech_config": {
-            "voice_config": {
-                "prebuilt_voice_config": {
-                    "voice_name": "puck"
-                }
-            }
-        },
-        "realtime_input_config": {
-            "automatic_activity_detection": {
-                "start_of_speech_sensitivity": "START_SENSITIVITY_LOW",
-                "end_of_speech_sensitivity": "END_SENSITIVITY_LOW",
-                "silence_duration_ms": 500
-            }
-        }
-    }
+pya = pyaudio.PyAudio()
 
-    client = genai.Client(api_key=API_KEY)
-    pa = pyaudio.PyAudio()
+class AudioAgent:
+    def __init__(self):
+        self.audio_in_queue = asyncio.Queue()
+        self.out_queue = asyncio.Queue(maxsize=5)
+        self.session = None
+        self.audio_stream = None
 
-    mic = pa.open(format=FORMAT, channels=CHANNELS, rate=IN_RATE,
-                  input=True, frames_per_buffer=CHUNK)
-    speaker = pa.open(format=FORMAT, channels=CHANNELS, rate=OUT_RATE,
-                      output=True)
-
-    print("🟢 Live connection ready. Agent will speak first.")
-
-    async with client.aio.live.connect(model=MODEL, config=config) as sess:
-        await sess.send_client_content(
-            turns={"role": "user", "parts": [{"text": "Start the conversation"}]},
-            turn_complete=True
+    async def listen_audio(self):
+        mic_info = pya.get_default_input_device_info()
+        self.audio_stream = await asyncio.to_thread(
+            pya.open,
+            format=FORMAT,
+            channels=CHANNELS,
+            rate=SEND_SAMPLE_RATE,
+            input=True,
+            input_device_index=mic_info["index"],
+            frames_per_buffer=CHUNK_SIZE,
         )
-        await asyncio.sleep(INITIAL_PROMPT_DELAY)  # Allow model processing time
-
-        async def send_audio_turn():
-            """Capture and send user audio"""
-            print("\n🎤 Listening... (Press Ctrl+C to stop)")
-            start_time = asyncio.get_event_loop().time()
-            frames_sent = 0
-            
-            while True:
-                elapsed = asyncio.get_event_loop().time() - start_time
-                if elapsed > SEND_DURATION_SEC:
-                    print("🛑 Finished listening")
-                    break
-                
-                try:
-                    frame = mic.read(CHUNK, exception_on_overflow=False)
-                    await sess.send_realtime_input(
-                        audio=Blob(data=frame, mime_type="audio/pcm;rate=16000")
-                    )
-                    frames_sent += 1
-                except Exception as e:
-                    print(f"⚠️ Audio send error: {str(e)}")
-                    break
-                
-                await asyncio.sleep(0.01)
-
-        async def receive_audio_turn():
-            """Receive and play agent's response"""
-            print("🔊 Processing response...")
-            last_audio_time = asyncio.get_event_loop().time()
-            speaking = False
-            response_started = False
-            
-            async for msg in sess.receive():
-                if msg.data:
-                    if not response_started:
-                        print("💬 Agent speaking...")
-                        response_started = True
-                    speaker.write(msg.data)
-                    last_audio_time = asyncio.get_event_loop().time()
-                    speaking = True
-                
-                if msg.server_content and getattr(msg.server_content, 'interrupted', False):
-                    print("⏹️ Response interrupted")
-                    break
-                
-                now = asyncio.get_event_loop().time()
-                if speaking and now - last_audio_time > RESPONSE_SILENCE_TIMEOUT:
-                    break
-            
-            if response_started:
-                print("✅ Agent finished speaking")
-
-        await receive_audio_turn()  
-        
         while True:
-            await send_audio_turn()    
-            await receive_audio_turn() 
+            data = await asyncio.to_thread(self.audio_stream.read, CHUNK_SIZE, exception_on_overflow=False)
+            await self.out_queue.put({"data": data, "mime_type": "audio/pcm"})
 
-    mic.stop_stream()
-    mic.close()
-    speaker.stop_stream()
-    speaker.close()
-    pa.terminate()
-    print("✅ Cleaned up.")
+    async def receive_audio(self):
+        while True:
+            turn = self.session.receive()
+            async for response in turn:
+                if response.data:
+                    self.audio_in_queue.put_nowait(response.data)
+                elif response.text:
+                    print(f"📨 Agent said: {response.text}", end="")
+
+            while not self.audio_in_queue.empty():
+                self.audio_in_queue.get_nowait()
+
+    async def play_audio(self):
+        stream = await asyncio.to_thread(
+            pya.open,
+            format=FORMAT,
+            channels=CHANNELS,
+            rate=RECEIVE_SAMPLE_RATE,
+            output=True,
+        )
+        while True:
+            bytestream = await self.audio_in_queue.get()
+            await asyncio.to_thread(stream.write, bytestream)
+
+    async def send_realtime(self):
+        while True:
+            msg = await self.out_queue.get()
+            await self.session.send(input=msg)
+
+    async def run(self):
+        try:
+            config = {
+                "response_modalities": ["AUDIO"],
+                "tools": [],
+                "system_instruction": SYSTEM_PROMPT,
+            }
+            
+            async with client.aio.live.connect(model=MODEL, config=config) as session, asyncio.TaskGroup() as tg:
+                self.session = session
+
+                print("🟢 Connected to Gemini Live API")
+                print("🎤 Speak into your microphone...\n")
+
+                tg.create_task(self.listen_audio())
+                tg.create_task(self.send_realtime())
+                tg.create_task(self.receive_audio())
+                tg.create_task(self.play_audio())
+
+                await asyncio.Event().wait()  
+
+        except Exception as e:
+            if self.audio_stream:
+                self.audio_stream.close()
+            print(f"❌ Error: {e}")
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("\n🛑 Conversation ended")
-    except Exception as e:
-        print(f"\n❌ Error occurred: {e}")
+    asyncio.run(AudioAgent().run())
