@@ -1,11 +1,12 @@
-
-
 import asyncio
 import os
 import pyaudio
 from google import genai
 from dotenv import load_dotenv
 
+from fastapi import FastAPI, BackgroundTasks, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
 
 client = genai.Client(api_key="AIzaSyBz_1yYajRX8ZNVHoUynStuY3FzN922dtk")
 
@@ -28,7 +29,7 @@ do not talk for long time try to let the user talk
 Do not mention you are an AI unless asked. Stay natural and human-like.
 if user tells you sign me in you iwll tell him that you done and you will redirect and he will get an email for the details 
 Your goal: Convince them to try our service — an affordable AI sales agent that finds potential clients and does the outreach for them, saving time and boosting sales.
-
+you should be friendly and act humantic try to use human sounds like cought and laughter
 Context: The person you're speaking to is Fares Abdi, a startup founder who built an innovative solution but struggles with outreach and cold calls. Hiring sales staff is too expensive for his bootstrapped business. Our service solves that.
 
 """
@@ -113,5 +114,45 @@ class AudioAgent:
                 self.audio_stream.close()
             print(f"❌ Error: {e}")
 
+# --- FastAPI server setup ---
+app = FastAPI()
+
+# Allow CORS for local frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Adjust for production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Store agent task globally (for demo, not production-safe)
+agent_task = None
+
+@app.get("/start-voice-agent")
+async def start_voice_agent(background_tasks: BackgroundTasks):
+    global agent_task
+    if agent_task is not None and not agent_task.done():
+        return {"status": "already running"}
+    agent = AudioAgent()
+    # Run the agent in the background
+    agent_task = asyncio.create_task(agent.run())
+    return {"status": "started"}
+
+@app.websocket("/ws-audio")
+async def websocket_audio(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            data = await websocket.receive_bytes()
+            # Here, 'data' is raw PCM Int16 audio from the browser's mic.
+            # You can now feed this to your AI agent or save/process as needed.
+            # For demo, just print the length of received audio chunk:
+            print(f"Received audio chunk: {len(data)} bytes")
+    except WebSocketDisconnect:
+        print("WebSocket disconnected")
+    except Exception as e:
+        print(f"WebSocket error: {e}")
+
 if __name__ == "__main__":
-    asyncio.run(AudioAgent().run())
+    uvicorn.run("AI_voice:app", host="0.0.0.0", port=8080, reload=False)

@@ -704,7 +704,7 @@
     <header class="main-header">
         <div class="container navbar">
             <div class="logo-wrapper">
-                <img src="images/logo.png" alt="Gemsell Logo" class="header-logo-img">
+                <img src="assets/logo.png" alt="Gemsell Logo" class="header-logo-img">
                 <a href="#" class="logo">Gemsell</a>
             </div>
             <nav class="nav-links">
@@ -781,7 +781,7 @@
                         </div>
                     </div>
                     <div class="dashboard-laptop">
-                        <img src="laptop.png" alt="Gemsell Dashboard on a Laptop">
+                        <img src="assets/laptop.png" alt="Gemsell Dashboard on a Laptop">
                     </div>
                     <div class="dashboard-features-right">
                         <div class="feature-card">
@@ -1108,7 +1108,7 @@
             const context = canvas.getContext("2d");
 
             const frameCount = 180;
-            const imageFolderPath = "iphone-zoom-straight-out/";
+            const imageFolderPath = "landing/iphone-zoom-straight-out/";
             const getcurrentFramePath = (index) => `${imageFolderPath}frame_${index.toString().padStart(6, '0')}.png`;
 
             const images = [];
@@ -1168,7 +1168,7 @@
             
             // IMPORTANT: Ensure 'audio concatenated.mp3' is in the same directory 
             // as this HTML file, or provide the correct path.
-            const audioFile = 'concatenated.mp3';
+            const audioFile = 'assets/concatenated.mp3';
 
             try {
                  const wavesurfer = WaveSurfer.create({
@@ -1290,7 +1290,7 @@
 
             function loadDiamondModel() {
                 gltfLoader.load(
-                    'diamond (2).glb',
+                    'assets/diamond (2).glb',
                     (gltf) => {
                         gltf.scene.traverse((child) => {
                             if (child.isMesh) {
