@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'dart:ui';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'matches.dart';
 
 class AIScanningScreen extends StatefulWidget {
   const AIScanningScreen({super.key});
@@ -11,58 +14,46 @@ class AIScanningScreen extends StatefulWidget {
 
 class _AIScanningScreenState extends State<AIScanningScreen>
     with TickerProviderStateMixin {
-  final List<Map<String, dynamic>> companies = [
-    {"name": "Tech Innovators Inc.", "logo": "assets/logo1.png", "relevance": 3},
-    {"name": "Global Solutions Ltd.", "logo": "assets/logo2.png", "relevance": 4},
-    {"name": "Future Dynamics Corp.", "logo": "assets/logo3.png", "relevance": 2},
-    {"name": "Digital Ventures LLC", "logo": "assets/logo4.png", "relevance": 5},
-    {"name": "Smart Systems Co.", "logo": "assets/logo5.png", "relevance": 3},
-  ];
-
+  List<Map<String, dynamic>> companies = [];
   late AnimationController _progressController;
   late AnimationController _pulseController;
   late AnimationController _fadeController;
   late Animation<double> _progressAnimation;
   late Animation<double> _pulseAnimation;
   late Animation<double> _fadeAnimation;
-  
+
   final List<bool> _visible = [];
   bool _scanningComplete = false;
   int _currentProgress = 0;
+  bool _loading = true;
+  String? _error;
+  int _prospectCount = 0;
 
   @override
   void initState() {
     super.initState();
-    _visible.addAll(List.filled(companies.length, false));
-    
     _progressController = AnimationController(
       duration: const Duration(seconds: 5),
       vsync: this,
     );
-    
     _pulseController = AnimationController(
       duration: const Duration(seconds: 3),
       vsync: this,
     );
-
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
-
     _progressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _progressController, curve: Curves.easeOutCubic),
     );
-
     _pulseAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
-
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _fadeController, curve: Curves.easeOutQuart),
     );
-
-    _startScanningSequence();
+    _fetchAndScan();
   }
 
   @override
@@ -73,40 +64,85 @@ class _AIScanningScreenState extends State<AIScanningScreen>
     super.dispose();
   }
 
-  void _startScanningSequence() async {
+  Future<void> _fetchAndScan() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+      companies = [];
+      _visible.clear();
+      _scanningComplete = false;
+      _currentProgress = 0;
+      _prospectCount = 0;
+    });
+
     // Start fade in animation
     _fadeController.forward();
-    
     await Future.delayed(const Duration(milliseconds: 500));
-    
-    // Start pulsing animation
     _pulseController.repeat(reverse: true);
-    
-    // Start progress animation
+
+    try {
+      // Call backend to run agent and get leads
+      final runAgentResp = await http.post(
+        Uri.parse('http://192.168.100.5:8000/run-agent'),
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (runAgentResp.statusCode != 200) {
+        throw Exception('Failed to run agent: ${runAgentResp.body}');
+      }
+      // Wait a bit for backend to save leads
+      await Future.delayed(const Duration(seconds: 1));
+      // Fetch ranked leads
+      final leadsResp = await http.get(
+        Uri.parse('http://192.168.100.5:8000/ranked-leads'),
+      );
+      if (leadsResp.statusCode != 200) {
+        throw Exception('Failed to fetch leads: ${leadsResp.body}');
+      }
+      final List<dynamic> leads = json.decode(leadsResp.body);
+      companies = leads.map<Map<String, dynamic>>((lead) {
+        return {
+          "name": lead["company_name"] ?? "Unknown",
+          "logo": "assets/logo${(leads.indexOf(lead) % 5) + 1}.png",
+          "relevance": 3 + (leads.indexOf(lead) % 3),
+          "sector": lead["sector"] ?? "Unknown",
+          "website": lead["url"] ?? "",
+          "match": (lead["score"] ?? 80), // Use backend score if available
+          "description": lead["description"] ?? "",
+          "phone": lead["phone"] ?? "",
+          "email": lead["email"] ?? "",
+          "location": lead["location"] ?? "",
+        };
+      }).toList();
+      _prospectCount = companies.length;
+      _visible.addAll(List.filled(companies.length, false));
+      setState(() {
+        _loading = false;
+      });
+      _startScanningSequence();
+    } catch (e) {
+      setState(() {
+        _loading = false;
+        _error = e.toString();
+      });
+    }
+  }
+
+  void _startScanningSequence() async {
+    if (!mounted) return;
     _progressController.forward();
-    
-    // Listen to progress changes
     _progressController.addListener(() {
       final newProgress = (_progressAnimation.value * 100).round();
       if (newProgress != _currentProgress) {
         setState(() => _currentProgress = newProgress);
       }
-      
-      // Start revealing companies at different progress points with staggered timing
-      if (_progressAnimation.value >= 0.25 && !_visible[0]) {
-        _revealCompany(0);
-      } else if (_progressAnimation.value >= 0.4 && companies.length > 1 && !_visible[1]) {
-        _revealCompany(1);
-      } else if (_progressAnimation.value >= 0.6 && companies.length > 2 && !_visible[2]) {
-        _revealCompany(2);
-      } else if (_progressAnimation.value >= 0.8 && companies.length > 3 && !_visible[3]) {
-        _revealCompany(3);
-      } else if (_progressAnimation.value >= 0.95 && companies.length > 4 && !_visible[4]) {
-        _revealCompany(4);
+      // Reveal companies at intervals
+      for (int i = 0; i < companies.length; i++) {
+        double revealAt = 0.2 + (i * 0.15);
+        if (_progressAnimation.value >= revealAt && !_visible[i]) {
+          _revealCompany(i);
+        }
       }
     });
-
-    // Complete scanning when animation finishes
     _progressController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         setState(() => _scanningComplete = true);
@@ -171,26 +207,44 @@ class _AIScanningScreenState extends State<AIScanningScreen>
           builder: (context, child) {
             return FadeTransition(
               opacity: _fadeAnimation,
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(24, 120, 24, 32),
-                children: [
-                  // Scanning Header
-                  _buildScanningHeader(),
-                  const SizedBox(height: 40),
-                  
-                  // AI Animation
-                  _buildAIAnimation(),
-                  const SizedBox(height: 40),
-                  
-                  // Companies Section
-                  _buildCompaniesSection(),
-                  const SizedBox(height: 40),
-                  
-                  // Metrics Section (now includes Continue button)
-                  _buildMetricsSection(),
-                  const SizedBox(height: 32),
-                ],
-              ),
+              child: _loading
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Lottie.asset('assets/animation/ai_scan.json', height: 120),
+                          const SizedBox(height: 24),
+                          const Text(
+                            "Contacting AI Engine...",
+                            style: TextStyle(color: Colors.white70, fontSize: 16),
+                          ),
+                        ],
+                      ),
+                    )
+                  : _error != null
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(32.0),
+                            child: Text(
+                              "Error: $_error",
+                              style: const TextStyle(color: Colors.redAccent, fontSize: 16),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        )
+                      : ListView(
+                          padding: const EdgeInsets.fromLTRB(24, 120, 24, 32),
+                          children: [
+                            _buildScanningHeader(),
+                            const SizedBox(height: 40),
+                            _buildAIAnimation(),
+                            const SizedBox(height: 40),
+                            _buildCompaniesSection(),
+                            const SizedBox(height: 40),
+                            _buildMetricsSection(),
+                            const SizedBox(height: 32),
+                          ],
+                        ),
             );
           },
         ),
@@ -422,15 +476,13 @@ class _AIScanningScreenState extends State<AIScanningScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  // color: Colors.cyan.withOpacity(0.2),
-                  color: const Color(0xFF34D399).withOpacity(0.18), // emerald glassy
+                  color: const Color(0xFF34D399).withOpacity(0.18),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  "${visibleCompanies.length} found",
+                  "$_prospectCount found",
                   style: TextStyle(
-                    // color: Colors.cyan.withOpacity(0.9),
-                    color: const Color(0xFF10B981).withOpacity(0.9), // emerald
+                    color: const Color(0xFF10B981).withOpacity(0.9),
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
                   ),
@@ -456,6 +508,7 @@ class _AIScanningScreenState extends State<AIScanningScreen>
                     company["name"],
                     company["logo"],
                     company["relevance"],
+                    company: company,
                   ),
                 ),
               );
@@ -466,7 +519,7 @@ class _AIScanningScreenState extends State<AIScanningScreen>
     );
   }
 
-  Widget _buildCompanyCard(String name, String logo, int relevance) {
+  Widget _buildCompanyCard(String name, String logo, int relevance, {Map<String, dynamic>? company}) {
     return _buildGlassContainer(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(20),
@@ -539,13 +592,34 @@ class _AIScanningScreenState extends State<AIScanningScreen>
                     ),
                   ],
                 ),
+                if (company?["sector"] != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text(
+                      company!["sector"],
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.5),
+                        fontSize: 11,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
-          Icon(
-            Icons.arrow_forward_ios_rounded,
-            color: Colors.white.withOpacity(0.4),
-            size: 14,
+          IconButton(
+            icon: Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: Colors.white.withOpacity(0.4),
+              size: 14,
+            ),
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => MatchesScreen(
+                  matches: companies,
+                ),
+              ));
+            },
           ),
         ],
       ),
@@ -557,7 +631,9 @@ class _AIScanningScreenState extends State<AIScanningScreen>
 
     final totalScans = 1247;
     final leadsFound = companies.length;
-    final avgRelevance = companies.fold(0, (sum, company) => sum + (company["relevance"] as int)) / companies.length;
+    final avgRelevance = companies.isNotEmpty
+        ? companies.fold(0, (sum, company) => sum + (company["relevance"] as int)) / companies.length
+        : 0.0;
 
     return TweenAnimationBuilder<double>(
       duration: const Duration(milliseconds: 1000),
@@ -589,26 +665,19 @@ class _AIScanningScreenState extends State<AIScanningScreen>
                           fontWeight: FontWeight.w300,
                           letterSpacing: 0.5,
                         ),
-                      ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          "Prospects: $_prospectCount",
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.7),
+                            fontSize: 13,
+                          ),
+                        ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(child: _buildMetricCard("Total Scans", totalScans.toString())),
-                    const SizedBox(width: 12),
-                    Expanded(child: _buildMetricCard("Prospects", leadsFound.toString())),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                _buildMetricCard(
-                  "Quality Score",
-                  "${avgRelevance.toStringAsFixed(1)}/5.0",
-                  isFullWidth: true,
-                ),
-                const SizedBox(height: 24),
-                // Continue button fades in with metrics
                 SizedBox(
                   width: double.infinity,
                   height: 56,
@@ -632,9 +701,11 @@ class _AIScanningScreenState extends State<AIScanningScreen>
                       ],
                     ),
                     child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/matches');
-                },
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => MatchesScreen(matches: companies),
+                        ));
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,
@@ -657,10 +728,9 @@ class _AIScanningScreenState extends State<AIScanningScreen>
                 ),
               ],
             ),
-          ),
-        );
-      },
-    );
+          ),);
+        },
+      );
   }
 
   Widget _buildMetricCard(String title, String value, {bool isFullWidth = false}) {

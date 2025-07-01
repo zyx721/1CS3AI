@@ -1,0 +1,37 @@
+# Python virtual environments
+venv/
+VENV/
+.env/
+.venv/
+ENV/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# VS Code settings
+.vscode/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Flutter/Dart build outputs
+build/
+*.dart_tool/
+.packages
+.pub-cache/
+.flutter-plugins
+.flutter-plugins-dependencies
+.flutter-versions
+
+# Node modules
+node_modules/
+
+# Misc
+*.log
+*.tmp

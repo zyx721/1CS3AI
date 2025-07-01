@@ -5,6 +5,8 @@ import 'dart:math' as math;
 import 'dart:developer' as developer;
 import 'dart:convert';
 import 'package:http/http.dart' as http; // <-- Add this import
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 // === THEME & CONSTANTS ===
 class AppTheme {
@@ -148,14 +150,26 @@ class _AccountSetupScreenState extends State<AccountSetupScreen>
         body: jsonEncode(businessInfo),
       );
       if (response.statusCode == 200) {
+        // Set isFirst to false after successful setup
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .update({'isFirst': false});
+        }
         setState(() {
           _submitSuccess = true;
         });
+        // Navigate to navbar after setup
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/navbar');
+        }
         // Optionally, go to the next page (completion step)
-        _pageController.nextPage(
-          duration: AppConstants.animationDuration,
-          curve: Curves.easeInOut,
-        );
+        // _pageController.nextPage(
+        //   duration: AppConstants.animationDuration,
+        //   curve: Curves.easeInOut,
+        // );
       } else {
         setState(() {
           _submitError = 'Failed to submit: ${response.body}';

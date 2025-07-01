@@ -5,6 +5,7 @@ import 'Profile_screen/profile_screen.dart';
 import '../auth/new_lead_step1.dart';
 import 'dart:ui';
 import 'new/compaign_list.dart';
+import 'new/ai_scanning_screen.dart';
 
 class NavBarScreen extends StatefulWidget {
   const NavBarScreen({Key? key}) : super(key: key);
@@ -25,6 +26,7 @@ class _NavBarScreenState extends State<NavBarScreen>
     // const EnhancedMapScreen(),
     // const ChatScreen(),
     const DashboardPage(), // Assuming this is the campaign list screen
+    AIScanningScreen(),
     const ProfileScreen(),
   ];
 
@@ -223,7 +225,8 @@ class _NavBarScreenState extends State<NavBarScreen>
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [    
                   _buildNavItem(Icons.list_rounded, 0, 'dashboard'),
-                  _buildNavItem(Icons.person_rounded, 1, 'Profile'),
+                  _buildNavItem(Icons.search_rounded, 1, 'Scan'),
+                  _buildNavItem(Icons.person_rounded, 2, 'Profile'),
                 ],
               ),
             ),
