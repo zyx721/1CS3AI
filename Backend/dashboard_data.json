@@ -20,5 +20,5 @@
     { "business_name": "Green Leaf Cafe", "contact": "555-222-3333", "status": "Not Contacted" }
   ],
   "search_agent":false,
-  "voice_agent":true
+  "voice_agent":false
 }
