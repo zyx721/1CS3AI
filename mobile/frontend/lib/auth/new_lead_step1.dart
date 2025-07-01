@@ -392,23 +392,14 @@ class _AccountSetupScreenState extends State<AccountSetupScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppTheme.gradientStart, AppTheme.gradientEnd],
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.eco_rounded,
-                  color: AppTheme.textLight,
-                  size: 28,
-                ),
+              // Use your logo asset here
+              Image.asset(
+                'assets/images/logo2.png',
+                height: 32,
               ),
               const SizedBox(width: 12),
               const Text(
-                'Chilbot AI',
+                'Gemsell',
                 style: TextStyle(
                   color: AppTheme.textLight,
                   fontSize: 26,

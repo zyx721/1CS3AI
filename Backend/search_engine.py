@@ -7,7 +7,7 @@ import time
 import os
 
 SERPER_API_KEY = "42e856cc5ef002c1597514cd71b67fb2e5cd6428"
-GEMINI_API_KEY = "AIzaSyBz_1yYajRX8ZNVHoUynStuY3FzN922dtk"
+GEMINI_API_KEY = "AIzaSyD5T6xGo_geOdxp3XzzvnTzbTD9ccsAbUM"
 
 genai.configure(api_key=GEMINI_API_KEY)
 gemini_model = genai.GenerativeModel("gemini-2.5-flash") 
