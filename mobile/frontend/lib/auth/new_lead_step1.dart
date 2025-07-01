@@ -151,7 +151,7 @@ class _AccountSetupScreenState extends State<AccountSetupScreen>
     try {
       // Use the correct endpoint and fix the URL
       final response = await http.post(
-        Uri.parse('http://10.48.173.163:8000/agent-info'),
+        Uri.parse('http://192.168.100.5:8000/agent-info'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(businessInfo),
       );

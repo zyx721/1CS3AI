@@ -982,7 +982,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                           ),
                           const SizedBox(height: 18),
                           Text(
-                            userData['displayName'] ?? user?.displayName ?? 'No Name',
+                            userData['name'] ?? user?.displayName ?? 'No Name',
                             style: GoogleFonts.inter(
                               fontWeight: FontWeight.bold,
                               fontSize: isTablet ? 22 : 18,
@@ -1511,14 +1511,14 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
                                     child: Text(
                                       "Change Password",
                                       style: TextStyle(
-                                        color: Colors.purple[700],
+                                        color: const Color.fromARGB(255, 5, 1, 7),
                                         fontWeight: FontWeight.bold,
                                         fontSize: 20,
                                       ),
                                     ),
                                   ),
                                   IconButton(
-                                    icon: Icon(Icons.close, color: Colors.purple[700]),
+                                    icon: Icon(Icons.close, color: const Color.fromARGB(255, 9, 2, 11)),
                                     onPressed: () => Navigator.of(context).pop(),
                                   ),
                                 ],
@@ -1528,13 +1528,13 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
                                 controller: _currentPasswordController,
                                 decoration: InputDecoration(
                                   labelText: "Current Password",
-                                  labelStyle: TextStyle(color: Colors.purple[700]),
+                                  labelStyle: TextStyle(color: const Color.fromARGB(255, 12, 3, 15)),
                                   focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.purple[700]!),
+                                    borderSide: BorderSide(color: const Color.fromARGB(255, 13, 3, 17)!),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.purple[200]!),
+                                    borderSide: BorderSide(color: const Color.fromARGB(255, 14, 10, 15)!),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   suffixIcon: IconButton(
@@ -1542,7 +1542,7 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
                                       _showCurrentPassword
                                           ? Icons.visibility_off
                                           : Icons.visibility,
-                                      color: Colors.purple[700],
+                                      color: const Color.fromARGB(255, 14, 4, 18),
                                     ),
                                     onPressed: () {
                                       setState(() {
@@ -1564,13 +1564,13 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
                                 controller: _newPasswordController,
                                 decoration: InputDecoration(
                                   labelText: "New Password",
-                                  labelStyle: TextStyle(color: Colors.purple[700]),
+                                  labelStyle: TextStyle(color: const Color.fromARGB(255, 32, 8, 43)),
                                   focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.purple[700]!),
+                                    borderSide: BorderSide(color: const Color.fromARGB(255, 23, 6, 31)!),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.purple[200]!),
+                                    borderSide: BorderSide(color: const Color.fromARGB(255, 28, 20, 30)!),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   suffixIcon: IconButton(
@@ -1578,7 +1578,7 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
                                       _showNewPassword
                                           ? Icons.visibility_off
                                           : Icons.visibility,
-                                      color: Colors.purple[700],
+                                      color: const Color.fromARGB(255, 22, 6, 29),
                                     ),
                                     onPressed: () {
                                       setState(() {
